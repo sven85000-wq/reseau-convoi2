@@ -1,250 +1,248 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V17 - ADMIN PRO</title>
+    <title>GPS CONVOI V30.4 - FINAL VERSION</title>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; display: flex; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        #map { width: 100%; height: 100vh; }
         
-        /* STRUCTURE */
-        #sidebar-left { width: 190px; height: 100vh; background: #2c3e50; color: white; padding: 15px; box-sizing: border-box; z-index: 2000; border-right: 2px solid #34495e; flex-shrink: 0; }
-        #sidebar-right { width: 260px; height: 100vh; background: #1e2b37; color: white; padding: 15px; box-sizing: border-box; z-index: 2000; border-left: 2px solid #34495e; flex-shrink: 0; }
-        #map { flex: 1; height: 100vh; z-index: 1; }
+        /* ACCUEIL ET RESPONSABILITÉ */
+        #welcome-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 20000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        #welcome-card { background: #1e2b37; color: white; border: 3px solid #f39c12; border-radius: 15px; max-width: 600px; width: 100%; padding: 25px; max-height: 95vh; overflow-y: auto; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
+        #welcome-card h1 { color: #f39c12; font-size: 22px; text-align: center; border-bottom: 2px solid #f39c12; padding-bottom: 10px; margin-top: 0; }
+        .warning-box { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .warning-box b { color: #e74c3c; display: block; margin-bottom: 5px; }
+        #welcome-btn { background: #27ae60; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase; margin-top: 10px; }
 
-        /* ALIGNEMENT RÉSEAUX PARFAIT */
-        .layer-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 12px; cursor: pointer; }
-        .layer-row input { width: 16px; height: 16px; margin: 0 10px 0 0; cursor: pointer; flex-shrink: 0; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 12px; border: 1px solid rgba(255,255,255,0.5); flex-shrink: 0; }
-        .label-text { flex-grow: 1; }
+        /* INTERFACE COMMANDE */
+        .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 15px; border-radius: 10px; font-weight: bold; font-size: 11px; cursor: pointer; }
+        #btn-left { left: 10px; } #btn-right { right: 10px; }
+        #nav-master-btn { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; width: 145px; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 10px; color: white; background: #c0392b; border: 2px solid white; text-align: center; cursor: pointer; }
+        
+        /* MENUS LATERAUX */
+        .sidebar { position: fixed; top: 0; height: 100vh; width: 300px; background: #1e2b37; color: white; padding: 20px; box-sizing: border-box; z-index: 10001; overflow-y: auto; display: none; }
+        #sidebar-left { left: 0; border-right: 4px solid #f39c12; }
+        #sidebar-right { right: 0; border-left: 4px solid #f39c12; }
+        
+        h2 { font-size: 11px; color: #f39c12; border-bottom: 1px solid #5d6d7e; padding-bottom: 5px; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        button { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 6px; font-weight: bold; color: white; font-size: 10px; border: none; cursor: pointer; transition: 0.2s; }
+        button:hover { opacity: 0.8; }
 
-        /* FENÊTRE ARCHIVES */
-        #archive-window { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 5000; display: none; flex-direction: column; align-items: center; padding: 40px; }
-        .archive-container { width: 100%; max-width: 900px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; overflow-y: auto; }
-        .file-card { background: #34495e; padding: 15px; border-radius: 8px; border-bottom: 4px solid #f39c12; cursor: pointer; text-align: center; color: white; }
-
-        h2 { font-size: 10px; color: #f39c12; border-bottom: 1px solid #5d6d7e; padding-bottom: 5px; margin-top: 20px; text-transform: uppercase; }
-        button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; color: white; font-size: 11px; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: none; box-sizing: border-box; }
-        
-        #dist-panel { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 3000; background: #000; color: #2ecc71; padding: 10px 25px; border-radius: 30px; border: 2px solid #2ecc71; font-weight: bold; font-size: 18px; display: none; }
-        
-        /* ÉTIQUETTES */
-        .poi-label { background: white; border: 1px solid #333; border-radius: 4px; padding: 2px 5px; font-size: 11px; font-weight: bold; color: black; }
-        .poi-label-officiel { background: #fff; border: 2px solid #e74c3c !important; border-radius: 4px; padding: 2px 5px; font-size: 11px; font-weight: bold; color: #c0392b; }
-        
-        .active-tool { outline: 3px solid #f39c12; box-shadow: 0 0 10px #f39c12; }
+        #lang-bar { position: fixed; top: 75px; left: 10px; z-index: 9000; display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 10px; }
+        .flag { width: 30px; height: 20px; border: 1px solid white; cursor: pointer; }
+        .archive-item { background: #34495e; padding: 10px; margin-top: 8px; border-radius: 8px; display: flex; justify-content: space-between; font-size: 11px; align-items: center; border-left: 5px solid #00d4ff; }
+        .arrow-up { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 22px solid #00d4ff; }
     </style>
 </head>
 <body>
 
-<div id="archive-window">
-    <h1 style="color: #f39c12;">📂 MES ARCHIVES</h1>
-    <div id="fileGrid" class="archive-container"></div>
-    <button style="background: #7f8c8d; width: 200px; margin-top: 30px;" onclick="closeFiles()">✖️ FERMER</button>
-</div>
-
-<div id="dist-panel">📍 DISTANCE : <span id="km-val">0</span> km</div>
-
-<div id="sidebar-left">
-    <button style="background:#27ae60; padding:15px;" onclick="startGPS()">🛰️ GPS DIRECT</button>
-    <h2>🗺️ CARTES</h2>
-    <button style="background:#444;" onclick="setBase(planOSM)">ROUTE</button>
-    <button style="background:#444;" onclick="setBase(satellite)">SAT</button>
-    
-    <h2>🚚 RÉSEAUX</h2>
-    <div class="layer-row" onclick="toggleL('gCat1')"><input type="checkbox" id="chk-gCat1" checked><div class="dot" style="background:#FFFF00;"></div><div class="label-text">Cat 1 / ATE</div></div>
-    <div class="layer-row" onclick="toggleL('g48')"><input type="checkbox" id="chk-g48" checked><div class="dot" style="background:#9b59b6;"></div><div class="label-text">Réseau 48t</div></div>
-    <div class="layer-row" onclick="toggleL('g72')"><input type="checkbox" id="chk-g72" checked><div class="dot" style="background:#e67e22;"></div><div class="label-text">Réseau 72t</div></div>
-    <div class="layer-row" onclick="toggleL('g94')"><input type="checkbox" id="chk-g94" checked><div class="dot" style="background:#FF0000;"></div><div class="label-text">Réseau 94t</div></div>
-    <div class="layer-row" onclick="toggleL('g120')"><input type="checkbox" id="chk-g120" checked><div class="dot" style="background:#1b5e20;"></div><div class="label-text">Réseau 120t+</div></div>
-</div>
-
-<div id="map"></div>
-
-<div id="sidebar-right">
-    <button style="background: #e67e22; padding: 15px; font-size: 13px; border: 2px solid white;" onclick="openFiles()">📂 ACCÉDER AUX ARCHIVES</button>
-    
-    <h2>📌 POINTS PERSONNELS</h2>
-    <input type="text" id="poiNote" placeholder="Note perso...">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-        <button style="background:#8e44ad;" onclick="activatePoi('🅿️', this)">🅿️ PARKING</button>
-        <button style="background:#8e44ad;" onclick="activatePoi('🌉', this)">🌉 PONT</button>
+    <div id="welcome-overlay">
+        <div id="welcome-card">
+            <h1 id="w-title">Bonjour à toutes et tous ! 🚛✨</h1>
+            <p id="w-p1">Bienvenue sur votre outil d’accompagnement pour vos convois. Cette page vous permet de préparer vos routes en toute simplicité :</p>
+            <ul id="w-list" style="font-size:13px; line-height: 1.6;">
+                <li><b>Réseaux (à gauche) :</b> Sélectionnez vos catégories de convoi.</li>
+                <li><b>Parcours (à droite) :</b> Créez vos tracés et importez vos fichiers GPX.</li>
+                <li><b>Points d'intérêt :</b> Signalez parkings, restos ou alertes (double-clic pour effacer).</li>
+            </ul>
+            <div class="warning-box">
+                <b id="w-warn-t">⚠️ RESPONSABILITÉ</b>
+                <p id="w-warn-p" style="font-size: 12px; margin: 5px 0 0 0;">L'utilisateur (ou l'auteur des GPX) est seul responsable de son itinéraire. Je décline toute responsabilité en cas d'erreur sur les ponts ou les tracés. Référez-vous à votre arrêté préfectoral.</p>
+            </div>
+            <p id="w-footer" style="text-align: center; font-weight: bold; color: #f39c12;">Bonne route à tous et au plaisir de se croiser sur une prochaine croisette ! ✌️🚩</p>
+            <button id="welcome-btn" onclick="closeWelcome()">J'AI COMPRIS / ACCEPTER</button>
+        </div>
     </div>
 
-    <h2>🛣️ NAVIGATION</h2>
-    <button id="btn-route" style="background:#2980b9; border:1px solid white;" onclick="startRoutingMode(this)">📏 TRACER LE TRAJET</button>
-    <button style="background:#c0392b;" onclick="clearCurrentRoute()">🗑️ EFFACER LE TRACÉ</button>
-    <button style="background:#27ae60;" onclick="saveMission()">💾 ENREGISTRER</button>
+    <div id="btn-left" class="menu-btn">☰ RÉSEAUX</div>
+    <div id="nav-master-btn" onclick="toggleNavMode()">🔴 PRÉPARATION</div>
+    <div id="btn-right" class="menu-btn">⚙️ OUTILS</div>
 
-    <h2>🚧 ADMIN : OFFICIEL</h2>
-    <p style="font-size:9px; color:#bdc3c7;">Double-clic sur un point pour le supprimer de l'export.</p>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-        <button style="background:#c0392b;" onclick="prepAdminPoi('⛔', 'FERMÉ')">⛔ FERMÉ</button>
-        <button style="background:#d35400;" onclick="prepAdminPoi('🚧', 'TRAVAUX')">🚧 TRAVAUX</button>
-        <button style="background:#2c3e50;" onclick="prepAdminPoi('↕️', 'HAUTEUR')">↕️ HAUTEUR</button>
-        <button style="background:#f39c12; color:black;" onclick="prepAdminPoi('⚠️', 'DANGER')">⚠️ INFO</button>
+    <div id="lang-bar">
+        <img src="https://flagcdn.com/w40/fr.png" class="flag" onclick="changeLang('fr')">
+        <img src="https://flagcdn.com/w40/gb.png" class="flag" onclick="changeLang('en')">
+        <img src="https://flagcdn.com/w40/nl.png" class="flag" onclick="changeLang('nl')">
+        <img src="https://flagcdn.com/w40/de.png" class="flag" onclick="changeLang('de')">
+        <img src="https://flagcdn.com/w40/es.png" class="flag" onclick="changeLang('es')">
+        <img src="https://flagcdn.com/w40/it.png" class="flag" onclick="changeLang('it')">
+        <img src="https://flagcdn.com/w40/pt.png" class="flag" onclick="changeLang('pt')">
+        <img src="https://flagcdn.com/w40/tr.png" class="flag" onclick="changeLang('tr')">
+        <img src="https://flagcdn.com/w40/pl.png" class="flag" onclick="changeLang('pl')">
     </div>
-    <button style="background:#2ecc71; color:black; margin-top:10px;" onclick="exportOfficiel()">📤 EXPORTER POUR TOUS</button>
-</div>
+
+    <div id="sidebar-left" class="sidebar">
+        <button style="background:#e74c3c;" onclick="closeAll()" class="t-close">✖ FERMER</button>
+        <h2 id="t-net">RÉSEAUX</h2>
+        <div style="font-size:13px; line-height:28px;">
+            <input type="checkbox" id="chk-gCat1" checked onchange="updateL('gCat1')"> Cat 1 / ATE<br>
+            <input type="checkbox" id="chk-g48" checked onchange="updateL('g48')"> <span id="t-r48">Réseau 48t</span><br>
+            <input type="checkbox" id="chk-g72" checked onchange="updateL('g72')"> <span id="t-r72">Réseau 72t</span><br>
+            <input type="checkbox" id="chk-g94" checked onchange="updateL('g94')"> <span id="t-r94">Réseau 94t</span><br>
+            <input type="checkbox" id="chk-g120" checked onchange="updateL('g120')"> <span id="t-r120">Réseau 120t+</span>
+        </div>
+    </div>
+
+    <div id="sidebar-right" class="sidebar">
+        <button style="background:#e74c3c;" onclick="closeAll()" class="t-close">✖ FERMER</button>
+        
+        <h2 id="t-poi">POI & ALERTES</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+            <button style="background:#2980b9; width:48%;" onclick="askPoi('🅿️', '#2980b9')">🅿️ PARK</button>
+            <button style="background:#c0392b; width:48%;" onclick="askPoi('⚠️', '#c0392b')">⚠️ ALERT</button>
+            <button style="background:#d35400; width:48%;" onclick="askPoi('🍽️', '#d35400')">🍽️ RESTO</button>
+            <button style="background:#7f8c8d; width:48%;" onclick="askPoi('🌉', '#7f8c8d')">🌉 PONT</button>
+            <button style="background:#e67e22; width:48%;" onclick="askPoi('⛽', '#e67e22')">⛽ STATION</button>
+            <button style="background:#16a085; width:48%;" onclick="askPoi('ℹ️', '#16a085')">ℹ️ INFO</button>
+            <button style="background:#8e44ad; width:100%;" onclick="askPoi('📝', '#8e44ad')" id="t-note">📝 NOTE PERSO</button>
+        </div>
+
+        <h2 id="t-route">MON PARCOURS</h2>
+        <button style="background:#00d4ff; color:black;" id="t-trace" onclick="startRouting()">📏 TRACER PARCOURS</button>
+        <div style="display: flex; gap: 5px;">
+            <button style="background:#f39c12; color:black; width:50%;" id="t-save" onclick="saveArchive()">💾 SAUVER</button>
+            <button style="background:#c0392b; width:50%;" id="t-clear" onclick="clearData()">🗑️ VIDER</button>
+        </div>
+
+        <h2 id="t-gpx">GPX</h2>
+        <div style="display: flex; gap: 5px;">
+            <button style="background:#27ae60; width:50%;" id="t-export" onclick="exportGPX()">📤 EXPORT</button>
+            <button style="background:#8e44ad; width:50%;" id="t-import" onclick="document.getElementById('file-input').click()">📥 IMPORT</button>
+        </div>
+        <input type="file" id="file-input" style="display:none" accept=".gpx" onchange="importGPX(event)">
+
+        <h2 id="t-arch">ARCHIVES</h2>
+        <div id="archive-list"></div>
+    </div>
+
+    <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
-    const URL_GEODATA = "https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json";
-    var planOSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-    var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+    // --- TRADUCTIONS ---
+    const trans = {
+        fr: { bL: "☰ RÉSEAUX", bR: "⚙️ OUTILS", prep: "🔴 PRÉPARATION", nav: "🟢 NAVIGATION", net: "RÉSEAUX", poi: "POI & ALERTES", route: "MON PARCOURS", gpx: "GPX", trace: "📏 TRACER PARCOURS", save: "💾 SAUVER", clear: "🗑️ VIDER", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ FERMER", note: "📝 NOTE PERSO", arch: "ARCHIVES", r48: "Réseau 48t", r72: "Réseau 72t", r94: "Réseau 94t", r120: "Réseau 120t+", wT: "Bonjour à toutes et tous ! 🚛✨", wWarnT: "⚠️ RESPONSABILITÉ", wWarnP: "L'utilisateur est seul responsable. Je décline toute responsabilité." },
+        en: { bL: "☰ NETWORKS", bR: "⚙️ TOOLS", prep: "🔴 PREPARATION", nav: "🟢 NAVIGATION", net: "NETWORKS", poi: "POI & ALERTS", route: "MY ROUTE", gpx: "GPX", trace: "📏 START ROUTING", save: "💾 SAVE", clear: "🗑️ CLEAR", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ CLOSE", note: "📝 PERSONAL NOTE", arch: "ARCHIVES", r48: "48t Network", r72: "72t Network", r94: "94t Network", r120: "120t+ Network", wT: "Hello everyone! 🚛✨", wWarnT: "⚠️ RESPONSIBILITY", wWarnP: "The user is solely responsible for their route." },
+        nl: { bL: "☰ NETWERKEN", bR: "⚙️ TOOLS", prep: "🔴 VOORBEREIDING", nav: "🟢 NAVIGATIE", net: "NETWERKEN", poi: "POI & ALARMEN", route: "MIJN ROUTE", gpx: "GPX", trace: "📏 ROUTE MAKEN", save: "💾 OPSLAAN", clear: "🗑️ WISSEN", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ SLUITEN", note: "📝 NOTITIE", arch: "ARCHIEVEN", r48: "48t Netwerk", r72: "72t Netwerk", r94: "94t Netwerk", r120: "120t+ Netwerk", wT: "Hallo allemaal! 🚛✨", wWarnT: "⚠️ VERANTWOORDELIJKHEID", wWarnP: "De gebruiker is zelf verantwoordelijk voor de route." },
+        de: { bL: "☰ NETZE", bR: "⚙️ TOOLS", prep: "🔴 VORBEREITUNG", nav: "🟢 NAVIGATION", net: "NETZE", poi: "POI & ALARM", route: "MEINE ROUTE", gpx: "GPX", trace: "📏 PLANEN", save: "💾 SPEICHERN", clear: "🗑️ LÖSCHEN", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ ZU", note: "📝 NOTIZ", arch: "ARCHIV", r48: "48t Netz", r72: "72t Netz", r94: "94t Netz", r120: "120t+ Netz", wT: "Hallo zusammen! 🚛✨", wWarnT: "⚠️ VERANTWORTUNG", wWarnP: "Der Nutzer ist allein verantwortlich." },
+        es: { bL: "☰ REDES", bR: "⚙️ HERRAM.", prep: "🔴 PREPARACIÓN", nav: "🟢 NAVEGACIÓN", net: "REDES", poi: "POI & ALERTAS", route: "MI RUTA", gpx: "GPX", trace: "📏 HACER RUTA", save: "💾 GUARDAR", clear: "🗑️ BORRAR", export: "📤 EXPORTAR", import: "📥 IMPORTAR", close: "✖ CERRAR", note: "📝 NOTA", arch: "ARCHIVOS", r48: "Red 48t", r72: "Red 72t", r94: "Red 94t", r120: "Red 120t+", wT: "¡Hola a todos! 🚛✨", wWarnT: "⚠️ RESPONSABILIDAD", wWarnP: "El usuario es el único responsable." },
+        it: { bL: "☰ RETI", bR: "⚙️ STRUM.", prep: "🔴 PREPARAZIONE", nav: "🟢 NAVIGAZIONE", net: "RETI", poi: "POI & ALLERTE", route: "PERCORSO", gpx: "GPX", trace: "📏 CREA", save: "💾 SALVA", clear: "🗑️ CANCELLA", export: "📤 ESPORTA", import: "📥 IMPORTA", close: "✖ CHIUDI", note: "📝 NOTA", arch: "ARCHIVIO", r48: "Rete 48t", r72: "Rete 72t", r94: "Rete 94t", r120: "Rete 120t+", wT: "Ciao a tutti! 🚛✨", wWarnT: "⚠️ RESPONSABILITÀ", wWarnP: "L'utente è l'unico responsabile." },
+        pt: { bL: "☰ REDES", bR: "⚙️ FERR.", prep: "🔴 PREPARAÇÃO", nav: "🟢 NAVEGACIÓN", net: "REDES", poi: "POI & ALERTAS", route: "ROTA", gpx: "GPX", trace: "📏 CRIAR", save: "💾 SALVAR", clear: "🗑️ LIMPAR", export: "📤 EXPORTAR", import: "📥 IMPORTAR", close: "✖ FECHAR", note: "📝 NOTA", arch: "ARQUIVO", r48: "Rede 48t", r72: "Rede 72t", r94: "Rede 94t", r120: "Rede 120t+", wT: "Olá a todos! 🚛✨", wWarnT: "⚠️ RESPONSABILIDADE", wWarnP: "O utilizador é o único responsável." },
+        tr: { bL: "☰ ŞEBEKE", bR: "⚙️ ARAÇLAR", prep: "🔴 HAZIRLIK", nav: "🟢 NAVİGASYON", net: "ŞEBEKELER", poi: "POI & UYARI", route: "ROTAM", gpx: "GPX", trace: "📏 OLUŞTUR", save: "💾 KAYDET", clear: "🗑️ SİL", export: "📤 DIŞA AKTAR", import: "📥 İÇE AKTAR", close: "✖ KAPAT", note: "📝 NOT", arch: "ARŞİV", r48: "48t Şebeke", r72: "72t Şebeke", r94: "94t Şebeke", r120: "120t+ Şebeke", wT: "Herkese merhaba! 🚛✨", wWarnT: "⚠️ SORUMLULUK", wWarnP: "Rota sorumluluğu kullanıcıya aittir." },
+        pl: { bL: "☰ SIECI", bR: "⚙️ NARZĘD.", prep: "🔴 PRZYGOTOWANIE", nav: "🟢 NAWIGACJA", net: "SIECI", poi: "POI & ALARMY", route: "TRASA", gpx: "GPX", trace: "📏 UTWÓRZ", save: "💾 ZAPISZ", clear: "🗑️ WYCZYŚĆ", export: "📤 EKSPORT", import: "📥 IMPORT", close: "✖ ZAMKNIJ", note: "📝 NOTA", arch: "ARCHIWUM", r48: "Sieć 48t", r72: "Sieć 72t", r94: "Sieć 94t", r120: "Sieć 120t+", wT: "Cześć wszystkim! 🚛✨", wWarnT: "⚠️ ODPOWIEDZIALNOŚĆ", wWarnP: "Użytkownik ponosi odpowiedzialność." }
+    };
 
-    var map = L.map('map', { center: [46.9, -0.5], zoom: 6, layers: [planOSM], zoomControl: false });
+    function changeLang(l) {
+        const d = trans[l];
+        document.getElementById('btn-left').innerText = d.bL;
+        document.getElementById('btn-right').innerText = d.bR;
+        document.getElementById('nav-master-btn').innerText = d.prep;
+        document.getElementById('t-net').innerText = d.net;
+        document.getElementById('t-poi').innerText = d.poi;
+        document.getElementById('t-route').innerText = d.route;
+        document.getElementById('t-gpx').innerText = d.gpx;
+        document.getElementById('t-trace').innerText = d.trace;
+        document.getElementById('t-save').innerText = d.save;
+        document.getElementById('t-clear').innerText = d.clear;
+        document.getElementById('t-export').innerText = d.export;
+        document.getElementById('t-import').innerText = d.import;
+        document.getElementById('t-note').innerText = d.note;
+        document.getElementById('t-arch').innerText = d.arch;
+        document.getElementById('t-r48').innerText = d.r48;
+        document.getElementById('t-r72').innerText = d.r72;
+        document.getElementById('t-r94').innerText = d.r94;
+        document.getElementById('t-r120').innerText = d.r120;
+        document.querySelectorAll('.t-close').forEach(el => el.innerText = d.close);
+        document.getElementById('w-title').innerText = d.wT;
+        document.getElementById('w-warn-t').innerText = d.wWarnT;
+        document.getElementById('w-warn-p').innerText = d.wWarnP;
+    }
+
+    // --- CARTE ET LOGIQUE ---
+    function closeWelcome() { document.getElementById('welcome-overlay').style.display = 'none'; }
+    var map = L.map('map', { center: [46.9, -0.5], zoom: 6, zoomControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
     var gPois = L.featureGroup().addTo(map);
-    var gOfficiel = L.featureGroup().addTo(map); // Points pour tous
     var gRouteMarkers = L.featureGroup().addTo(map);
-    var routeLayer = L.polyline([], {color: '#00faff', weight: 5, opacity: 0.85}).addTo(map);
-    
+    var routeLayer = L.polyline([], {color: '#000080', weight: 6}).addTo(map);
+    var routePoints = [];
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
-    var fullRouteCoords = [];
 
-    // --- BASE DE DONNÉES OFFICIELLE (C'EST ICI QUE JE COLLERAI TON CODE) ---
-    var baseDonneesOfficielle = []; 
-
-    function loadOfficiel() {
-        baseDonneesOfficielle.forEach(p => createOfficielMarker(p.latlng, p.icon, p.note));
+    function toggleNavMode() {
+        let btn = document.getElementById('nav-master-btn');
+        if(btn.innerText.includes("🔴")) {
+            btn.innerText = "🟢 NAVIGATION"; btn.style.background = "#27ae60";
+            map.locate({setView: true, watch: true});
+        } else {
+            btn.innerText = "🔴 PRÉPARATION"; btn.style.background = "#c0392b";
+            map.stopLocate();
+        }
     }
 
-    // --- RÉSEAUX ---
-    fetch(URL_GEODATA).then(res => res.json()).then(data => {
-        L.geoJSON(data, { onEachFeature: (f, l) => {
-            let t = JSON.stringify(f.properties).toUpperCase();
-            let g = "gCat1", c = "#FFFF00";
-            if(t.includes("120")) { c="#1b5e20"; g="g120"; }
-            else if(t.includes("94")) { c="#FF0000"; g="g94"; }
-            else if(t.includes("72")) { c="#e67e22"; g="g72"; }
-            else if(t.includes("48")) { c="#9b59b6"; g="g48"; }
-            l.setStyle({color: c, weight: 1.2}); groups[g].addLayer(l);
-        }});
-        Object.values(groups).forEach(g => map.addLayer(g));
-    });
-
-    function toggleL(id) {
-        let chk = document.getElementById('chk-'+id); chk.checked = !chk.checked;
-        if(chk.checked) map.addLayer(groups[id]); else map.removeLayer(groups[id]);
+    function askPoi(t, c) { 
+        closeAll(); map.off('click');
+        map.once('click', (e) => { 
+            let n = prompt("Note ?"); if(!n) return;
+            let icon = L.divIcon({ html: `<div style="background:${c}; width:30px; height:30px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-size:16px;">${t}</div>`, className: '' });
+            let m = L.marker(e.latlng, {icon:icon}).addTo(gPois).bindPopup(n);
+            m.on('dblclick', () => { gPois.removeLayer(m); });
+        }); 
     }
 
-    // --- POINTS ADMIN (OFFICIEL) ---
-    function prepAdminPoi(icon, label) {
-        document.querySelectorAll('button').forEach(b => b.classList.remove('active-tool'));
-        map.off('click');
-        map.on('click', (e) => {
-            let note = prompt("Détail du point :", label);
-            if(note) createOfficielMarker(e.latlng, icon, note);
+    function startRouting() { closeAll(); map.off('click'); map.on('click', (e) => { addPoint(e.latlng); }); }
+    function addPoint(l) { let m = L.marker(l, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); updateRoute(); }
+    function updateRoute() {
+        if(routePoints.length < 2) return;
+        fetch(`https://router.project-osrm.org/route/v1/driving/${routePoints.map(p=>`${p.getLatLng().lng},${p.getLatLng().lat}`).join(';')}?overview=full&geometries=geojson`).then(r=>r.json()).then(d=>{
+            if(d.routes && d.routes[0]) routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]));
         });
     }
 
-    function createOfficielMarker(latlng, icon, note) {
-        let m = L.marker(latlng, {opacity:0}).addTo(gOfficiel);
-        m.bindTooltip(icon + " " + note, {permanent:true, direction:'top', className:'poi-label-officiel'});
-        m.officielData = {latlng: latlng, icon: icon, note: note};
-        m.on('dblclick', () => gOfficiel.removeLayer(m)); // SUPPRESSION ADMIN
+    function saveArchive() { let n = prompt("Nom du parcours ?"); if(!n) return; let a = JSON.parse(localStorage.getItem('conv_v30') || '[]'); a.push({name:n, pts: routePoints.map(p=>p.getLatLng())}); localStorage.setItem('conv_v30', JSON.stringify(a)); renderArchives(); }
+    function renderArchives() { let div = document.getElementById('archive-list'); div.innerHTML = ''; let a = JSON.parse(localStorage.getItem('conv_v30') || '[]'); a.forEach((x, i) => { let item = document.createElement('div'); item.className = 'archive-item'; item.innerHTML = `<span>📁 ${x.name}</span> <button onclick="delArch(${i})" style="width:30px; background:#c0392b; margin:0;">🗑️</button>`; item.onclick = (e) => { if(e.target.tagName !== 'BUTTON') loadArch(i); }; div.appendChild(item); }); }
+    function loadArch(i) { let a = JSON.parse(localStorage.getItem('conv_v30') || '[]'); clearData(); a[i].pts.forEach(p => addPoint([p.lat, p.lng])); closeAll(); }
+    function delArch(i) { let a = JSON.parse(localStorage.getItem('conv_v30') || '[]'); a.splice(i,1); localStorage.setItem('conv_v30', JSON.stringify(a)); renderArchives(); }
+    function clearData() { routePoints=[]; gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); }
+    function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
+    function updateL(id) { if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]); else map.removeLayer(groups[id]); }
+
+    // --- IMPORT / EXPORT GPX ---
+    function exportGPX() {
+        if(routeLayer.getLatLngs().length === 0) { alert("Pas de parcours à exporter !"); return; }
+        let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPS CONVOI"><trk><trkseg>';
+        routeLayer.getLatLngs().forEach(pt => { gpx += `<trkpt lat="${pt.lat}" lon="${pt.lng}"></trkpt>`; });
+        gpx += '</trkseg></trk></gpx>';
+        let blob = new Blob([gpx], {type: 'application/gpx+xml'});
+        let link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'parcours_convoi.gpx'; link.click();
     }
 
-    function exportOfficiel() {
-        let data = [];
-        gOfficiel.eachLayer(l => { if(l.officielData) data.push(l.officielData); });
-        prompt("COPIE CE CODE ET DONNE-LE MOI :", JSON.stringify(data));
+    function importGPX(e) {
+        let file = e.target.files[0]; if(!file) return;
+        let reader = new FileReader();
+        reader.onload = function(event) {
+            let parser = new DOMParser(); let xml = parser.parseFromString(event.target.result, "text/xml");
+            let pts = xml.getElementsByTagName("trkpt");
+            if(pts.length === 0) { alert("Fichier GPX invalide ou vide"); return; }
+            clearData();
+            addPoint([pts[0].getAttribute("lat"), pts[0].getAttribute("lon")]);
+            addPoint([pts[pts.length-1].getAttribute("lat"), pts[pts.length-1].getAttribute("lon")]);
+            closeAll();
+        };
+        reader.readAsText(file);
     }
 
-    // --- POINTS PERSO ---
-    function activatePoi(icon, btn) {
-        document.querySelectorAll('button').forEach(b => b.classList.remove('active-tool'));
-        btn.classList.add('active-tool');
-        map.off('click');
-        map.on('click', (e) => {
-            let n = document.getElementById('poiNote').value || "";
-            createM(e.latlng, icon, n);
-            saveAllPois();
-        });
-    }
+    // --- CHARGEMENT INITIAL ---
+    document.getElementById('btn-left').onclick = () => { closeAll(); document.getElementById('sidebar-left').style.display='block'; };
+    document.getElementById('btn-right').onclick = () => { closeAll(); document.getElementById('sidebar-right').style.display='block'; };
 
-    function createM(l, i, n) {
-        let m = L.marker(l, {draggable:true, opacity:0}).addTo(gPois);
-        m.bindTooltip(i+" "+n, {permanent:true, direction:'right', className:'poi-label'});
-        m.myInfo = {icon:i, note:n};
-        m.on('dblclick', () => { gPois.removeLayer(m); saveAllPois(); });
-    }
-
-    function saveAllPois() {
-        let pArr = [];
-        gPois.eachLayer(l => { if(l.myInfo) pArr.push({latlng: l.getLatLng(), info: l.myInfo}); });
-        localStorage.setItem('convoi_pois_perso', JSON.stringify(pArr));
-    }
-
-    // --- ROUTE ---
-    function startRoutingMode(btn) {
-        document.querySelectorAll('button').forEach(b => b.classList.remove('active-tool'));
-        btn.classList.add('active-tool');
-        let pts = []; map.off('click');
-        map.on('click', (e) => {
-            pts.push(e.latlng);
-            L.circleMarker(e.latlng, {radius: 4, color: '#00faff'}).addTo(gRouteMarkers);
-            if(pts.length > 1) {
-                fetch(`https://router.project-osrm.org/route/v1/driving/${pts[pts.length-2].lng},${pts[pts.length-2].lat};${pts[pts.length-1].lng},${pts[pts.length-1].lat}?overview=full&geometries=geojson`)
-                .then(r => r.json()).then(d => {
-                    let coords = d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                    fullRouteCoords = fullRouteCoords.concat(coords);
-                    routeLayer.setLatLngs(fullRouteCoords);
-                    document.getElementById('dist-panel').style.display = 'block';
-                    document.getElementById('km-val').innerText = (calculateTotalDist()).toFixed(1);
-                });
-            }
-        });
-    }
-
-    function calculateTotalDist() {
-        let d = 0;
-        for(let i=0; i < fullRouteCoords.length-1; i++) d += L.latLng(fullRouteCoords[i]).distanceTo(L.latLng(fullRouteCoords[i+1]));
-        return d / 1000;
-    }
-
-    function clearCurrentRoute() {
-        fullRouteCoords = []; routeLayer.setLatLngs([]); gRouteMarkers.clearLayers();
-        document.getElementById('dist-panel').style.display = 'none';
-    }
-
-    // --- ARCHIVES ---
-    function openFiles() {
-        let grid = document.getElementById('fileGrid'); grid.innerHTML = "";
-        let saved = JSON.parse(localStorage.getItem('convoi_v17_routes') || "[]");
-        saved.forEach((m, i) => {
-            let card = document.createElement('div'); card.className = "file-card";
-            card.innerHTML = `<b>${m.name}</b><br><small>Charger</small><br><span onclick="delF(${i}, event)" style="color:#ff7675; font-size:10px;">Supprimer</span>`;
-            card.onclick = () => {
-                clearCurrentRoute(); fullRouteCoords = m.route; routeLayer.setLatLngs(m.route);
-                document.getElementById('dist-panel').style.display = 'block';
-                document.getElementById('km-val').innerText = calculateTotalDist().toFixed(1);
-                map.fitBounds(routeLayer.getBounds()); closeFiles();
-            };
-            grid.appendChild(card);
-        });
-        document.getElementById('archive-window').style.display = 'flex';
-    }
-    function closeFiles() { document.getElementById('archive-window').style.display = 'none'; }
-    function saveMission() {
-        let name = prompt("Nom du fichier :"); if(!name) return;
-        let saved = JSON.parse(localStorage.getItem('convoi_v17_routes') || "[]");
-        saved.push({ name: name, route: fullRouteCoords });
-        localStorage.setItem('convoi_v17_routes', JSON.stringify(saved));
-        alert("Sauvegardé !");
-    }
-    function delF(i, e) { e.stopPropagation(); let s = JSON.parse(localStorage.getItem('convoi_v17_routes') || "[]"); s.splice(i,1); localStorage.setItem('convoi_v17_routes', JSON.stringify(s)); openFiles(); }
-
-    function startGPS() { map.locate({watch:true, setView:true, maxZoom:15}); }
-    function setBase(l) { map.removeLayer(satellite); map.removeLayer(planOSM); map.addLayer(l); }
-    
-    loadOfficiel();
-    let savedP = JSON.parse(localStorage.getItem('convoi_pois_perso') || "[]");
-    savedP.forEach(p => createM(p.latlng, p.info.icon, p.info.note));
+    fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
+    .then(r => r.json()).then(data => { L.geoJSON(data, { onEachFeature: (f, l) => { let p = JSON.stringify(f.properties).toUpperCase(); let g = "gCat1", c = "#FFFF00"; if(p.includes("120")) { c="#1b5e20"; g="g120"; } else if(p.includes("94")) { c="#FF0000"; g="g94"; } else if(p.includes("72")) { c="#e67e22"; g="g72"; } else if(p.includes("48")) { c="#9b59b6"; g="g48"; } l.setStyle({color: c, weight: 1.5}); groups[g].addLayer(l); map.addLayer(groups[g]); }}); });
+    renderArchives();
 </script>
 </body>
 </html>
+
 
