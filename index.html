@@ -1,0 +1,229 @@
+  
+Aucun élément sélectionné 
+
+Aller au contenu
+Utiliser Gmail avec un lecteur d'écran
+1 sur 10 834
+(aucun objet)
+Boîte de réception
+sven lauffenburger <sven85000@gmail.com>
+	
+23:13 (il y a 2 minutes)
+	
+	
+À moi
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>GPS CONVOI V18 - ÉPURÉ</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; display: flex; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        
+        /* STRUCTURE SIDEBARS */
+        #sidebar-left { width: 190px; height: 100vh; background: #2c3e50; color: white; padding: 15px; box-sizing: border-box; z-index: 2000; border-right: 2px solid #34495e; flex-shrink: 0; }
+        #sidebar-right { width: 260px; height: 100vh; background: #1e2b37; color: white; padding: 15px; box-sizing: border-box; z-index: 2000; border-left: 2px solid #34495e; flex-shrink: 0; }
+        #map { flex: 1; height: 100vh; z-index: 1; }
+
+        /* ALIGNEMENT RÉSEAUX (PARFAIT) */
+        .layer-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 12px; cursor: pointer; }
+        .layer-row input { width: 16px; height: 16px; margin: 0 10px 0 0; cursor: pointer; flex-shrink: 0; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 12px; border: 1px solid rgba(255,255,255,0.5); flex-shrink: 0; }
+        .label-text { flex-grow: 1; font-weight: 500; }
+
+        /* FENÊTRE ARCHIVES */
+        #archive-window { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 5000; display: none; flex-direction: column; align-items: center; padding: 40px; }
+        .archive-container { width: 100%; max-width: 900px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; overflow-y: auto; }
+        .file-card { background: #34495e; padding: 15px; border-radius: 8px; border-bottom: 4px solid #f39c12; cursor: pointer; text-align: center; color: white; }
+
+        h2 { font-size: 10px; color: #f39c12; border-bottom: 1px solid #5d6d7e; padding-bottom: 5px; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; color: white; font-size: 11px; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: none; box-sizing: border-box; background: #2c3e50; color: white; }
+        
+        #dist-panel { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 3000; background: #000; color: #2ecc71; padding: 10px 25px; border-radius: 30px; border: 2px solid #2ecc71; font-weight: bold; font-size: 18px; display: none; }
+        
+        /* ÉTIQUETTES CARTES */
+        .poi-label { background: white; border: 1px solid #333; border-radius: 4px; padding: 2px 5px; font-size: 11px; font-weight: bold; color: black; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+        .active-tool { outline: 3px solid #f39c12; box-shadow: 0 0 10px #f39c12; }
+    </style>
+</head>
+<body>
+
+<div id="archive-window">
+    <h1 style="color: #f39c12;">📂 MES ARCHIVES</h1>
+    <div id="fileGrid" class="archive-container"></div>
+    <button style="background: #7f8c8d; width: 200px; margin-top: 30px;" onclick="closeFiles()">✖️ FERMER</button>
+</div>
+
+<div id="dist-panel">📍 DISTANCE : <span id="km-val">0</span> km</div>
+
+<div id="sidebar-left">
+    <button style="background:#27ae60; padding:15px;" onclick="startGPS()">🛰️ GPS DIRECT</button>
+    
+    <h2>🗺️ FOND DE CARTE</h2>
+    <button style="background:#444;" onclick="setBase(planOSM)">MODE ROUTE</button>
+    <button style="background:#444;" onclick="setBase(satellite)">MODE SATELLITE</button>
+    
+    <h2>🚚 RÉSEAUX LOURDS</h2>
+    <div class="layer-row" onclick="toggleL('gCat1')"><input type="checkbox" id="chk-gCat1" checked><div class="dot" style="background:#FFFF00;"></div><div class="label-text">Cat 1 / ATE</div></div>
+    <div class="layer-row" onclick="toggleL('g48')"><input type="checkbox" id="chk-g48" checked><div class="dot" style="background:#9b59b6;"></div><div class="label-text">Réseau 48t</div></div>
+    <div class="layer-row" onclick="toggleL('g72')"><input type="checkbox" id="chk-g72" checked><div class="dot" style="background:#e67e22;"></div><div class="label-text">Réseau 72t</div></div>
+    <div class="layer-row" onclick="toggleL('g94')"><input type="checkbox" id="chk-g94" checked><div class="dot" style="background:#FF0000;"></div><div class="label-text">Réseau 94t</div></div>
+    <div class="layer-row" onclick="toggleL('g120')"><input type="checkbox" id="chk-g120" checked><div class="dot" style="background:#1b5e20;"></div><div class="label-text">Réseau 120t+</div></div>
+</div>
+
+<div id="map"></div>
+
+<div id="sidebar-right">
+    <button style="background: #e67e22; padding: 15px; font-size: 13px; border: 2px solid white;" onclick="openFiles()">📂 MES TRAJETS ENREGISTRÉS</button>
+    
+    <h2>📌 MES POINTS (MÉMOIRE)</h2>
+    <input type="text" id="poiNote" placeholder="Note (ex: Parking, Pont...)">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+        <button style="background:#8e44ad;" onclick="activatePoi('🅿️', this)">🅿️ PARKING</button>
+        <button style="background:#8e44ad;" onclick="activatePoi('🌉', this)">🌉 PONT</button>
+        <button style="background:#8e44ad;" onclick="activatePoi('🍴', this)">🍴 RESTO</button>
+        <button style="background:#8e44ad;" onclick="activatePoi('ℹ️', this)">ℹ️ INFO</button>
+    </div>
+
+    <h2>🛣️ NAVIGATION</h2>
+    <button id="btn-route" style="background:#2980b9; border:1px solid white;" onclick="startRoutingMode(this)">📏 TRACER UN TRAJET</button>
+    <button style="background:#c0392b;" onclick="clearCurrentRoute()">🗑️ EFFACER LE TRACÉ</button>
+    
+    <h2>💾 SAUVEGARDE</h2>
+    <input type="text" id="missionName" placeholder="Nom de la mission">
+    <button style="background:#27ae60;" onclick="saveMission()">💾 ENREGISTRER LE TRAJET</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    const URL_GEODATA = "https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json";
+    var planOSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+    var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+
+    var map = L.map('map', { center: [46.9, -0.5], zoom: 6, layers: [planOSM], zoomControl: false });
+    var gPois = L.featureGroup().addTo(map);
+    var gRouteMarkers = L.featureGroup().addTo(map);
+    var routeLayer = L.polyline([], {color: '#00faff', weight: 5, opacity: 0.85}).addTo(map);
+    
+    var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
+    var fullRouteCoords = [];
+
+    // --- CHARGEMENT DES RÉSEAUX ---
+    fetch(URL_GEODATA).then(res => res.json()).then(data => {
+        L.geoJSON(data, { onEachFeature: (f, l) => {
+            let t = JSON.stringify(f.properties).toUpperCase();
+            let g = "gCat1", c = "#FFFF00";
+            if(t.includes("120")) { c="#1b5e20"; g="g120"; }
+            else if(t.includes("94")) { c="#FF0000"; g="g94"; }
+            else if(t.includes("72")) { c="#e67e22"; g="g72"; }
+            else if(t.includes("48")) { c="#9b59b6"; g="g48"; }
+            l.setStyle({color: c, weight: 1.2}); groups[g].addLayer(l);
+        }});
+        Object.values(groups).forEach(g => map.addLayer(g));
+    });
+
+    function toggleL(id) {
+        let chk = document.getElementById('chk-'+id); chk.checked = !chk.checked;
+        if(chk.checked) map.addLayer(groups[id]); else map.removeLayer(groups[id]);
+    }
+
+    // --- GESTION DES POINTS PERSONNELS ---
+    function activatePoi(icon, btn) {
+        document.querySelectorAll('button').forEach(b => b.classList.remove('active-tool'));
+        btn.classList.add('active-tool');
+        map.off('click');
+        map.on('click', (e) => {
+            let n = document.getElementById('poiNote').value || "";
+            createM(e.latlng, icon, n);
+            saveAllPois();
+        });
+    }
+
+    function createM(l, i, n) {
+        let m = L.marker(l, {draggable:true, opacity:0}).addTo(gPois);
+        m.bindTooltip(i+" "+n, {permanent:true, direction:'right', className:'poi-label'});
+        m.myInfo = {icon:i, note:n};
+        m.on('dblclick', () => { gPois.removeLayer(m); saveAllPois(); });
+    }
+
+    function saveAllPois() {
+        let pArr = [];
+        gPois.eachLayer(l => { if(l.myInfo) pArr.push({latlng: l.getLatLng(), info: l.myInfo}); });
+        localStorage.setItem('convoi_pois_perso', JSON.stringify(pArr));
+    }
+
+    // --- TRACÉ DE ROUTE ---
+    function startRoutingMode(btn) {
+        document.querySelectorAll('button').forEach(b => b.classList.remove('active-tool'));
+        btn.classList.add('active-tool');
+        let pts = []; map.off('click');
+        map.on('click', (e) => {
+            pts.push(e.latlng);
+            L.circleMarker(e.latlng, {radius: 4, color: '#00faff'}).addTo(gRouteMarkers);
+            if(pts.length > 1) {
+                fetch(`https://router.project-osrm.org/route/v1/driving/${pts[pts.length-2].lng},${pts[pts.length-2].lat};${pts[pts.length-1].lng},${pts[pts.length-1].lat}?overview=full&geometries=geojson`)
+                .then(r => r.json()).then(d => {
+                    if(d.routes) {
+                        let coords = d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                        fullRouteCoords = fullRouteCoords.concat(coords);
+                        routeLayer.setLatLngs(fullRouteCoords);
+                        document.getElementById('dist-panel').style.display = 'block';
+                        document.getElementById('km-val').innerText = (calculateTotalDist()).toFixed(1);
+                    }
+                });
+            }
+        });
+    }
+
+    function calculateTotalDist() {
+        let d = 0;
+        for(let i=0; i < fullRouteCoords.length-1; i++) d += L.latLng(fullRouteCoords[i]).distanceTo(L.latLng(fullRouteCoords[i+1]));
+        return d / 1000;
+    }
+
+    function clearCurrentRoute() {
+        fullRouteCoords = []; routeLayer.setLatLngs([]); gRouteMarkers.clearLayers();
+        document.getElementById('dist-panel').style.display = 'none';
+    }
+
+    // --- SAUVEGARDE ET ARCHIVES ---
+    function openFiles() {
+        let grid = document.getElementById('fileGrid'); grid.innerHTML = "";
+        let saved = JSON.parse(localStorage.getItem('convoi_v18_routes') || "[]");
+        saved.forEach((m, i) => {
+            let card = document.createElement('div'); card.className = "file-card";
+            card.innerHTML = `<b>${m.name}</b><br><small>Charger le trajet</small><br><span onclick="delF(${i}, event)" style="color:#ff7675; font-size:10px;">Supprimer</span>`;
+            card.onclick = () => {
+                clearCurrentRoute(); fullRouteCoords = m.route; routeLayer.setLatLngs(m.route);
+                document.getElementById('dist-panel').style.display = 'block';
+                document.getElementById('km-val').innerText = calculateTotalDist().toFixed(1);
+                map.fitBounds(routeLayer.getBounds()); closeFiles();
+            };
+            grid.appendChild(card);
+        });
+        document.getElementById('archive-window').style.display = 'flex';
+    }
+    function closeFiles() { document.getElementById('archive-window').style.display = 'none'; }
+    function saveMission() {
+        let name = prompt("Nommez votre trajet :"); if(!name) return;
+        let saved = JSON.parse(localStorage.getItem('convoi_v18_routes') || "[]");
+        saved.push({ name: name, route: fullRouteCoords });
+        localStorage.setItem('convoi_v18_routes', JSON.stringify(saved));
+        alert("Trajet enregistré !");
+    }
+    function delF(i, e) { e.stopPropagation(); let s = JSON.parse(localStorage.getItem('convoi_v18_routes') || "[]"); s.splice(i,1); localStorage.setItem('convoi_v18_routes', JSON.stringify(s)); openFiles(); }
+
+    function startGPS() { map.locate({watch:true, setView:true, maxZoom:15}); }
+    function setBase(l) { map.removeLayer(satellite); map.removeLayer(planOSM); map.addLayer(l); }
+    
+    // Au démarrage : on charge les points perso sauvegardés
+    let savedP = JSON.parse(localStorage.getItem('convoi_pois_perso') || "[]");
+    savedP.forEach(p => createM(p.latlng, p.info.icon, p.info.note));
+</script>
+</body>
+</html>
+
