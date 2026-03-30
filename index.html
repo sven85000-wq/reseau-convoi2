@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V43.4 - GUIDE COMPLET</title>
+    <title>GPS CONVOI V43.6 - GUIDE & ERGONOMIE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -9,16 +9,15 @@
         body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; position: absolute; }
 
-        /* BANDEAU DISTANCE */
+        /* BANDEAU KM */
         #nav-info {
             position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
             z-index: 9999; background: rgba(0,0,0,0.9); color: #f39c12;
             padding: 12px 25px; border-radius: 30px; border: 2px solid #f39c12;
-            display: flex; gap: 15px; font-weight: bold; font-size: 18px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8); pointer-events: none;
+            display: flex; gap: 15px; font-weight: bold; font-size: 18px; pointer-events: none;
         }
 
-        /* MODAL ACCUEIL STYLE GUIDE */
+        /* MODAL ACCUEIL (GUIDE COMPLET V43.4) */
         #welcome-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 20000;
@@ -29,41 +28,36 @@
             border-radius: 15px; padding: 20px; max-width: 550px; text-align: left;
             max-height: 90vh; overflow-y: auto;
         }
-        .modal-content h1 { text-align: center; color: #f39c12; margin-top: 0; }
-        .guide-section { margin-bottom: 15px; padding-left: 10px; border-left: 3px solid #3498db; }
+        .modal-content h1 { text-align: center; color: #f39c12; margin-top: 0; font-size: 22px; }
+        .guide-section { margin-bottom: 15px; padding-left: 10px; border-left: 3px solid #3498db; font-size: 14px; }
         .guide-section b { color: #f39c12; }
 
-        /* FENÊTRE TRAVAUX */
-        #umap-window {
-            position: fixed; top: 70px; right: 10px; width: 280px; height: 350px; 
-            z-index: 15000; border: 3px solid #f39c12; border-radius: 12px; background: #1e2b37;
-            display: none; overflow: hidden; touch-action: none;
-        }
-        #resize-handle {
-            position: absolute; bottom: 0; right: 0; width: 40px; height: 40px;
-            background: #f39c12; clip-path: polygon(100% 0, 100% 100%, 0 100%);
-            z-index: 15005; cursor: nwse-resize;
-        }
-
+        /* BOUTON TRAVAUX REDUIT (V43.5) */
         #btn-travaux-direct {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 9998; background: #f39c12; color: black; border: 2px solid #000;
-            padding: 10px 15px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer;
+            padding: 10px 5px; border-radius: 10px; font-weight: bold; font-size: 10px; 
+            width: 75px; text-align: center; cursor: pointer;
         }
 
-        .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        #btn-left { left: 10px; } #btn-right { right: 10px; }
+        .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 10px; border-radius: 10px; font-weight: bold; font-size: 12px; }
+        #btn-left { left: 5px; } #btn-right { right: 5px; }
         
-        #lang-bar { position: fixed; top: 75px; left: 10px; z-index: 9000; display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.85); padding: 8px; border-radius: 8px; }
-        .flag { width: 30px; height: 20px; border: 1px solid #fff; cursor: pointer; }
+        #umap-window {
+            position: fixed; top: 70px; right: 10px; width: 280px; height: 350px; 
+            z-index: 15000; border: 3px solid #f39c12; border-radius: 12px; background: #1e2b37;
+            display: none; overflow: hidden;
+        }
+        #resize-handle { position: absolute; bottom: 0; right: 0; width: 35px; height: 35px; background: #f39c12; clip-path: polygon(100% 0, 100% 100%, 0 100%); z-index: 15005; }
 
         .sidebar { position: fixed; top: 0; height: 100vh; width: 310px; background: #1e2b37; color: white; padding: 20px; z-index: 10000; display: none; overflow-y: auto; }
         #sidebar-left { left: 0; border-right: 4px solid #f39c12; }
         #sidebar-right { right: 0; border-left: 4px solid #f39c12; }
         button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .row { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; }
-        .gps-dot { width: 14px; height: 14px; background: #4285F4; border: 2px solid white; border-radius: 50%; }
-        h2 { font-size: 14px; color: #f39c12; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 15px; text-transform: uppercase; }
+        
+        .archive-item { display: flex; gap: 5px; margin-top: 5px; }
+        .btn-load { flex-grow: 1; background: #34495e; color: white; text-align: left; }
+        .btn-del { width: 40px; background: #c0392b; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -79,12 +73,12 @@
 
             <div class="guide-section">
                 <b>➡️ Colonne de Droite (Outils) :</b><br>
-                Ici, vous pouvez créer votre propre carte, tracer vos itinéraires, importer ou exporter vos parcours au format GPX pour les partager.
+                Ici, vous pouvez créer votre propre carte, tracer vos itinéraires, importer ou exporter vos parcours au format GPX et gérer vos archives.
             </div>
 
             <div class="guide-section">
                 <b>🚧 Bandeau Travaux (Haut) :</b><br>
-                Cliquez sur le bouton orange en haut pour ouvrir la fenêtre Travaux en temps réel. Cette fenêtre flottante peut être déplacée et <b>agrandie via le coin orange (box)</b> en bas à droite pour une meilleure visibilité.
+                Le bouton central ouvre la fenêtre Travaux. Elle peut être déplacée et <b>agrandie via le coin orange (box)</b> en bas à droite pour voir les détails.
             </div>
 
             <div class="guide-section">
@@ -92,25 +86,23 @@
                 Le bandeau en bas affiche vos kilomètres restants. Ce nombre réduit automatiquement dès que vous commencez à rouler.
             </div>
 
-            <p style="font-size:11px; background:rgba(231, 76, 60, 0.2); padding:10px; border-radius:5px;">
-                ⚠️ <b>SÉCURITÉ :</b> Les données sont stockées sur votre téléphone. Soyez prudents avec vos exports GPX. Nous déclinons toute responsabilité en cas d'erreur de parcours.
+            <p style="font-size:11px; background:rgba(231, 76, 60, 0.2); padding:10px; border-radius:5px; margin-top:10px;">
+                ⚠️ <b>SÉCURITÉ :</b> Les données sont locales. Attention à vos partages. Nous déclinons toute responsabilité en cas d'incident.
             </p>
 
-            <button style="background:#f39c12; color:black; font-size:18px;" onclick="closeWelcome()">C'EST PARTI !</button>
+            <button style="background:#f39c12; color:black; font-size:18px; margin-top:10px;" onclick="closeWelcome()">C'EST PARTI !</button>
         </div>
     </div>
 
     <div id="nav-info">
         <span id="t-dist-label">📍 RESTANT :</span> <span id="dist-val">0</span> km
-        <span>🧭 <span id="heading">--</span></span>
     </div>
 
-    <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX LIVE</div>
+    <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX</div>
 
     <div id="umap-window">
         <div style="background:#f39c12; color:#000; padding:8px; font-weight:bold; display:flex; justify-content:space-between;">
-            <span onclick="minimizeUmap()" style="cursor:pointer">➖</span>
-            <span onclick="toggleUmap()" style="cursor:pointer">✖</span>
+            <span onclick="toggleUmap()" style="cursor:pointer">✖ FERMER</span>
         </div>
         <iframe id="umap-frame" style="width:100%; height:calc(100% - 35px); border:none;" src=""></iframe>
         <div id="resize-handle"></div>
@@ -119,46 +111,30 @@
     <div id="btn-left" class="menu-btn" onclick="openMenu('sidebar-left')">☰ RÉSEAUX</div>
     <div id="btn-right" class="menu-btn" onclick="openMenu('sidebar-right')">⚙️ OUTILS</div>
 
-    <div id="lang-bar">
-        <img src="https://flagcdn.com/w40/fr.png" class="flag" onclick="changeLang('fr')">
-        <img src="https://flagcdn.com/w40/gb.png" class="flag" onclick="changeLang('en')">
-        <img src="https://flagcdn.com/w40/it.png" class="flag" onclick="changeLang('it')">
-        <img src="https://flagcdn.com/w40/de.png" class="flag" onclick="changeLang('de')">
-        <img src="https://flagcdn.com/w40/es.png" class="flag" onclick="changeLang('es')">
-        <img src="https://flagcdn.com/w40/pt.png" class="flag" onclick="changeLang('pt')">
-        <img src="https://flagcdn.com/w40/pl.png" class="flag" onclick="changeLang('pl')">
-        <img src="https://flagcdn.com/w40/nl.png" class="flag" onclick="changeLang('nl')">
-    </div>
-
     <div id="sidebar-left" class="sidebar">
-        <button style="background:#e74c3c; margin-bottom:20px;" onclick="closeAll()">✖ FERMER</button>
-        <button style="background:#27ae60; padding:18px; margin-bottom:20px;" onclick="startGPS()" id="t-gps">🛰️ RE-CENTRER GPS</button>
-        <h2 id="t-net-title">RÉSEAUX</h2>
-        <div class="row"><input type="checkbox" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</div>
-        <div class="row"><input type="checkbox" checked onchange="toggleL('g48')"> Réseau 48t</div>
-        <div class="row"><input type="checkbox" checked onchange="toggleL('g72')"> Réseau 72t</div>
-        <div class="row"><input type="checkbox" checked onchange="toggleL('g94')"> Réseau 94t</div>
-        <div class="row"><input type="checkbox" checked onchange="toggleL('g120')"> Réseau 120t+</div>
+        <button style="background:#e74c3c;" onclick="closeAll()">✖ FERMER</button>
+        <button style="background:#27ae60; margin-top:10px;" onclick="startGPS()">🛰️ RE-CENTRER GPS</button>
+        <h3 style="color:#f39c12; border-bottom:1px solid #444; padding-bottom:5px;">RÉSEAUX</h3>
+        <label><input type="checkbox" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</label><br><br>
+        <label><input type="checkbox" checked onchange="toggleL('g48')"> Réseau 48t</label><br><br>
+        <label><input type="checkbox" checked onchange="toggleL('g72')"> Réseau 72t</label><br><br>
+        <label><input type="checkbox" checked onchange="toggleL('g94')"> Réseau 94t</label><br><br>
+        <label><input type="checkbox" checked onchange="toggleL('g120')"> Réseau 120t+</label>
     </div>
 
     <div id="sidebar-right" class="sidebar">
-        <button style="background:#e74c3c; margin-bottom:20px;" onclick="closeAll()">✖ FERMER</button>
-        <h2 id="t-poi-title">AIDES & POI</h2>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
-            <button style="background:#2980b9;" onclick="activatePoi('🅿️', '#2980b9')">🅿️ PARKING</button>
-            <button style="background:#c0392b;" onclick="activatePoi('⚠️', '#c0392b')">⚠️ ALERTE</button>
-        </div>
-        <h2 id="t-route-title">ITINÉRAIRE</h2>
-        <button id="t-route-btn" style="background:#2ecc71; color:black;" onclick="startRouting()">📍 TRACER</button>
-        <button id="t-clear-btn" style="background:#c0392b;" onclick="clearCurrentData()">🗑️ EFFACER</button>
-        <button id="t-save" style="background:#f39c12; color:black;" onclick="saveToArchive()">💾 SAUVEGARDER</button>
-        <h2 style="color:#3498db;">GPX</h2>
+        <button style="background:#e74c3c;" onclick="closeAll()">✖ FERMER</button>
+        <h3 style="color:#f39c12">ITINÉRAIRE</h3>
+        <button style="background:#2ecc71; color:black;" onclick="startRouting()">📍 TRACER</button>
+        <button style="background:#c0392b;" onclick="clearCurrentData()">🗑️ EFFACER</button>
+        <button style="background:#f39c12; color:black;" onclick="saveToArchive()">💾 SAUVEGARDER</button>
+        <h3 style="color:#3498db">GPX</h3>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
             <button style="background:#3498db;" onclick="exportGPX()">📤 EXPORT</button>
             <button style="background:#3498db;" onclick="document.getElementById('fileIn').click()">📥 IMPORT</button>
         </div>
         <input type="file" id="fileIn" style="display:none" onchange="importGPX(this)">
-        <h2 id="t-arch-title">MES ARCHIVES</h2>
+        <h3 style="color:#f39c12">MES ARCHIVES</h3>
         <div id="archive-list"></div>
     </div>
 
@@ -167,34 +143,15 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; }
-
-    const trans = {
-        fr: { btnL: "☰ RÉSEAUX", btnR: "⚙️ OUTILS", gps: "🛰️ RE-CENTRER GPS", net: "RÉSEAUX", poi: "AIDES & POI", route: "ITINÉRAIRE", trace: "📍 TRACER", clear: "🗑️ EFFACER", save: "💾 SAUVEGARDER", arch: "MES ARCHIVES", work: "🚧 TRAVAUX", dist: "📍 RESTANT :" },
-        en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ RE-CENTER GPS", net: "NETWORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW", clear: "🗑️ CLEAR", save: "💾 SAVE", arch: "MY ARCHIVES", work: "🚧 WORKS", dist: "📍 REMAINING:" }
-    };
-
-    function changeLang(l) {
-        const d = trans[l] || trans.fr;
-        document.getElementById('btn-left').innerText = d.btnL; document.getElementById('btn-right').innerText = d.btnR;
-        document.getElementById('t-gps').innerText = d.gps; document.getElementById('t-net-title').innerText = d.net;
-        document.getElementById('t-poi-title').innerText = d.poi; document.getElementById('t-route-title').innerText = d.route;
-        document.getElementById('t-route-btn').innerText = d.trace; document.getElementById('t-clear-btn').innerText = d.clear;
-        document.getElementById('t-save').innerText = d.save; document.getElementById('t-arch-title').innerText = d.arch;
-        document.getElementById('btn-travaux-direct').innerText = d.work; document.getElementById('t-dist-label').innerText = d.dist;
-    }
-
     var map = L.map('map', { center: [46.9, -0.5], zoom: 6, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    var userMarker = null, routePoints = [];
+    var userMarker = null, routePoints = [], routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map);
     var gRouteMarkers = L.featureGroup().addTo(map);
-    var routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map);
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
 
     function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); closeAll(); }
-
     map.on('locationfound', (e) => {
-        document.getElementById('heading').innerText = e.heading ? Math.round(e.heading) + "°" : "--";
         if (!userMarker) {
             userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize:[14,14] }) }).addTo(map);
             map.setView(e.latlng, 15);
@@ -245,16 +202,37 @@
         Object.keys(groups).forEach(k => map.addLayer(groups[k]));
     });
 
-    const win = document.getElementById('umap-window'); const handle = document.getElementById('resize-handle'); let sX, sY, sW, sH;
+    function saveToArchive() { 
+        let n = prompt("Nom du parcours :"); if(!n) return; 
+        let a = JSON.parse(localStorage.getItem('c_arch') || "[]"); 
+        a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) }); 
+        localStorage.setItem('c_arch', JSON.stringify(a)); renderArch(); 
+    }
+
+    function renderArch() { 
+        let l = document.getElementById('archive-list'); l.innerHTML = ""; 
+        let a = JSON.parse(localStorage.getItem('c_arch') || "[]");
+        a.forEach((x, i) => { 
+            let div = document.createElement('div'); div.className = "archive-item";
+            div.innerHTML = `<button class="btn-load" onclick="loadArch(${i})">📂 ${x.name}</button><button class="btn-del" onclick="deleteArch(${i})">✖</button>`;
+            l.appendChild(div); 
+        }); 
+    }
+
+    function deleteArch(i) { if(confirm("Supprimer cette archive ?")) { let a = JSON.parse(localStorage.getItem('c_arch') || "[]"); a.splice(i, 1); localStorage.setItem('c_arch', JSON.stringify(a)); renderArch(); }}
+    function loadArch(i) { 
+        let x = JSON.parse(localStorage.getItem('c_arch'))[i]; clearCurrentData(); 
+        x.pts.forEach(p => { let m = L.marker(p, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); }); 
+        updateRoute(); closeAll(); 
+    }
+    
+    function exportGPX() { let pts = routeLayer.getLatLngs(); if(!pts.length) return; let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>'; pts.forEach(p => { gpx += `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`; }); gpx += '</trkseg></trk></gpx>'; let b = new Blob([gpx], {type:'application/gpx+xml'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = "convoi.gpx"; a.click(); }
+    renderArch();
+
+    const win = document.getElementById('umap-window'), handle = document.getElementById('resize-handle'); let sX, sY, sW, sH;
     handle.addEventListener('touchstart', (e) => { sX = e.touches[0].clientX; sY = e.touches[0].clientY; sW = parseInt(document.defaultView.getComputedStyle(win).width, 10); sH = parseInt(document.defaultView.getComputedStyle(win).height, 10); e.preventDefault(); }, {passive: false});
     window.addEventListener('touchmove', (e) => { if (!sX) return; win.style.width = (sW + (e.touches[0].clientX - sX)) + 'px'; win.style.height = (sH + (e.touches[0].clientY - sY)) + 'px'; }, {passive: false});
     window.addEventListener('touchend', () => { sX = null; });
-
-    function saveToArchive() { let n = prompt("Nom :"); if(!n) return; let d = { name: n, pts: routePoints.map(m => m.getLatLng()) }; let a = JSON.parse(localStorage.getItem('c_arch') || "[]"); a.push(d); localStorage.setItem('c_arch', JSON.stringify(a)); renderArch(); }
-    function renderArch() { let l = document.getElementById('archive-list'); l.innerHTML = ""; JSON.parse(localStorage.getItem('c_arch') || "[]").forEach((x, i) => { let d = document.createElement('div'); d.innerHTML = `<button onclick="loadArch(${i})" style="background:#34495e; margin-top:5px;">📂 ${x.name}</button>`; l.appendChild(d); }); }
-    function loadArch(i) { let x = JSON.parse(localStorage.getItem('c_arch'))[i]; clearCurrentData(); x.pts.forEach(p => { let m = L.marker(p, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); }); updateRoute(); closeAll(); }
-    function exportGPX() { let pts = routeLayer.getLatLngs(); if(!pts.length) return; let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>'; pts.forEach(p => { gpx += `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`; }); gpx += '</trkseg></trk></gpx>'; let b = new Blob([gpx], {type:'application/gpx+xml'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = "convoi.gpx"; a.click(); }
-    renderArch();
 </script>
 </body>
 </html>
