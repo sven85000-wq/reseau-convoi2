@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V41.5 - RÉGLABLE & CENTRÉ</title>
+    <title>GPS CONVOI V41.6 - COMPLET</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -25,7 +25,6 @@
             display: none;
             box-shadow: 0 8px 25px rgba(0,0,0,0.8);
             transition: opacity 0.2s;
-            /* RENDRE LA FENÊTRE AGRANDISSABLE */
             overflow: hidden; 
             resize: both; 
         }
@@ -43,7 +42,7 @@
             position: fixed;
             top: 15px;
             left: 50%;
-            transform: translateX(-50%); /* Centrage parfait */
+            transform: translateX(-50%);
             z-index: 9998;
             background: #f39c12;
             color: black;
@@ -56,7 +55,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
-        /* --- INTERFACE V40.16 / V40.32 --- */
+        /* --- INTERFACE --- */
         .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 18px; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
         #btn-left { left: 10px; } #btn-right { right: 10px; }
 
@@ -147,11 +146,16 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // --- DICTIONNAIRE ---
+    // --- DICTIONNAIRE COMPLET 8 LANGUES ---
     const trans = {
         fr: { btnL: "☰ RÉSEAUX", btnR: "⚙️ OUTILS", gps: "🛰️ RE-CENTRER GPS", net: "RÉSEAUX & TRAVAUX", poi: "AIDES & POI", route: "ITINÉRAIRE", trace: "📍 TRACER (ÉPINGLES)", clear: "🗑️ EFFACER TOUT", save: "💾 SAUVEGARDER", arch: "MES ARCHIVES", work: "🚧 TRAVAUX" },
-        en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ RE-CENTER GPS", net: "NETWORKS & WORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW (PINS)", clear: "🗑️ CLEAR ALL", save: "💾 SAVE", arch: "MY ARCHIVES", work: "🚧 WORKS" }
-        // ... autres langues conservées
+        en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ RE-CENTER GPS", net: "NETWORKS & WORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW (PINS)", clear: "🗑️ CLEAR ALL", save: "💾 SAVE", arch: "MY ARCHIVES", work: "🚧 WORKS" },
+        it: { btnL: "☰ RETI", btnR: "⚙️ STRUMENTI", gps: "🛰️ RICENTRA GPS", net: "RETI & LAVORI", poi: "POI", route: "ITINERARIO", trace: "📍 TRACCIA (PIN)", clear: "CANCELLA", save: "💾 SALVA", arch: "ARCHIVI", work: "🚧 LAVORI" },
+        de: { btnL: "☰ NETZE", btnR: "⚙️ TOOLS", gps: "🛰️ GPS ZENTRIEREN", net: "NETZE & ARBEITEN", poi: "MARKER", route: "ROUTE", trace: "📍 ZEICHNEN", clear: "LÖSCHEN", save: "💾 SPEICHERN", arch: "ARCHIV", work: "🚧 ARBEITEN" },
+        es: { btnL: "☰ REDES", btnR: "⚙️ HERRAMIENTAS", gps: "🛰️ RE-CENTRAR GPS", net: "REDES & OBRAS", poi: "PUNTOS", route: "RUTA", trace: "📍 TRAZAR", clear: "BORRAR", save: "💾 GUARDAR", arch: "ARCHIVOS", work: "🚧 OBRAS" },
+        pt: { btnL: "☰ REDES", btnR: "⚙️ FERRAMENTAS", gps: "🛰️ RE-CENTRAR GPS", net: "REDES & OBRAS", poi: "PONTOS", route: "ROTA", trace: "📍 TRAÇAR", clear: "LIMPAR", save: "💾 SALVAR", arch: "ARQUIVOS", work: "🚧 OBRAS" },
+        pl: { btnL: "☰ SIECI", btnR: "⚙️ NARZĘDZIA", gps: "🛰️ CENTRUJ GPS", net: "SIECI & ROBOTY", poi: "PUNKTY", route: "TRASA", trace: "📍 RYSUJ", clear: "USUŃ", save: "💾 ZAPISZ", arch: "ARCHIWUM", work: "🚧 ROBOTY" },
+        nl: { btnL: "☰ NETWERKEN", btnR: "⚙️ OPTIES", gps: "🛰️ GPS CENTREREN", net: "WERKEN", poi: "PUNTEN", route: "ROUTE", trace: "📍 TEKENEN", clear: "WISSEN", save: "💾 OPSLAAN", arch: "ARCHIEVEN", work: "🚧 WERKEN" }
     };
 
     function changeLang(l) {
@@ -209,7 +213,6 @@
         document.getElementById('umap-min-txt').innerText = win.classList.contains('minimized') ? "➕" : "➖ RÉDUIRE";
     }
 
-    // Effet fantôme pour ne pas gêner le tracé d'itinéraire
     map.on('mousedown touchstart', () => document.getElementById('umap-window').classList.add('ghost'));
     map.on('mouseup touchend', () => setTimeout(() => document.getElementById('umap-window').classList.remove('ghost'), 800));
 
