@@ -14,27 +14,23 @@
         #welcome-card { background: #1e2b37; color: white; border: 3px solid #f39c12; border-radius: 15px; max-width: 600px; width: 100%; padding: 25px; max-height: 95vh; overflow-y: auto; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
         #welcome-card h1 { color: #f39c12; font-size: 22px; text-align: center; border-bottom: 2px solid #f39c12; padding-bottom: 10px; margin-top: 0; }
         .warning-box { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; padding: 15px; border-radius: 8px; margin: 15px 0; }
-        .warning-box b { color: #e74c3c; display: block; margin-bottom: 5px; }
         #welcome-btn { background: #27ae60; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase; margin-top: 10px; }
 
-        /* INTERFACE COMMANDE */
+        /* INTERFACE */
         .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 15px; border-radius: 10px; font-weight: bold; font-size: 11px; cursor: pointer; }
         #btn-left { left: 10px; } #btn-right { right: 10px; }
         #nav-master-btn { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; width: 145px; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 10px; color: white; background: #c0392b; border: 2px solid white; text-align: center; cursor: pointer; }
         
-        /* MENUS LATERAUX */
         .sidebar { position: fixed; top: 0; height: 100vh; width: 300px; background: #1e2b37; color: white; padding: 20px; box-sizing: border-box; z-index: 10001; overflow-y: auto; display: none; }
         #sidebar-left { left: 0; border-right: 4px solid #f39c12; }
         #sidebar-right { right: 0; border-left: 4px solid #f39c12; }
         
-        h2 { font-size: 11px; color: #f39c12; border-bottom: 1px solid #5d6d7e; padding-bottom: 5px; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        button { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 6px; font-weight: bold; color: white; font-size: 10px; border: none; cursor: pointer; transition: 0.2s; }
-        button:hover { opacity: 0.8; }
+        h2 { font-size: 11px; color: #f39c12; border-bottom: 1px solid #5d6d7e; padding-bottom: 5px; margin-top: 20px; text-transform: uppercase; }
+        button { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 6px; font-weight: bold; color: white; font-size: 10px; border: none; cursor: pointer; }
 
         #lang-bar { position: fixed; top: 75px; left: 10px; z-index: 9000; display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 10px; }
         .flag { width: 30px; height: 20px; border: 1px solid white; cursor: pointer; }
         .archive-item { background: #34495e; padding: 10px; margin-top: 8px; border-radius: 8px; display: flex; justify-content: space-between; font-size: 11px; align-items: center; border-left: 5px solid #00d4ff; }
-        .arrow-up { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 22px solid #00d4ff; }
     </style>
 </head>
 <body>
@@ -42,17 +38,16 @@
     <div id="welcome-overlay">
         <div id="welcome-card">
             <h1 id="w-title">Bonjour à toutes et tous ! 🚛✨</h1>
-            <p id="w-p1">Bienvenue sur votre outil d’accompagnement pour vos convois. Cette page vous permet de préparer vos routes en toute simplicité :</p>
-            <ul id="w-list" style="font-size:13px; line-height: 1.6;">
-                <li><b>Réseaux (à gauche) :</b> Sélectionnez vos catégories de convoi.</li>
-                <li><b>Parcours (à droite) :</b> Créez vos tracés et importez vos fichiers GPX.</li>
-                <li><b>Points d'intérêt :</b> Signalez parkings, restos ou alertes (double-clic pour effacer).</li>
+            <p id="w-p1">Bienvenue sur votre outil convoi. Cette page vous permet de préparer vos routes :</p>
+            <ul style="font-size:13px;">
+                <li><b>Réseaux (à gauche) :</b> Sélectionnez vos catégories.</li>
+                <li><b>Outils (à droite) :</b> Tracés, Archives et Import/Export GPX.</li>
+                <li><b>Points d'intérêt :</b> Posez vos repères (double-clic pour effacer).</li>
             </ul>
             <div class="warning-box">
                 <b id="w-warn-t">⚠️ RESPONSABILITÉ</b>
-                <p id="w-warn-p" style="font-size: 12px; margin: 5px 0 0 0;">L'utilisateur (ou l'auteur des GPX) est seul responsable de son itinéraire. Je décline toute responsabilité en cas d'erreur sur les ponts ou les tracés. Référez-vous à votre arrêté préfectoral.</p>
+                <p id="w-warn-p" style="font-size: 12px; margin: 5px 0 0 0;">L'utilisateur (ou l'auteur des GPX) est seul responsable. Je décline toute responsabilité en cas d'erreur. Référez-vous à votre arrêté.</p>
             </div>
-            <p id="w-footer" style="text-align: center; font-weight: bold; color: #f39c12;">Bonne route à tous et au plaisir de se croiser sur une prochaine croisette ! ✌️🚩</p>
             <button id="welcome-btn" onclick="closeWelcome()">J'AI COMPRIS / ACCEPTER</button>
         </div>
     </div>
@@ -87,7 +82,6 @@
 
     <div id="sidebar-right" class="sidebar">
         <button style="background:#e74c3c;" onclick="closeAll()" class="t-close">✖ FERMER</button>
-        
         <h2 id="t-poi">POI & ALERTES</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 5px;">
             <button style="background:#2980b9; width:48%;" onclick="askPoi('🅿️', '#2980b9')">🅿️ PARK</button>
@@ -98,21 +92,18 @@
             <button style="background:#16a085; width:48%;" onclick="askPoi('ℹ️', '#16a085')">ℹ️ INFO</button>
             <button style="background:#8e44ad; width:100%;" onclick="askPoi('📝', '#8e44ad')" id="t-note">📝 NOTE PERSO</button>
         </div>
-
         <h2 id="t-route">MON PARCOURS</h2>
         <button style="background:#00d4ff; color:black;" id="t-trace" onclick="startRouting()">📏 TRACER PARCOURS</button>
         <div style="display: flex; gap: 5px;">
             <button style="background:#f39c12; color:black; width:50%;" id="t-save" onclick="saveArchive()">💾 SAUVER</button>
             <button style="background:#c0392b; width:50%;" id="t-clear" onclick="clearData()">🗑️ VIDER</button>
         </div>
-
         <h2 id="t-gpx">GPX</h2>
         <div style="display: flex; gap: 5px;">
             <button style="background:#27ae60; width:50%;" id="t-export" onclick="exportGPX()">📤 EXPORT</button>
             <button style="background:#8e44ad; width:50%;" id="t-import" onclick="document.getElementById('file-input').click()">📥 IMPORT</button>
         </div>
         <input type="file" id="file-input" style="display:none" accept=".gpx" onchange="importGPX(event)">
-
         <h2 id="t-arch">ARCHIVES</h2>
         <div id="archive-list"></div>
     </div>
@@ -121,17 +112,16 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // --- TRADUCTIONS ---
     const trans = {
         fr: { bL: "☰ RÉSEAUX", bR: "⚙️ OUTILS", prep: "🔴 PRÉPARATION", nav: "🟢 NAVIGATION", net: "RÉSEAUX", poi: "POI & ALERTES", route: "MON PARCOURS", gpx: "GPX", trace: "📏 TRACER PARCOURS", save: "💾 SAUVER", clear: "🗑️ VIDER", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ FERMER", note: "📝 NOTE PERSO", arch: "ARCHIVES", r48: "Réseau 48t", r72: "Réseau 72t", r94: "Réseau 94t", r120: "Réseau 120t+", wT: "Bonjour à toutes et tous ! 🚛✨", wWarnT: "⚠️ RESPONSABILITÉ", wWarnP: "L'utilisateur est seul responsable. Je décline toute responsabilité." },
-        en: { bL: "☰ NETWORKS", bR: "⚙️ TOOLS", prep: "🔴 PREPARATION", nav: "🟢 NAVIGATION", net: "NETWORKS", poi: "POI & ALERTS", route: "MY ROUTE", gpx: "GPX", trace: "📏 START ROUTING", save: "💾 SAVE", clear: "🗑️ CLEAR", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ CLOSE", note: "📝 PERSONAL NOTE", arch: "ARCHIVES", r48: "48t Network", r72: "72t Network", r94: "94t Network", r120: "120t+ Network", wT: "Hello everyone! 🚛✨", wWarnT: "⚠️ RESPONSIBILITY", wWarnP: "The user is solely responsible for their route." },
-        nl: { bL: "☰ NETWERKEN", bR: "⚙️ TOOLS", prep: "🔴 VOORBEREIDING", nav: "🟢 NAVIGATIE", net: "NETWERKEN", poi: "POI & ALARMEN", route: "MIJN ROUTE", gpx: "GPX", trace: "📏 ROUTE MAKEN", save: "💾 OPSLAAN", clear: "🗑️ WISSEN", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ SLUITEN", note: "📝 NOTITIE", arch: "ARCHIEVEN", r48: "48t Netwerk", r72: "72t Netwerk", r94: "94t Netwerk", r120: "120t+ Netwerk", wT: "Hallo allemaal! 🚛✨", wWarnT: "⚠️ VERANTWOORDELIJKHEID", wWarnP: "De gebruiker is zelf verantwoordelijk voor de route." },
+        en: { bL: "☰ NETWORKS", bR: "⚙️ TOOLS", prep: "🔴 PREPARATION", nav: "🟢 NAVIGATION", net: "NETWORKS", poi: "POI & ALERTS", route: "MY ROUTE", gpx: "GPX", trace: "📏 START ROUTING", save: "💾 SAVE", clear: "🗑️ CLEAR", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ CLOSE", note: "📝 PERSONAL NOTE", arch: "ARCHIVES", r48: "48t Network", r72: "72t Network", r94: "94t Network", r120: "120t+ Network", wT: "Hello everyone! 🚛✨", wWarnT: "⚠️ RESPONSIBILITY", wWarnP: "The user is solely responsible." },
+        nl: { bL: "☰ NETWERKEN", bR: "⚙️ TOOLS", prep: "🔴 VOORBEREIDING", nav: "🟢 NAVIGATIE", net: "NETWERKEN", poi: "POI & ALARMEN", route: "MIJN ROUTE", gpx: "GPX", trace: "📏 ROUTE MAKEN", save: "💾 OPSLAAN", clear: "🗑️ WISSEN", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ SLUITEN", note: "📝 NOTITIE", arch: "ARCHIEVEN", r48: "48t Netwerk", r72: "72t Netwerk", r94: "94t Netwerk", r120: "120t+ Netwerk", wT: "Hallo allemaal! 🚛✨", wWarnT: "⚠️ VERANTWOORDELIJKHEID", wWarnP: "De gebruiker is zelf verantwoordelijk." },
         de: { bL: "☰ NETZE", bR: "⚙️ TOOLS", prep: "🔴 VORBEREITUNG", nav: "🟢 NAVIGATION", net: "NETZE", poi: "POI & ALARM", route: "MEINE ROUTE", gpx: "GPX", trace: "📏 PLANEN", save: "💾 SPEICHERN", clear: "🗑️ LÖSCHEN", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ ZU", note: "📝 NOTIZ", arch: "ARCHIV", r48: "48t Netz", r72: "72t Netz", r94: "94t Netz", r120: "120t+ Netz", wT: "Hallo zusammen! 🚛✨", wWarnT: "⚠️ VERANTWORTUNG", wWarnP: "Der Nutzer ist allein verantwortlich." },
-        es: { bL: "☰ REDES", bR: "⚙️ HERRAM.", prep: "🔴 PREPARACIÓN", nav: "🟢 NAVEGACIÓN", net: "REDES", poi: "POI & ALERTAS", route: "MI RUTA", gpx: "GPX", trace: "📏 HACER RUTA", save: "💾 GUARDAR", clear: "🗑️ BORRAR", export: "📤 EXPORTAR", import: "📥 IMPORTAR", close: "✖ CERRAR", note: "📝 NOTA", arch: "ARCHIVOS", r48: "Red 48t", r72: "Red 72t", r94: "Red 94t", r120: "Red 120t+", wT: "¡Hola a todos! 🚛✨", wWarnT: "⚠️ RESPONSABILIDAD", wWarnP: "El usuario es el único responsable." },
-        it: { bL: "☰ RETI", bR: "⚙️ STRUM.", prep: "🔴 PREPARAZIONE", nav: "🟢 NAVIGAZIONE", net: "RETI", poi: "POI & ALLERTE", route: "PERCORSO", gpx: "GPX", trace: "📏 CREA", save: "💾 SALVA", clear: "🗑️ CANCELLA", export: "📤 ESPORTA", import: "📥 IMPORTA", close: "✖ CHIUDI", note: "📝 NOTA", arch: "ARCHIVIO", r48: "Rete 48t", r72: "Rete 72t", r94: "Rete 94t", r120: "Rete 120t+", wT: "Ciao a tutti! 🚛✨", wWarnT: "⚠️ RESPONSABILITÀ", wWarnP: "L'utente è l'unico responsabile." },
-        pt: { bL: "☰ REDES", bR: "⚙️ FERR.", prep: "🔴 PREPARAÇÃO", nav: "🟢 NAVEGACIÓN", net: "REDES", poi: "POI & ALERTAS", route: "ROTA", gpx: "GPX", trace: "📏 CRIAR", save: "💾 SALVAR", clear: "🗑️ LIMPAR", export: "📤 EXPORTAR", import: "📥 IMPORTAR", close: "✖ FECHAR", note: "📝 NOTA", arch: "ARQUIVO", r48: "Rede 48t", r72: "Rede 72t", r94: "Rede 94t", r120: "Rede 120t+", wT: "Olá a todos! 🚛✨", wWarnT: "⚠️ RESPONSABILIDADE", wWarnP: "O utilizador é o único responsável." },
-        tr: { bL: "☰ ŞEBEKE", bR: "⚙️ ARAÇLAR", prep: "🔴 HAZIRLIK", nav: "🟢 NAVİGASYON", net: "ŞEBEKELER", poi: "POI & UYARI", route: "ROTAM", gpx: "GPX", trace: "📏 OLUŞTUR", save: "💾 KAYDET", clear: "🗑️ SİL", export: "📤 DIŞA AKTAR", import: "📥 İÇE AKTAR", close: "✖ KAPAT", note: "📝 NOT", arch: "ARŞİV", r48: "48t Şebeke", r72: "72t Şebeke", r94: "94t Şebeke", r120: "120t+ Şebeke", wT: "Herkese merhaba! 🚛✨", wWarnT: "⚠️ SORUMLULUK", wWarnP: "Rota sorumluluğu kullanıcıya aittir." },
-        pl: { bL: "☰ SIECI", bR: "⚙️ NARZĘD.", prep: "🔴 PRZYGOTOWANIE", nav: "🟢 NAWIGACJA", net: "SIECI", poi: "POI & ALARMY", route: "TRASA", gpx: "GPX", trace: "📏 UTWÓRZ", save: "💾 ZAPISZ", clear: "🗑️ WYCZYŚĆ", export: "📤 EKSPORT", import: "📥 IMPORT", close: "✖ ZAMKNIJ", note: "📝 NOTA", arch: "ARCHIWUM", r48: "Sieć 48t", r72: "Sieć 72t", r94: "Sieć 94t", r120: "Sieć 120t+", wT: "Cześć wszystkim! 🚛✨", wWarnT: "⚠️ ODPOWIEDZIALNOŚĆ", wWarnP: "Użytkownik ponosi odpowiedzialność." }
+        es: { bL: "☰ REDES", bR: "⚙️ HERRAM.", prep: "🔴 PREPARACIÓN", nav: "🟢 NAVEGACIÓN", net: "REDES", poi: "POI & ALERTAS", route: "MI RUTA", gpx: "GPX", trace: "📏 HACER RUTA", save: "💾 GUARDAR", clear: "🗑️ BORRAR", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ CERRAR", note: "📝 NOTA", arch: "ARCHIVOS", r48: "Red 48t", r72: "Red 72t", r94: "Red 94t", r120: "Red 120t+", wT: "¡Hola a todos! 🚛✨", wWarnT: "⚠️ RESPONSABILIDAD", wWarnP: "El usuario es responsable." },
+        it: { bL: "☰ RETI", bR: "⚙️ STRUM.", prep: "🔴 PREPARAZIONE", nav: "🟢 NAVIGAZIONE", net: "RETI", poi: "POI & ALLERTE", route: "PERCORSO", gpx: "GPX", trace: "📏 CREA", save: "💾 SALVA", clear: "🗑️ CANCELLA", export: "📤 ESPORTA", import: "📥 IMPORTA", close: "✖ CHIUDI", note: "📝 NOTA", arch: "ARCHIVIO", r48: "Rete 48t", r72: "Rete 72t", r94: "Rete 94t", r120: "Rete 120t+", wT: "Ciao a tutti! 🚛✨", wWarnT: "⚠️ RESPONSABILITÀ", wWarnP: "L'utente è responsabile." },
+        pt: { bL: "☰ REDES", bR: "⚙️ FERR.", prep: "🔴 PREPARAÇÃO", nav: "🟢 NAVIG.", net: "REDES", poi: "POI & ALERTAS", route: "ROTA", gpx: "GPX", trace: "📏 CRIAR", save: "💾 SALVAR", clear: "🗑️ LIMPAR", export: "📤 EXPORT", import: "📥 IMPORT", close: "✖ FECHAR", note: "📝 NOTA", arch: "ARQUIVO", r48: "Rede 48t", r72: "Rede 72t", r94: "Rede 94t", r120: "Rede 120t+", wT: "Olá! 🚛✨", wWarnT: "⚠️ RESPONSABILIDADE", wWarnP: "O utilizador é responsável." },
+        tr: { bL: "☰ ŞEBEKE", bR: "⚙️ ARAÇLAR", prep: "🔴 HAZIRLIK", nav: "🟢 NAVİGASYON", net: "ŞEBEKELER", poi: "POI & UYARI", route: "ROTAM", gpx: "GPX", trace: "📏 OLUŞTUR", save: "💾 KAYDET", clear: "🗑️ SİL", export: "📤 DIŞA AKTAR", import: "📥 İÇE AKTAR", close: "✖ KAPAT", note: "📝 NOT", arch: "ARŞİV", r48: "48t Şebeke", r72: "72t Şebeke", r94: "94t Şebeke", r120: "120t+ Şebeke", wT: "Merhaba! 🚛✨", wWarnT: "⚠️ SORUMLULUK", wWarnP: "Rota sorumluluğu kullanıcıdadır." },
+        pl: { bL: "☰ SIECI", bR: "⚙️ NARZĘD.", prep: "🔴 PRZYGOT.", nav: "🟢 NAWIGACJA", net: "SIECI", poi: "POI & ALARMY", route: "TRASA", gpx: "GPX", trace: "📏 UTWÓRZ", save: "💾 ZAPISZ", clear: "🗑️ WYCZYŚĆ", export: "📤 EKSPORT", import: "📥 IMPORT", close: "✖ ZAMKNIJ", note: "📝 NOTA", arch: "ARCHIWUM", r48: "Sieć 48t", r72: "Sieć 72t", r94: "Sieć 94t", r120: "Sieć 120t+", wT: "Cześć! 🚛✨", wWarnT: "⚠️ ODPOWIEDZIALNOŚĆ", wWarnP: "Użytkownik jest odpowiedzialny." }
     };
 
     function changeLang(l) {
@@ -160,7 +150,6 @@
         document.getElementById('w-warn-p').innerText = d.wWarnP;
     }
 
-    // --- CARTE ET LOGIQUE ---
     function closeWelcome() { document.getElementById('welcome-overlay').style.display = 'none'; }
     var map = L.map('map', { center: [46.9, -0.5], zoom: 6, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -201,7 +190,7 @@
         });
     }
 
-    function saveArchive() { let n = prompt("Nom du parcours ?"); if(!n) return; let a = JSON.parse(localStorage.getItem('conv_v30') || '[]'); a.push({name:n, pts: routePoints.map(p=>p.getLatLng())}); localStorage.setItem('conv_v30', JSON.stringify(a)); renderArchives(); }
+    function saveArchive() { let n = prompt("Nom ?"); if(!n) return; let a = JSON.parse(localStorage.getItem('conv_v30') || '[]'); a.push({name:n, pts: routePoints.map(p=>p.getLatLng())}); localStorage.setItem('conv_v30', JSON.stringify(a)); renderArchives(); }
     function renderArchives() { let div = document.getElementById('archive-list'); div.innerHTML = ''; let a = JSON.parse(localStorage.getItem('conv_v30') || '[]'); a.forEach((x, i) => { let item = document.createElement('div'); item.className = 'archive-item'; item.innerHTML = `<span>📁 ${x.name}</span> <button onclick="delArch(${i})" style="width:30px; background:#c0392b; margin:0;">🗑️</button>`; item.onclick = (e) => { if(e.target.tagName !== 'BUTTON') loadArch(i); }; div.appendChild(item); }); }
     function loadArch(i) { let a = JSON.parse(localStorage.getItem('conv_v30') || '[]'); clearData(); a[i].pts.forEach(p => addPoint([p.lat, p.lng])); closeAll(); }
     function delArch(i) { let a = JSON.parse(localStorage.getItem('conv_v30') || '[]'); a.splice(i,1); localStorage.setItem('conv_v30', JSON.stringify(a)); renderArchives(); }
@@ -209,14 +198,13 @@
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
     function updateL(id) { if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]); else map.removeLayer(groups[id]); }
 
-    // --- IMPORT / EXPORT GPX ---
     function exportGPX() {
-        if(routeLayer.getLatLngs().length === 0) { alert("Pas de parcours à exporter !"); return; }
+        if(routeLayer.getLatLngs().length === 0) return;
         let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPS CONVOI"><trk><trkseg>';
         routeLayer.getLatLngs().forEach(pt => { gpx += `<trkpt lat="${pt.lat}" lon="${pt.lng}"></trkpt>`; });
         gpx += '</trkseg></trk></gpx>';
         let blob = new Blob([gpx], {type: 'application/gpx+xml'});
-        let link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'parcours_convoi.gpx'; link.click();
+        let link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'parcours.gpx'; link.click();
     }
 
     function importGPX(e) {
@@ -225,7 +213,7 @@
         reader.onload = function(event) {
             let parser = new DOMParser(); let xml = parser.parseFromString(event.target.result, "text/xml");
             let pts = xml.getElementsByTagName("trkpt");
-            if(pts.length === 0) { alert("Fichier GPX invalide ou vide"); return; }
+            if(pts.length === 0) return;
             clearData();
             addPoint([pts[0].getAttribute("lat"), pts[0].getAttribute("lon")]);
             addPoint([pts[pts.length-1].getAttribute("lat"), pts[pts.length-1].getAttribute("lon")]);
@@ -234,7 +222,6 @@
         reader.readAsText(file);
     }
 
-    // --- CHARGEMENT INITIAL ---
     document.getElementById('btn-left').onclick = () => { closeAll(); document.getElementById('sidebar-left').style.display='block'; };
     document.getElementById('btn-right').onclick = () => { closeAll(); document.getElementById('sidebar-right').style.display='block'; };
 
