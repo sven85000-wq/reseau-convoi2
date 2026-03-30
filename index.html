@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V42.6 - RECTIFIÉE</title>
+    <title>GPS CONVOI V42.6 - TRAVAUX DIRECT</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -21,7 +21,7 @@
             border-radius: 15px; padding: 25px; max-width: 500px; text-align: center;
         }
         .warning-flash {
-            border: 2px solid #ff0000; background: rgba(255,0,0,0.15);
+            border: 2px solid #ff0000; background: rgba(255,0,0,0.15); 
             padding: 12px; border-radius: 10px; margin-top: 15px;
             animation: blinker 1.5s linear infinite;
         }
@@ -37,8 +37,8 @@
 
         /* --- FENÊTRE TRAVAUX --- */
         #umap-window {
-            position: fixed; top: 70px; right: 10px; width: 280px; height: 350px;
-            z-index: 15000; border: 3px solid #f39c12; border-radius: 12px;
+            position: fixed; top: 70px; right: 10px; width: 280px; height: 350px; 
+            z-index: 15000; border: 3px solid #f39c12; border-radius: 12px; 
             background: #1e2b37; display: none; overflow: hidden;
         }
         #resize-handle { position: absolute; bottom: 0; right: 0; width: 30px; height: 30px; background: #f39c12; clip-path: polygon(100% 0, 100% 100%, 0 100%); cursor: nwse-resize; }
@@ -48,11 +48,11 @@
         .umap-tabs button.active { background: #f39c12; color: black; font-weight: bold; }
         #umap-frame { width: 100%; height: calc(100% - 65px); border: none; }
 
-        /* --- BOUTONS FIXES --- */
+        /* --- BOUTONS --- */
         #btn-travaux-direct { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 9998; background: #f39c12; color: black; border: 2px solid #000; padding: 10px 15px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 18px; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
         #btn-left { left: 10px; } #btn-right { right: 10px; }
-       
+        
         #lang-bar { position: fixed; top: 75px; left: 10px; z-index: 9000; display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.8); padding: 8px; border-radius: 8px; }
         .flag { width: 30px; height: 20px; border: 1px solid #fff; cursor: pointer; }
 
@@ -63,7 +63,7 @@
         h2 { font-size: 11px; color: #f39c12; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 15px; text-transform: uppercase; }
         button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; }
         .row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; }
-        .gps-dot { width: 14px; height: 14px; background: #4285F4; border: 2px solid white; border-radius: 50%; }
+        .gps-dot { width: 16px; height: 16px; background: #4285F4; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -96,7 +96,7 @@
             <span onclick="minimizeUmap()" style="cursor:pointer">➖ RÉDUIRE</span>
             <div><span onclick="toggleFullScreen()" style="background:#2ecc71; color:white; padding:2px 6px; border-radius:4px; margin-right:5px; cursor:pointer">BOX</span><span onclick="toggleUmap()" style="background:#c0392b; color:white; padding:2px 6px; border-radius:4px; cursor:pointer">X</span></div>
         </div>
-        <div class="umap-tabs"><button id="tab-gogo" class="active" onclick="switchFrame('gogo')">GOGO</button><button id="tab-umap" onclick="switchFrame('umap')">UMAP</button></div>
+        <div class="umap-tabs"><button id="tab-umap" class="active" onclick="switchFrame('umap')">UMAP</button><button id="tab-gogo" onclick="switchFrame('gogo')">GOGO</button></div>
         <iframe id="umap-frame" src=""></iframe>
         <div id="resize-handle"></div>
     </div>
@@ -117,7 +117,7 @@
 
     <div id="sidebar-left" class="sidebar">
         <button style="background:#e74c3c;" onclick="closeAll()">✖ FERMER</button>
-        <button style="background:#27ae60;" onclick="startGPS()" id="t-gps">🛰️ RE-CENTRER GPS</button>
+        <button style="background:#27ae60;" onclick="reCenterGPS()" id="t-gps">🛰️ RE-CENTRER GPS</button>
         <h2 id="t-net-title">RÉSEAUX & TRAVAUX</h2>
         <div class="row" onclick="toggleUmap()" style="background: rgba(243,156,18,0.2); border: 1px solid #f39c12; cursor:pointer;"><span style="margin-right:10px;">🚧</span> <b>FENÊTRE TRAVAUX</b></div>
         <div class="row"><input type="checkbox" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</div>
@@ -154,8 +154,11 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; }
-   
+    function closeWelcome() { 
+        document.getElementById('welcome-modal').style.display = 'none'; 
+        startGPS(); 
+    }
+    
     // --- LANGUES ---
     const trans = {
         fr: { btnL: "☰ RÉSEAUX", btnR: "⚙️ OUTILS", gps: "🛰️ RE-CENTRER GPS", net: "RÉSEAUX & TRAVAUX", poi: "AIDES & POI", route: "ITINÉRAIRE", trace: "📍 TRACER (ÉPINGLES)", clear: "🗑️ EFFACER TOUT", save: "💾 SAUVEGARDER", arch: "MES ARCHIVES", work: "🚧 TRAVAUX LIVE" },
@@ -178,33 +181,44 @@
         document.getElementById('btn-travaux-direct').innerText = d.work;
     }
 
-    // --- CARTE & LAYERS ---
+    // --- CARTE ---
     var map = L.map('map', { center: [46.9, -0.5], zoom: 6, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     var gPois = L.featureGroup().addTo(map);
     var gRouteMarkers = L.featureGroup().addTo(map);
     var routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map);
-    var routePoints = [];
+    var routePoints = []; 
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
 
-    // --- LOGIQUE FENÊTRE TRAVAUX ---
+    // --- GPS LOGIQUE ---
+    var userPos = null; var userMarker = null;
+    function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); }
+    map.on('locationfound', (e) => {
+        userPos = e.latlng;
+        if (!userMarker) { userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(map);
+        } else { userMarker.setLatLng(e.latlng); }
+    });
+    function reCenterGPS() { if (userPos) { map.setView(userPos, 15); closeAll(); } else { alert("Signal GPS en attente..."); } }
+
+    // --- FENÊTRE TRAVAUX ---
     function toggleUmap() {
         const win = document.getElementById('umap-window');
         if (win.style.display === 'none' || win.style.display === '') {
-            switchFrame('gogo'); win.style.display = 'block'; closeAll();
+            switchFrame('umap'); // Ouvre UMAP par défaut
+            win.style.display = 'block'; closeAll();
         } else { win.style.display = 'none'; }
     }
     function switchFrame(type) {
-        const links = { gogo: "https://infotravauxconvoi.gogocarto.fr/map?iframe=1#/carte/@46.33,2.50,6z?cat=all", umap: "https://umap.openstreetmap.fr/fr/map/travaux-convoi-2026_1383926?localizeUser=true" };
+        const links = { 
+            gogo: "https://infotravauxconvoi.gogocarto.fr/map?iframe=1#/carte/@46.33,2.50,6z?cat=all", 
+            umap: "https://umap.openstreetmap.fr/fr/map/travaux-convoi-2026_1383926?localizeUser=true" 
+        };
         document.getElementById('umap-frame').src = links[type];
         document.getElementById('tab-gogo').className = (type==='gogo'?'active':'');
         document.getElementById('tab-umap').className = (type==='umap'?'active':'');
     }
-    function minimizeUmap() {
-        let w = document.getElementById('umap-window');
-        w.style.height = (w.style.height==='35px'?'350px':'35px');
-    }
+    function minimizeUmap() { let w = document.getElementById('umap-window'); w.style.height = (w.style.height==='35px'?'350px':'35px'); }
     function toggleFullScreen() {
         let w = document.getElementById('umap-window');
         if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; w.style.top='70px'; w.style.right='10px'; }
@@ -222,22 +236,21 @@
     });}
 
     function startRouting() { closeAll(); map.on('click', (e) => { let m = L.marker(e.latlng, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); updateRoute(); }); }
-   
-    function updateRoute() {
-        if (routePoints.length < 2) return;
-        let coords = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';');
-        fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`).then(r => r.json()).then(d => {
+    function updateRoute() { 
+        if (routePoints.length < 2) return; 
+        let coords = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';'); 
+        fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`).then(r => r.json()).then(d => { 
             if(d.routes) {
                 routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(x => [x[1], x[0]]));
                 document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
                 document.getElementById('distance-info').style.display = 'block';
             }
-        });
+        }); 
     }
 
     function clearCurrentData() { gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); gPois.clearLayers(); routePoints=[]; document.getElementById('distance-info').style.display = 'none'; }
-   
-    // --- CHARGEMENT RÉSEAUX ---
+    
+    // --- RÉSEAUX ---
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json").then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
             let p = JSON.stringify(f.properties).toUpperCase(), g = "gCat1", c = "#FFFF00";
@@ -257,14 +270,7 @@
     // --- GPX ---
     function exportGPX() { let pts = routeLayer.getLatLngs(); if(!pts.length) return; let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>' + pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') + '</trkseg></trk></gpx>'; let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx], {type: 'application/gpx+xml'})); a.download = "itineraire.gpx"; a.click(); }
     function importGPX(i) { let r = new FileReader(); r.onload = (e) => { let xml = new DOMParser().parseFromString(e.target.result, "text/xml"), pts = Array.from(xml.getElementsByTagName("trkpt")).map(p => [p.getAttribute("lat"), p.getAttribute("lon")]); if(pts.length) { clearCurrentData(); routeLayer.setLatLngs(pts); map.fitBounds(routeLayer.getBounds()); } }; r.readAsText(i.files[0]); }
-   
-    // --- GPS ---
-    function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); closeAll(); }
-    var userMarker = null;
-    map.on('locationfound', (e) => {
-        if (!userMarker) { userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [14, 14] }) }).addTo(map); map.setView(e.latlng, 15);
-        } else { userMarker.setLatLng(e.latlng); }
-    });
 </script>
 </body>
 </html>
+
