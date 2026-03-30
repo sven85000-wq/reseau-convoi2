@@ -23,9 +23,6 @@
         #dist-val { font-size: 14px; font-weight: 900; color: #00d4ff; }
         #dist-label { font-size: 7px; color: #94a3b8; display: block; }
 
-        .leaflet-bottom.leaflet-right { bottom: 20px !important; right: 10px !important; }
-        .leaflet-control-layers { border: 2px solid white !important; background: #1e293b !important; color: white !important; border-radius: 10px !important; }
-
         .sidebar { position: fixed; top: 0; height: 100vh; width: 85%; max-width: 320px; background: #1e293b; z-index: 10001; padding: 20px; display: none; overflow-y: auto; box-sizing: border-box; }
         #side-left { left: 0; border-right: 4px solid #f39c12; }
         #side-right { right: 0; border-left: 4px solid #00d4ff; }
@@ -33,13 +30,10 @@
         .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; }
         .row { display: flex; align-items: center; background: #334155; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 12px; }
        
-        #side-right h2 { font-size: 14px; margin-bottom: 10px; }
         .act-btn { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 8px; color: white; font-size: 10px; cursor: pointer; }
-
+        .nav-arrow { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 25px solid #4285F4; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
         .poi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .poi-btn { padding: 8px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 9px; }
-        .nav-arrow { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 25px solid #4285F4; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-        .archive-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 4px solid #22c55e; font-size: 11px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -70,6 +64,7 @@
         <button class="close-btn" onclick="closeAll()">FERMER</button>
         <h2>TRAVAUX EN DIRECT</h2>
         <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="protectedLoadUmap()">🔄 ACTUALISER UMAP</button>
+        <p id="umap-status" style="font-size: 9px; text-align: center; color: #94a3b8;">Dernière synchro : --:--</p>
         <hr>
         <h2>POI + NOTES</h2>
         <div class="poi-grid">
@@ -97,7 +92,6 @@
 <script>
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
     var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
-
     var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false, layers: [osm] });
     L.control.layers({ "📍 Plan": osm, "🛰️ Sat": satellite }, null, { position: 'bottomright' }).addTo(map);
 
@@ -112,48 +106,51 @@
     function openSide(s) { closeAll(); document.getElementById('side-'+s).style.display = 'block'; }
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
 
+    // GESTION UMAP AMÉLIORÉE (CARTE 1383926)
     function protectedLoadUmap() {
         let pass = prompt("Code de validation :");
-        if(pass === "1234") {
-            loadUmapData();
-        } else {
-            alert("Accès refusé.");
-        }
+        if(pass === "1234") { loadUmapData(); } else { alert("Accès refusé."); }
     }
 
-    // FONCTION MISE À JOUR AVEC TON NOUVEAU NUMÉRO : 1383926
     function loadUmapData() {
-        fetch("https://umap.openstreetmap.fr/fr/map/1383926/geojson/?" + Date.now())
-        .then(r => r.json()).then(data => {
+        const urlUmap = "https://umap.openstreetmap.fr/fr/map/1383926/geojson/";
+        const proxy = "https://api.allorigins.win/raw?url=";
+
+        fetch(proxy + encodeURIComponent(urlUmap + "?t=" + Date.now()))
+        .then(r => r.json())
+        .then(data => {
             groups.gUmap.clearLayers();
             L.geoJSON(data, {
                 pointToLayer: (f, latlng) => {
-                    let texte = (f.properties.name || "").toUpperCase();
+                    let infos = ((f.properties.name || "") + " " + (f.properties.description || "")).toUpperCase();
                     let iconEmoji = "⚠️";
 
-                    if (texte.includes("TRAVAUX")) iconEmoji = "🚧";
-                    if (texte.includes("BARRÉE") || texte.includes("INTERDIT") || texte.includes("FERMÉ")) iconEmoji = "⛔";
-                    if (texte.includes("PONT")) iconEmoji = "🌉";
-                    if (texte.includes("DÉVIATION")) iconEmoji = "↪️";
-                    if (texte.includes("STATION") || texte.includes("GAZ")) iconEmoji = "⛽";
-                    if (texte.includes("PARKING") || texte.includes("ATTENTE")) iconEmoji = "🅿️";
+                    if (infos.includes("TRAVAUX") || infos.includes("CHANTIER")) iconEmoji = "🚧";
+                    if (infos.includes("BARR") || infos.includes("FERM") || infos.includes("INTERDIT")) iconEmoji = "⛔";
+                    if (infos.includes("PONT")) iconEmoji = "🌉";
+                    if (infos.includes("DÉVIA")) iconEmoji = "↪️";
+                    if (infos.includes("PARK") || infos.includes("ATTENTE")) iconEmoji = "🅿️";
+                    if (infos.includes("STATI") || infos.includes("GAZ")) iconEmoji = "⛽";
                    
                     return L.marker(latlng, {
                         icon: L.divIcon({
-                            html:`<div style="font-size:30px; filter:drop-shadow(0 2px 4px black);">${iconEmoji}</div>`,
-                            className:''
+                            html: `<div style="font-size:32px; filter:drop-shadow(0 2px 4px black); text-shadow: 1px 1px 0px white;">${iconEmoji}</div>`,
+                            className: ''
                         })
-                    }).bindPopup(`<b>${f.properties.name || "Alerte Travaux"}</b><br>${f.properties.description || ""}`);
+                    }).bindPopup(`<b>${f.properties.name || "Alerte"}</b><br>${f.properties.description || ""}`);
                 },
-                style: (f) => {
-                    return { color: "#ef4444", weight: 6, opacity: 0.8, dashArray: '10, 15' };
-                }
+                style: (f) => { return { color: "#ef4444", weight: 6, opacity: 0.8, dashArray: '10, 15' }; }
             }).addTo(groups.gUmap);
+           
             map.addLayer(groups.gUmap);
-            alert("Synchronisation effectuée sur la carte 1383926.");
-        }).catch(e => console.log("Erreur uMap (Vérifiez si la carte est publique)"));
+            document.getElementById('chk-gUmap').checked = true;
+            let now = new Date();
+            document.getElementById('umap-status').innerText = "Dernière synchro : " + now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0');
+        })
+        .catch(e => console.log("Erreur uMap auto"));
     }
 
+    // Navigation & Localisation
     function toggleNav() {
         let b = document.getElementById('btn-nav');
         if(b.innerText.includes("🔴")) {
@@ -162,21 +159,20 @@
         } else {
             b.innerText = "🔴 PRÉPARATION"; b.style.background = "#ef4444";
             map.removeLayer(userMarker); map.stopLocate();
-            resetRotation();
+            document.getElementById('map').style.transform = `rotate(0deg)`;
         }
     }
 
     map.on('locationfound', e => {
         userMarker.setLatLng(e.latlng).addTo(map);
-        if (e.heading !== null && e.heading !== undefined) { rotateMap(e.heading); }
+        if (e.heading !== null && e.heading !== undefined) {
+            document.getElementById('map').style.transform = `rotate(${-e.heading}deg)`;
+        }
         if(routePoints.length > 0) {
             let last = routePoints[routePoints.length - 1].getLatLng();
             document.getElementById('dist-val').innerText = (e.latlng.distanceTo(last) / 1000).toFixed(1);
         }
     });
-
-    function rotateMap(heading) { document.getElementById('map').style.transform = `rotate(${-heading}deg)`; }
-    function resetRotation() { document.getElementById('map').style.transform = `rotate(0deg)`; }
 
     function toggleL(id) {
         if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]);
@@ -188,8 +184,8 @@
         map.on('click', e => {
             let note = prompt("Note du point :");
             if(note !== null) {
-                let m = L.marker(e.latlng, { icon: L.divIcon({html:`<div style="font-size:26px; filter:drop-shadow(0 2px 2px black);">${emoji}</div>`, className:''}) }).addTo(markersLayer);
-                m.bindPopup(note); m.on('dblclick', () => map.removeLayer(m));
+                L.marker(e.latlng, { icon: L.divIcon({html:`<div style="font-size:26px; filter:drop-shadow(0 2px 2px black);">${emoji}</div>`, className:''}) })
+                .addTo(markersLayer).bindPopup(note);
             }
             map.off('click');
         });
@@ -281,10 +277,10 @@
 
     function clearAllData() { routePoints=[]; markersLayer.clearLayers(); routeLayer.setLatLngs([]); document.getElementById('dist-val').innerText="0.0"; }
 
-    // Chargement auto des travaux au démarrage
+    // DÉMARRAGE & RÉSEAUX
     loadUmapData();
-   
-    // Réseaux GitHub
+    setInterval(loadUmapData, 300000); // Mise à jour auto toutes les 5 min
+
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
     .then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
