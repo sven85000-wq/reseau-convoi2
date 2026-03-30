@@ -1,206 +1,199 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V30.6 - FINAL PRO</title>
+    <title>GPS CONVOI V40.7 - ÉLITE NOTES</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; height: 100vh; background: #0f172a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        #map { width: 100%; height: 100vh; transition: transform 0.5s ease; }
-        #nav-info { position: fixed; top: 75px; left: 50%; transform: translateX(-50%); width: 85%; background: rgba(15, 23, 42, 0.95); color: #00d4ff; padding: 12px; border-radius: 12px; z-index: 15000; display: none; text-align: center; border: 2px solid #334155; }
-        .nav-data { display: inline-block; margin: 0 15px; }
-        .nav-val { font-size: 20px; font-weight: bold; display: block; }
-        .nav-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; }
-        .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #1e293b; color: white; border: 2px solid #f39c12; padding: 12px 18px; border-radius: 12px; font-weight: bold; font-size: 11px; cursor: pointer; }
-        #btn-left { left: 15px; } #btn-right { right: 15px; }
-        #nav-master-btn { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; width: 150px; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 10px; color: white; background: #ef4444; border: 2px solid white; text-align: center; cursor: pointer; }
-        .sidebar { position: fixed; top: 0; height: 100vh; width: 320px; background: #1e293b; color: #f8fafc; padding: 25px; box-sizing: border-box; z-index: 10001; overflow-y: auto; display: none; box-shadow: 0 0 50px rgba(0,0,0,0.7); }
-        #sidebar-left { left: 0; border-right: 5px solid #f39c12; }
-        #sidebar-right { right: 0; border-left: 5px solid #f39c12; }
-        h2 { font-size: 13px; color: #f39c12; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-top: 20px; text-transform: uppercase; }
-        .check-container { display: flex; align-items: center; margin-bottom: 12px; padding: 12px; background: #334155; border-radius: 10px; cursor: pointer; }
-        .check-container input { width: 28px; height: 28px; margin-right: 15px; accent-color: #f39c12; }
-        button { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; font-weight: bold; font-size: 11px; border: none; cursor: pointer; color: white; }
-        #lang-bar { position: fixed; top: 80px; left: 15px; z-index: 9000; display: flex; flex-direction: column; gap: 8px; background: rgba(30, 41, 59, 0.7); padding: 10px; border-radius: 12px; border: 1px solid #334155; }
-        .flag { width: 32px; height: 22px; border-radius: 4px; cursor: pointer; }
-        #welcome-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 20000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        #welcome-card { background: #1e293b; color: white; border: 3px solid #f39c12; border-radius: 20px; max-width: 500px; width: 100%; padding: 35px; text-align: center; }
+        body { margin: 0; padding: 0; background: #0f172a; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
+        #map { width: 100%; height: 100vh; z-index: 1; }
+        #top-bar { position: fixed; top: 10px; left: 0; width: 100%; z-index: 9999; display: flex; justify-content: space-around; align-items: center; padding: 0 10px; box-sizing: border-box; }
+        .ctrl-btn { padding: 12px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 10px; min-width: 90px; text-align: center; }
+        #btn-reseaux { background: #1e293b; color: #f39c12; border-color: #f39c12; }
+        #btn-nav { background: #ef4444; width: 140px; }
+        #btn-outils { background: #1e293b; color: #00d4ff; border-color: #00d4ff; }
+        #dist-box { background: rgba(15, 23, 42, 0.95); padding: 8px 15px; border-radius: 12px; border: 2px solid #334155; text-align: center; min-width: 100px; }
+        #dist-val { font-size: 20px; font-weight: 900; color: #00d4ff; display: block; }
+        .sidebar { position: fixed; top: 0; height: 100vh; width: 320px; background: #1e293b; z-index: 10001; padding: 20px; display: none; overflow-y: auto; box-shadow: 0 0 40px rgba(0,0,0,0.8); box-sizing: border-box; }
+        #side-left { left: 0; border-right: 4px solid #f39c12; }
+        #side-right { right: 0; border-left: 4px solid #00d4ff; }
+        .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; cursor: pointer; }
+        h2 { font-size: 11px; color: #f39c12; text-transform: uppercase; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-top: 20px; }
+        .row { display: flex; align-items: center; background: #334155; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+        .row input { width: 22px; height: 22px; margin-right: 12px; }
+        .act-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 8px; color: white; cursor: pointer; font-size: 11px; }
+        .poi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .poi-btn { padding: 10px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 10px; cursor: pointer; }
+        .poi-btn.active { background: #f39c12; border-color: white; }
+        .archive-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 4px solid #22c55e; cursor: pointer; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
+        .del-arch { color: #ef4444; font-weight: bold; padding: 5px; }
+       
+        /* Style des bulles de notes */
+        .leaflet-popup-content-wrapper { background: #1e293b; color: white; border: 1px solid #f39c12; font-weight: bold; }
+        .leaflet-popup-tip { background: #f39c12; }
     </style>
 </head>
 <body>
 
-    <div id="nav-info">
-        <div class="nav-data"><span class="nav-label" id="t-dist-lbl">DISTANCE RESTANTE</span><span class="nav-val"><span id="dist-val">--</span> km</span></div>
-        <div class="nav-data"><span class="nav-label" id="t-speed-lbl">VITESSE REELLE</span><span class="nav-val"><span id="speed-val">0</span> km/h</span></div>
+    <div id="top-bar">
+        <div id="btn-reseaux" class="ctrl-btn" onclick="openSide('left')">☰ RÉSEAUX</div>
+        <div id="dist-box"><span id="dist-label" style="font-size:8px; color:#94a3b8;">DISTANCE</span><span id="dist-val">0.0</span> <span style="font-size:9px;">KM</span></div>
+        <div id="btn-nav" class="ctrl-btn" onclick="toggleNav()">🔴 PRÉPARATION</div>
+        <div id="btn-outils" class="ctrl-btn" onclick="openSide('right')">⚙️ OUTILS</div>
     </div>
 
-    <div id="welcome-overlay">
-        <div id="welcome-card">
-            <h1 id="w-title">Bonjour à toutes et tous ! 🚛✨</h1>
-            <p id="w-p1">Préparez vos réseaux et activez la navigation pour suivre votre route.</p>
-            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 15px; border-radius: 12px; margin: 20px 0;">
-                <b id="w-warn-t" style="color:#ef4444;">⚠️ RESPONSABILITÉ</b>
-                <p id="w-warn-p" style="font-size: 12px; margin-top:8px;">L'utilisateur est seul responsable. Je décline toute responsabilité.</p>
-            </div>
-            <button id="w-btn-acc" style="background:#22c55e; padding:18px; font-size:15px;" onclick="closeWelcome()">J'AI COMPRIS / ACCEPTER</button>
+    <div id="side-left" class="sidebar">
+        <button class="close-btn" onclick="closeAll()">FERMER</button>
+        <h2>RÉSEAUX</h2>
+        <div id="net-list">
+            <label class="row"><input type="checkbox" id="chk-gCat1" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</label>
+            <label class="row"><input type="checkbox" id="chk-g48" checked onchange="toggleL('g48')"> Réseau 48t</label>
+            <label class="row"><input type="checkbox" id="chk-g72" checked onchange="toggleL('g72')"> Réseau 72t</label>
+            <label class="row"><input type="checkbox" id="chk-g94" checked onchange="toggleL('g94')"> Réseau 94t</label>
+            <label class="row"><input type="checkbox" id="chk-g120" checked onchange="toggleL('g120')"> Réseau 120t+</label>
         </div>
     </div>
 
-    <div id="btn-left" class="menu-btn" onclick="openMenu('left')">☰ RÉSEAUX</div>
-    <div id="nav-master-btn" onclick="toggleNavMode()">🔴 PRÉPARATION</div>
-    <div id="btn-right" class="menu-btn" onclick="openMenu('right')">⚙️ OUTILS</div>
-
-    <div id="lang-bar">
-        <img src="https://flagcdn.com/w40/fr.png" class="flag" onclick="changeLang('fr')">
-        <img src="https://flagcdn.com/w40/gb.png" class="flag" onclick="changeLang('en')">
-        <img src="https://flagcdn.com/w40/nl.png" class="flag" onclick="changeLang('nl')">
-        <img src="https://flagcdn.com/w40/de.png" class="flag" onclick="changeLang('de')">
-        <img src="https://flagcdn.com/w40/es.png" class="flag" onclick="changeLang('es')">
-        <img src="https://flagcdn.com/w40/it.png" class="flag" onclick="changeLang('it')">
-        <img src="https://flagcdn.com/w40/pt.png" class="flag" onclick="changeLang('pt')">
-        <img src="https://flagcdn.com/w40/tr.png" class="flag" onclick="changeLang('tr')">
-        <img src="https://flagcdn.com/w40/pl.png" class="flag" onclick="changeLang('pl')">
-    </div>
-
-    <div id="sidebar-left" class="sidebar">
-        <button style="background:#ef4444; margin-bottom:15px;" onclick="closeAll()">✖ FERMER</button>
-        <h2 id="t-net">RÉSEAUX</h2>
-        <div style="display: flex; gap: 5px; margin-bottom: 15px;">
-            <button style="background:#475569; width:50%;" id="t-on" onclick="toggleAll(true)">TOUT ON</button>
-            <button style="background:#475569; width:50%;" id="t-off" onclick="toggleAll(false)">TOUT OFF</button>
+    <div id="side-right" class="sidebar">
+        <button class="close-btn" onclick="closeAll()">FERMER</button>
+        <h2>POSER POI + NOTE</h2>
+        <div class="poi-grid">
+            <button class="poi-btn" id="btn-gas" onclick="setPoiMode('⛽', 'btn-gas')">⛽ STATION</button>
+            <button class="poi-btn" id="btn-bridge" onclick="setPoiMode('🌉', 'btn-bridge')">🌉 PONT</button>
+            <button class="poi-btn" id="btn-rest" onclick="setPoiMode('🍴', 'btn-rest')">🍴 RESTAU</button>
+            <button class="poi-btn" id="btn-park" onclick="setPoiMode('🅿️', 'btn-park')">🅿️ PARKING</button>
         </div>
-        <label class="check-container"><input type="checkbox" class="net-chk" id="chk-gCat1" checked onchange="updateL('gCat1')"><span>Cat 1 / ATE</span></label>
-        <label class="check-container"><input type="checkbox" class="net-chk" id="chk-g48" checked onchange="updateL('g48')"><span id="t-r48">Réseau 48t</span></label>
-        <label class="check-container"><input type="checkbox" class="net-chk" id="chk-g72" checked onchange="updateL('g72')"><span id="t-r72">Réseau 72t</span></label>
-        <label class="check-container"><input type="checkbox" class="net-chk" id="chk-g94" checked onchange="updateL('g94')"><span id="t-r94">Réseau 94t</span></label>
-        <label class="check-container"><input type="checkbox" class="net-chk" id="chk-g120" checked onchange="updateL('g120')"><span id="t-r120">Réseau 120t+</span></label>
-    </div>
-
-    <div id="sidebar-right" class="sidebar">
-        <button style="background:#ef4444; margin-bottom:15px;" onclick="closeAll()">✖ FERMER</button>
-        <h2 id="t-route">PARCOURS</h2>
-        <button style="background:#00d4ff; color:#0f172a;" id="t-trace" onclick="startRouting()">📏 TRACER ROUTE</button>
-        <button style="background:#ef4444;" id="t-clear" onclick="clearData()">🗑️ TOUT EFFACER</button>
-        <h2 id="t-gpx">GPX</h2>
-        <div style="display: flex; gap: 5px;">
-            <button style="background:#22c55e; width:50%;" id="t-export" onclick="exportGPX()">📤 EXPORT</button>
-            <button style="background:#8b5cf6; width:50%;" id="t-import" onclick="document.getElementById('file-input').click()">📥 IMPORT</button>
+        <h2>ACTIONS</h2>
+        <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="startRouting()">📏 TRACER ROUTE (BLEU FONCÉ)</button>
+        <button class="act-btn" style="background:#3b82f6;" onclick="saveArchive()">💾 SAUVEGARDER</button>
+        <div style="display:flex; gap:5px;">
+            <button class="act-btn" style="background:#22c55e;" onclick="exportGPX()">📤 EXPORT</button>
+            <button class="act-btn" style="background:#8b5cf6;" onclick="document.getElementById('file-in').click()">📥 IMPORT</button>
         </div>
-        <input type="file" id="file-input" style="display:none" accept=".gpx" onchange="importGPX(event)">
+        <input type="file" id="file-in" style="display:none" accept=".gpx" onchange="importGPX(event)">
+        <div id="archive-list"></div>
+        <button class="act-btn" style="background:#ef4444; margin-top:20px;" onclick="clearAllData()">🗑️ EFFACER CARTE</button>
     </div>
 
     <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const trans = {
-        fr: { wT: "Bonjour à toutes et tous ! 🚛✨", wBtn: "J'AI COMPRIS / ACCEPTER", bL: "☰ RÉSEAUX", bR: "⚙️ OUTILS", prep: "🔴 PRÉPARATION", nav: "🟢 NAVIGATION", net: "RÉSEAUX", route: "PARCOURS", trace: "📏 TRACER ROUTE", clear: "🗑️ TOUT EFFACER", export: "📤 EXPORT", import: "📥 IMPORT", on: "TOUT ON", off: "TOUT OFF", r48: "Réseau 48t", wWarnT: "⚠️ RESPONSABILITÉ", dist: "DISTANCE RESTANTE", speed: "VITESSE REELLE" },
-        en: { wT: "Hello everyone! 🚛✨", wBtn: "UNDERSTOOD / ACCEPT", bL: "☰ NETWORKS", bR: "⚙️ TOOLS", prep: "🔴 PREPARATION", nav: "🟢 NAVIGATION", net: "NETWORKS", route: "MY ROUTE", trace: "📏 START ROUTE", clear: "🗑️ CLEAR ALL", export: "📤 EXPORT", import: "📥 IMPORT", on: "ALL ON", off: "ALL OFF", r48: "48t Network", wWarnT: "⚠️ RESPONSIBILITY", dist: "REMAINING DISTANCE", speed: "REAL SPEED" },
-        nl: { wT: "Hallo allemaal! 🚛✨", wBtn: "BEGREPEN / ACCEPTEREN", bL: "☰ NETWERKEN", bR: "⚙️ TOOLS", prep: "🔴 VOORBEREIDING", nav: "🟢 NAVIGATIE", net: "NETWERKEN", route: "MIJN ROUTE", trace: "📏 ROUTE MAKEN", clear: "🗑️ ALLES WISSEN", export: "📤 EXPORT", import: "📥 IMPORT", on: "ALLES AAN", off: "ALLES UIT", r48: "48t Netwerk", wWarnT: "⚠️ VERANTWOORDEL.", dist: "AFSTAND", speed: "SNELHEID" },
-        de: { wT: "Hallo zusammen! 🚛✨", wBtn: "VERSTANDEN / AKZEPTIEREN", bL: "☰ NETZE", bR: "⚙️ TOOLS", prep: "🔴 VORBEREITUNG", nav: "🟢 NAVIGATION", net: "NETZE", route: "ROUTE", trace: "📏 PLANEN", clear: "🗑️ LÖSCHEN", export: "📤 EXPORT", import: "📥 IMPORT", on: "ALLES AN", off: "ALLES AUS", r48: "48t Netz", wWarnT: "⚠️ VERANTWORTUNG", dist: "DISTANZ", speed: "SPEED" },
-        es: { wT: "¡Hola a todos! 🚛✨", wBtn: "ENTENDIDO / ACEPTAR", bL: "☰ REDES", bR: "⚙️ HERRAM.", prep: "🔴 PREPARACIÓN", nav: "🟢 NAVEGACIÓN", net: "REDES", route: "MI RUTA", trace: "📏 RUTA", clear: "🗑️ BORRAR TODO", export: "📤 EXPORT", import: "📥 IMPORT", on: "TODO ON", off: "TODO OFF", r48: "Red 48t", wWarnT: "⚠️ RESPONSABILIDAD", dist: "DISTANCIA", speed: "VELOCIDAD" },
-        it: { wT: "Ciao a tutti! 🚛✨", wBtn: "CAPITO / ACCETTA", bL: "☰ RETI", bR: "⚙️ STRUM.", prep: "🔴 PREPARAZIONE", nav: "🟢 NAVIGAZIONE", net: "RETI", route: "PERCORSO", trace: "📏 CREA", clear: "🗑️ CANCELLA", export: "📤 ESPORTA", import: "📥 IMPORTA", on: "TUTTO ON", off: "TUTTO OFF", r48: "Rete 48t", wWarnT: "⚠️ RESPONSABILITÀ", dist: "DISTANZA", speed: "VELOCITÀ" },
-        pt: { wT: "Olá a todos! 🚛✨", wBtn: "ENTENDIDO / ACEITAR", bL: "☰ REDES", bR: "⚙️ FERR.", prep: "🔴 PREPARAÇÃO", nav: "🟢 NAVIG.", net: "REDES", route: "ROTA", trace: "📏 CRIAR", clear: "🗑️ LIMPAR", export: "📤 EXPORTAR", import: "📥 IMPORTAR", on: "TUDO ON", off: "TUDO OFF", r48: "Rede 48t", wWarnT: "⚠️ RESPONSABILIDADE", dist: "DISTÂNCIA", speed: "VELOCIDADE" },
-        tr: { wT: "Merhaba! 🚛✨", wBtn: "ANLADIM / KABUL ET", bL: "☰ ŞEBEKE", bR: "⚙️ ARAÇLAR", prep: "🔴 HAZIRLIK", nav: "🟢 NAVİGASYON", net: "ŞEBEKELER", route: "ROTAM", trace: "📏 OLUŞTUR", clear: "🗑️ SİL", export: "📤 AKTAR", import: "📥 İÇE AKTAR", on: "HEPSİ AÇIK", off: "HEPSİ KAPALI", r48: "48t Şebeke", wT: "Merhaba! 🚛✨", wWarnT: "⚠️ SORUMLULUK", dist: "MESAFE", speed: "HIZ" },
-        pl: { wT: "Cześć wszystkim! 🚛✨", wBtn: "ROZUMIEM / AKCEPTUJĘ", bL: "☰ SIECI", bR: "⚙️ NARZĘD.", prep: "🔴 PRZYGOT.", nav: "🟢 NAWIGACJA", net: "SIECI", route: "TRASA", trace: "📏 UTWÓRZ", clear: "🗑️ WYCZYŚĆ", export: "📤 EKSPORT", import: "📥 IMPORT", on: "WSZYSTKO ON", off: "WSZYSTKO OFF", r48: "Sieć 48t", wWarnT: "⚠️ ODPOWIEDZIAL.", dist: "DYSTANS", speed: "PRĘDKOŚĆ" }
-    };
-
-    function changeLang(l) {
-        const d = trans[l];
-        document.getElementById('w-title').innerText = d.wT;
-        document.getElementById('w-btn-acc').innerText = d.wBtn;
-        document.getElementById('btn-left').innerText = d.bL;
-        document.getElementById('btn-right').innerText = d.bR;
-        document.getElementById('nav-master-btn').innerText = d.prep;
-        document.getElementById('t-net').innerText = d.net;
-        document.getElementById('t-route').innerText = d.route;
-        document.getElementById('t-trace').innerText = d.trace;
-        document.getElementById('t-clear').innerText = d.clear;
-        document.getElementById('t-export').innerText = d.export;
-        document.getElementById('t-import').innerText = d.import;
-        document.getElementById('t-r48').innerText = d.r48;
-        document.getElementById('w-warn-t').innerText = d.wWarnT;
-        document.getElementById('t-dist-lbl').innerText = d.dist;
-        document.getElementById('t-speed-lbl').innerText = d.speed;
-        document.getElementById('t-on').innerText = d.on;
-        document.getElementById('t-off').innerText = d.off;
-    }
-
-    var map = L.map('map', { center: [46.9, -0.5], zoom: 6, zoomControl: false });
+    var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    var userMarker = L.circleMarker([0,0], { radius: 9, color: 'white', fillColor: '#3b82f6', fillOpacity: 1, weight: 3 }).addTo(map);
-    var routeLayer = L.polyline([], {color: '#3b82f6', weight: 6}).addTo(map);
-    var routePoints = []; var gRouteMarkers = L.featureGroup().addTo(map);
-    var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
 
-    function toggleNavMode() {
-        let btn = document.getElementById('nav-master-btn'); let info = document.getElementById('nav-info');
-        if(btn.innerText.includes("🔴")) {
-            btn.innerText = "🟢 NAVIGATION"; btn.style.background = "#22c55e"; info.style.display = "block";
-            map.locate({setView: true, watch: true, enableHighAccuracy: true});
+    var routeLayer = L.polyline([], {color: '#00008B', weight: 7, opacity: 0.9}).addTo(map);
+    var routePoints = [];
+    var markersLayer = L.featureGroup().addTo(map);
+    var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
+    var userMarker = L.marker([0,0], {icon: L.divIcon({html:'<b style="font-size:32px; filter:drop-shadow(0 2px 4px black);">⬆️</b>', className:''})});
+
+    function openSide(s) { closeAll(); document.getElementById('side-'+s).style.display = 'block'; }
+    function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
+
+    // --- NAVIGATION ---
+    function toggleNav() {
+        let b = document.getElementById('btn-nav');
+        let lbl = document.getElementById('dist-label');
+        if(b.innerText.includes("🔴")) {
+            b.innerText = "🟢 NAVIGATION"; b.style.background = "#22c55e";
+            lbl.innerText = "RESTE À FAIRE"; lbl.style.color = "#22c55e";
+            map.locate({watch: true, setView: true, enableHighAccuracy: true});
         } else {
-            btn.innerText = "🔴 PRÉPARATION"; btn.style.background = "#ef4444"; info.style.display = "none";
-            map.stopLocate(); document.getElementById('map').style.transform = "rotate(0deg)";
+            b.innerText = "🔴 PRÉPARATION"; b.style.background = "#ef4444";
+            lbl.innerText = "DISTANCE"; lbl.style.color = "#00d4ff";
+            map.stopLocate();
         }
     }
 
-    map.on('locationfound', function(e) {
-        userMarker.setLatLng(e.latlng);
-        if(e.speed > 0) document.getElementById('speed-val').innerText = Math.round(e.speed * 3.6);
-        if(e.heading) document.getElementById('map').style.transform = `rotate(${-e.heading}deg)`;
-        if(routeLayer.getLatLngs().length > 0) {
-            let pts = routeLayer.getLatLngs();
-            let last = pts[pts.length - 1];
-            document.getElementById('dist-val').innerText = (e.latlng.distanceTo(last)/1000).toFixed(1);
+    map.on('locationfound', e => {
+        userMarker.setLatLng(e.latlng).addTo(map);
+        if(document.getElementById('btn-nav').innerText.includes("🟢") && routePoints.length > 0) {
+            let last = routePoints[routePoints.length - 1].getLatLng();
+            document.getElementById('dist-val').innerText = (e.latlng.distanceTo(last) / 1000).toFixed(1);
         }
     });
 
-    function closeWelcome() { document.getElementById('welcome-overlay').style.display = 'none'; }
-    function openMenu(m) { closeAll(); document.getElementById('sidebar-'+m).style.display='block'; }
-    function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
-    function toggleAll(st) { document.querySelectorAll('.net-chk').forEach(c => { c.checked = st; updateL(c.id.replace('chk-','')); }); }
-    function updateL(id) { if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]); else map.removeLayer(groups[id]); }
-   
-    function startRouting() {
+    // --- RÉSEAUX ---
+    function toggleL(id) {
+        if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]);
+        else map.removeLayer(groups[id]);
+    }
+
+    // --- POI AVEC NOTES AU SURVOL ---
+    function setPoiMode(emoji, btnId) {
         closeAll();
+        document.querySelectorAll('.poi-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(btnId).classList.add('active');
         map.off('click');
-        map.on('click', (e) => {
-            let m = L.marker(e.latlng, {draggable:true}).addTo(gRouteMarkers);
+        map.on('click', e => {
+            let note = prompt("Saisir une note (Hauteur, Nom...) :");
+            if(note !== null) {
+                let m = L.marker(e.latlng, {
+                    icon: L.divIcon({html:`<div style="font-size:26px; filter:drop-shadow(0 2px 2px black);">${emoji}</div>`, className:''})
+                }).addTo(markersLayer);
+               
+                // On attache la bulle
+                m.bindPopup(note);
+
+                // Événements Survol (Hover)
+                m.on('mouseover', function(ev) { this.openPopup(); });
+                m.on('mouseout', function(ev) { this.closePopup(); });
+               
+                // Double clic pour supprimer
+                m.on('dblclick', () => map.removeLayer(m));
+            }
+            document.getElementById(btnId).classList.remove('active');
+            map.off('click');
+        });
+    }
+
+    // --- TRACÉ ---
+    function startRouting() {
+        closeAll(); map.off('click');
+        map.on('click', e => {
+            let m = L.marker(e.latlng, {draggable:true}).addTo(markersLayer);
             routePoints.push(m);
             m.on('dragend', updateRoute);
+            m.on('dblclick', () => { map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
             updateRoute();
         });
     }
 
     function updateRoute() {
         if(routePoints.length < 2) return;
-        let coords = routePoints.map(p => `${p.getLatLng().lng},${p.getLatLng().lat}`).join(';');
-        fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`)
-        .then(r=>r.json()).then(d=>{ if(d.routes) routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(c=>[c[1],c[0]])); });
+        let c = routePoints.map(p => `${p.getLatLng().lng},${p.getLatLng().lat}`).join(';');
+        fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson`)
+        .then(r=>r.json()).then(d=>{
+            if(d.routes) {
+                routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(pt=>[pt[1],pt[0]]));
+                document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
+            }
+        });
     }
 
-    function clearData() { routePoints=[]; gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); document.getElementById('dist-val').innerText="--"; }
-   
+    // --- EXPORT / IMPORT / ARCHIVES ---
     function exportGPX() {
-        if(routeLayer.getLatLngs().length === 0) return;
+        let coords = routeLayer.getLatLngs();
+        if(coords.length === 0) return alert("Pas de tracé.");
         let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>';
-        routeLayer.getLatLngs().forEach(pt => { gpx += `<trkpt lat="${pt.lat}" lon="${pt.lng}"></trkpt>`; });
+        coords.forEach(p => gpx += `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`);
         gpx += '</trkseg></trk></gpx>';
-        let blob = new Blob([gpx], {type: 'application/gpx+xml'});
-        let link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'convoi_parcours.gpx'; link.click();
+        let b = new Blob([gpx], {type: 'application/gpx+xml'});
+        let link = document.createElement('a'); link.href = URL.createObjectURL(b); link.download = 'convoi_elite.gpx'; link.click();
     }
 
-    function importGPX(e) {
-        let file = e.target.files[0]; if(!file) return;
+    function importGPX(event) {
+        let file = event.target.files[0]; if(!file) return;
         let reader = new FileReader();
-        reader.onload = function(event) {
-            let parser = new DOMParser(); let xml = parser.parseFromString(event.target.result, "text/xml");
+        reader.onload = function(e) {
+            let parser = new DOMParser();
+            let xml = parser.parseFromString(e.target.result, "text/xml");
             let pts = xml.getElementsByTagName("trkpt");
-            if(pts.length === 0) return;
-            clearData();
-            for(let i=0; i<pts.length; i+=Math.max(1, Math.floor(pts.length/10))) {
-                let m = L.marker([pts[i].getAttribute("lat"), pts[i].getAttribute("lon")], {draggable:true}).addTo(gRouteMarkers);
+            clearAllData();
+            for(let p of pts) {
+                let m = L.marker([p.getAttribute("lat"), p.getAttribute("lon")], {draggable:true}).addTo(markersLayer);
                 routePoints.push(m);
             }
             updateRoute();
@@ -208,8 +201,52 @@
         reader.readAsText(file);
     }
 
+    function saveArchive() {
+        let n = prompt("Nom du convoi :"); if(!n) return;
+        let data = { name: n, pts: routePoints.map(p => p.getLatLng()) };
+        let arch = JSON.parse(localStorage.getItem('gps_v7') || '[]');
+        arch.push(data); localStorage.setItem('gps_v7', JSON.stringify(arch));
+        renderArchives();
+    }
+
+    function renderArchives() {
+        let div = document.getElementById('archive-list'); div.innerHTML = '';
+        let arch = JSON.parse(localStorage.getItem('gps_v7') || '[]');
+        arch.forEach((a, i) => {
+            let item = document.createElement('div'); item.className = 'archive-item';
+            item.innerHTML = `<span>📂 ${a.name}</span> <span class="del-arch" onclick="deleteArch(${i}); event.stopPropagation();">✖</span>`;
+            item.onclick = () => {
+                clearAllData();
+                a.pts.forEach(p => { let m = L.marker([p.lat, p.lng], {draggable:true}).addTo(markersLayer); routePoints.push(m); });
+                updateRoute(); closeAll();
+            };
+            div.appendChild(item);
+        });
+    }
+
+    function deleteArch(i) {
+        let arch = JSON.parse(localStorage.getItem('gps_v7'));
+        arch.splice(i, 1); localStorage.setItem('gps_v7', JSON.stringify(arch));
+        renderArchives();
+    }
+
+    function clearAllData() { routePoints=[]; markersLayer.clearLayers(); routeLayer.setLatLngs([]); document.getElementById('dist-val').innerText="0.0"; }
+
+    // Chargement réseaux
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
-    .then(r => r.json()).then(data => { L.geoJSON(data, { onEachFeature: (f, l) => { let p = JSON.stringify(f.properties).toUpperCase(); let g = "gCat1", c = "#FFFF00"; if(p.includes("120")) { c="#1b5e20"; g="g120"; } else if(p.includes("94")) { c="#FF0000"; g="g94"; } else if(p.includes("72")) { c="#e67e22"; g="g72"; } else if(p.includes("48")) { c="#9b59b6"; g="g48"; } l.setStyle({color: c, weight: 1.5}); groups[g].addLayer(l); map.addLayer(groups[g]); }}); });
+    .then(r => r.json()).then(data => {
+        L.geoJSON(data, { onEachFeature: (f, l) => {
+            let p = JSON.stringify(f.properties).toUpperCase();
+            let g = "gCat1", col = "#FFFF00";
+            if(p.includes("120")) { g="g120"; col="#1b5e20"; }
+            else if(p.includes("94")) { g="g94"; col="#FF0000"; }
+            else if(p.includes("72")) { g="g72"; col="#e67e22"; }
+            else if(p.includes("48")) { g="g48"; col="#9b59b6"; }
+            l.setStyle({color: col, weight: 3}); groups[g].addLayer(l); map.addLayer(groups[g]);
+        }});
+    });
+    renderArchives();
 </script>
 </body>
 </html>
+
