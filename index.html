@@ -1,58 +1,37 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V40.14 - FINAL</title>
+    <title>GPS CONVOI V40.15 - NAV+</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; background: #0f172a; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
-        #map { width: 100%; height: 100vh; z-index: 1; }
-       
-        /* Barre supérieure */
-        #top-bar {
-            position: fixed; top: 10px; left: 0; width: 100%; z-index: 9999;
-            display: flex; justify-content: space-between; align-items: flex-start;
-            padding: 0 10px; box-sizing: border-box; pointer-events: none;
-        }
+        #map { width: 100%; height: 100vh; z-index: 1; transition: transform 0.2s linear; }
+        
+        #top-bar { position: fixed; top: 10px; left: 0; width: 100%; z-index: 9999; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 10px; box-sizing: border-box; pointer-events: none; }
         .ctrl-btn, #center-group, .leaflet-control-layers { pointer-events: auto; }
-       
-        .ctrl-btn {
-            padding: 10px 8px; border-radius: 10px; font-weight: bold; cursor: pointer;
-            border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            font-size: 9px; min-width: 75px; text-align: center;
-        }
+        
+        .ctrl-btn { padding: 10px 8px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 9px; min-width: 75px; text-align: center; }
         #btn-reseaux { background: #1e293b; color: #f39c12; border-color: #f39c12; }
         #btn-outils { background: #1e293b; color: #00d4ff; border-color: #00d4ff; }
 
-        /* Groupe Central */
         #center-group { display: flex; flex-direction: column; align-items: center; gap: 5px; margin: 0 5px; }
         #btn-nav { background: #ef4444; width: 120px; padding: 10px 5px; border-radius: 12px; border: 2px solid white; font-weight: bold; font-size: 9px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-       
-        #dist-box {
-            background: rgba(15, 23, 42, 0.9); padding: 4px 10px; border-radius: 15px;
-            border: 1px solid #334155; text-align: center; min-width: 70px;
-        }
+        
+        #dist-box { background: rgba(15, 23, 42, 0.9); padding: 4px 10px; border-radius: 15px; border: 1px solid #334155; text-align: center; min-width: 70px; }
         #dist-val { font-size: 14px; font-weight: 900; color: #00d4ff; }
         #dist-label { font-size: 7px; color: #94a3b8; display: block; }
 
-        /* Positionnement du sélecteur en BAS à DROITE */
         .leaflet-bottom.leaflet-right { bottom: 20px !important; right: 10px !important; }
-        .leaflet-control-layers {
-            border: 2px solid white !important;
-            background: #1e293b !important;
-            color: white !important;
-            border-radius: 10px !important;
-        }
+        .leaflet-control-layers { border: 2px solid white !important; background: #1e293b !important; color: white !important; border-radius: 10px !important; }
 
-        /* Sidebars */
         .sidebar { position: fixed; top: 0; height: 100vh; width: 85%; max-width: 320px; background: #1e293b; z-index: 10001; padding: 20px; display: none; overflow-y: auto; box-sizing: border-box; }
         #side-left { left: 0; border-right: 4px solid #f39c12; }
         #side-right { right: 0; border-left: 4px solid #00d4ff; }
-       
+        
         .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; }
         .row { display: flex; align-items: center; background: #334155; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 12px; }
-        .row input { width: 20px; height: 20px; margin-right: 12px; }
         .act-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 8px; color: white; font-size: 11px; }
 
         .poi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -74,7 +53,7 @@
 
     <div id="side-left" class="sidebar">
         <button class="close-btn" onclick="closeAll()">FERMER</button>
-        <h2>RÉSEAUX (ÉPAISSEUR : 1.8)</h2>
+        <h2>RÉSEAUX (1.8)</h2>
         <div id="net-list">
             <label class="row"><input type="checkbox" id="chk-gCat1" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</label>
             <label class="row"><input type="checkbox" id="chk-g48" checked onchange="toggleL('g48')"> Réseau 48t</label>
@@ -88,10 +67,10 @@
         <button class="close-btn" onclick="closeAll()">FERMER</button>
         <h2>POI + NOTES</h2>
         <div class="poi-grid">
-            <button class="poi-btn" onclick="setPoiMode('⛽', 'btn-gas')">⛽ STATION</button>
-            <button class="poi-btn" onclick="setPoiMode('🌉', 'btn-bridge')">🌉 PONT</button>
-            <button class="poi-btn" onclick="setPoiMode('🍴', 'btn-rest')">🍴 RESTAU</button>
-            <button class="poi-btn" onclick="setPoiMode('🅿️', 'btn-park')">🅿️ PARKING</button>
+            <button class="poi-btn" onclick="setPoiMode('⛽')">⛽ STATION</button>
+            <button class="poi-btn" onclick="setPoiMode('🌉')">🌉 PONT</button>
+            <button class="poi-btn" onclick="setPoiMode('🍴')">🍴 RESTAU</button>
+            <button class="poi-btn" onclick="setPoiMode('🅿️')">🅿️ PARKING</button>
         </div>
         <h2>ÉDITION</h2>
         <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="startRouting()">📏 TRACER ROUTE</button>
@@ -119,13 +98,14 @@
     var routePoints = [];
     var markersLayer = L.featureGroup().addTo(map);
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
-   
+    
     var arrowIcon = L.divIcon({ html: '<div class="nav-arrow"></div>', className: '', iconSize: [20, 30], iconAnchor: [10, 15] });
     var userMarker = L.marker([0,0], {icon: arrowIcon});
 
     function openSide(s) { closeAll(); document.getElementById('side-'+s).style.display = 'block'; }
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
 
+    // --- LOGIQUE DE ROTATION (SUIVI DE ROUTE) ---
     function toggleNav() {
         let b = document.getElementById('btn-nav');
         if(b.innerText.includes("🔴")) {
@@ -134,17 +114,38 @@
         } else {
             b.innerText = "🔴 PRÉPARATION"; b.style.background = "#ef4444";
             map.removeLayer(userMarker); map.stopLocate();
+            resetRotation();
         }
     }
 
     map.on('locationfound', e => {
         userMarker.setLatLng(e.latlng).addTo(map);
+        
+        // Si on a un cap (heading) fourni par le GPS, on fait tourner la carte
+        if (e.heading !== null && e.heading !== undefined) {
+            rotateMap(e.heading);
+        }
+
         if(routePoints.length > 0) {
             let last = routePoints[routePoints.length - 1].getLatLng();
             document.getElementById('dist-val').innerText = (e.latlng.distanceTo(last) / 1000).toFixed(1);
         }
     });
 
+    function rotateMap(heading) {
+        // On fait pivoter le container de la carte pour que le cap soit vers le haut
+        let mapDiv = document.getElementById('map');
+        mapDiv.style.transform = `rotate(${-heading}deg)`;
+        
+        // On doit compenser la rotation sur le marqueur pour qu'il pointe toujours vers l'avant
+        // Mais ici, l'astuce est que la flèche bleue est fixe par rapport au téléphone
+    }
+
+    function resetRotation() {
+        document.getElementById('map').style.transform = `rotate(0deg)`;
+    }
+
+    // --- FONCTIONS CLASSIQUES ---
     function toggleL(id) {
         if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]);
         else map.removeLayer(groups[id]);
@@ -157,8 +158,7 @@
             let note = prompt("Note du point :");
             if(note !== null) {
                 let m = L.marker(e.latlng, { icon: L.divIcon({html:`<div style="font-size:26px; filter:drop-shadow(0 2px 2px black);">${emoji}</div>`, className:''}) }).addTo(markersLayer);
-                m.bindPopup(note); m.on('mouseover', function() { this.openPopup(); }); m.on('mouseout', function() { this.closePopup(); });
-                m.on('dblclick', () => map.removeLayer(m));
+                m.bindPopup(note); m.on('dblclick', () => map.removeLayer(m));
             }
             map.off('click');
         });
@@ -179,7 +179,7 @@
         if(routePoints.length < 2) { routeLayer.setLatLngs([]); return; }
         let c = routePoints.map(p => `${p.getLatLng().lng},${p.getLatLng().lat}`).join(';');
         fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson`)
-        .then(r=>r.json()).then(d=>{
+        .then(r=>r.json()).then(d=>{ 
             if(d.routes && d.routes[0]) {
                 routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(pt=>[pt[1],pt[0]]));
                 document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
@@ -218,22 +218,22 @@
     function saveArchive() {
         let n = prompt("Nom du convoi :"); if(!n) return;
         let data = { name: n, pts: routePoints.map(p => p.getLatLng()) };
-        let arch = JSON.parse(localStorage.getItem('gps_v14') || '[]');
-        arch.push(data); localStorage.setItem('gps_v14', JSON.stringify(arch));
+        let arch = JSON.parse(localStorage.getItem('gps_v15') || '[]');
+        arch.push(data); localStorage.setItem('gps_v15', JSON.stringify(arch));
         renderArchives();
     }
 
     function renderArchives() {
         let div = document.getElementById('archive-list'); div.innerHTML = '';
-        let arch = JSON.parse(localStorage.getItem('gps_v14') || '[]');
+        let arch = JSON.parse(localStorage.getItem('gps_v15') || '[]');
         arch.forEach((a, i) => {
             let item = document.createElement('div'); item.className = 'archive-item';
             item.innerHTML = `<span>📂 ${a.name}</span> <span style="color:#ef4444;" onclick="deleteArch(${i}); event.stopPropagation();">✖</span>`;
             item.onclick = () => {
                 clearAllData();
-                a.pts.forEach(p => {
-                    let m = L.marker([p.lat, p.lng], {draggable:true}).addTo(markersLayer);
-                    routePoints.push(m);
+                a.pts.forEach(p => { 
+                    let m = L.marker([p.lat, p.lng], {draggable:true}).addTo(markersLayer); 
+                    routePoints.push(m); 
                     m.on('dblclick', () => { map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
                 });
                 updateRoute(); closeAll();
@@ -243,8 +243,8 @@
     }
 
     function deleteArch(i) {
-        let arch = JSON.parse(localStorage.getItem('gps_v14'));
-        arch.splice(i, 1); localStorage.setItem('gps_v14', JSON.stringify(arch));
+        let arch = JSON.parse(localStorage.getItem('gps_v15'));
+        arch.splice(i, 1); localStorage.setItem('gps_v15', JSON.stringify(arch));
         renderArchives();
     }
 
@@ -266,3 +266,4 @@
 </script>
 </body>
 </html>
+
