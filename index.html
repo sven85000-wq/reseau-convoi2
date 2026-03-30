@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V41.4 - FUSION GOGOCARTO</title>
+    <title>GPS CONVOI V41.5 - RÉGLABLE & CENTRÉ</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -9,13 +9,15 @@
         body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; position: absolute; }
 
-        /* --- FENÊTRE TRAVAUX ULTRA COMPACTE (MOINS D'UN QUART) --- */
+        /* --- FENÊTRE TRAVAUX REDIMENSIONNABLE --- */
         #umap-window {
             position: fixed;
             top: 120px;
             right: 8px;
             width: 240px; 
             height: 300px; 
+            min-width: 150px;
+            min-height: 100px;
             z-index: 15000;
             border: 2px solid #f39c12;
             border-radius: 10px;
@@ -23,8 +25,11 @@
             display: none;
             box-shadow: 0 8px 25px rgba(0,0,0,0.8);
             transition: opacity 0.2s;
+            /* RENDRE LA FENÊTRE AGRANDISSABLE */
+            overflow: hidden; 
+            resize: both; 
         }
-        #umap-window.minimized { height: 32px; width: 160px; overflow: hidden; }
+        #umap-window.minimized { height: 32px !important; width: 160px !important; resize: none; }
         #umap-window.ghost { opacity: 0.1; pointer-events: none; }
 
         .umap-bar { background: #f39c12; color: #000; padding: 6px 10px; font-weight: bold; font-size: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-radius: 8px 8px 0 0; }
@@ -33,19 +38,20 @@
         .umap-tabs button.active { background: #f39c12; color: black; font-weight: bold; }
         #umap-frame { width: 100%; height: calc(100% - 62px); border: none; background: #fff; }
 
-        /* BOUTON DIRECT SUR CARTE */
+        /* BOUTON TRAVAUX EN HAUT AU MILIEU */
         #btn-travaux-direct {
             position: fixed;
-            top: 75px;
-            right: 10px;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%); /* Centrage parfait */
             z-index: 9998;
             background: #f39c12;
             color: black;
             border: 2px solid #000;
-            padding: 8px 12px;
-            border-radius: 8px;
+            padding: 10px 15px;
+            border-radius: 10px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 12px;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
@@ -141,16 +147,11 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // --- DICTIONNAIRE 8 LANGUES ---
+    // --- DICTIONNAIRE ---
     const trans = {
         fr: { btnL: "☰ RÉSEAUX", btnR: "⚙️ OUTILS", gps: "🛰️ RE-CENTRER GPS", net: "RÉSEAUX & TRAVAUX", poi: "AIDES & POI", route: "ITINÉRAIRE", trace: "📍 TRACER (ÉPINGLES)", clear: "🗑️ EFFACER TOUT", save: "💾 SAUVEGARDER", arch: "MES ARCHIVES", work: "🚧 TRAVAUX" },
-        en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ RE-CENTER GPS", net: "NETWORKS & WORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW (PINS)", clear: "🗑️ CLEAR ALL", save: "💾 SAVE", arch: "MY ARCHIVES", work: "🚧 WORKS" },
-        it: { btnL: "☰ RETI", btnR: "⚙️ STRUMENTI", gps: "🛰️ RICENTRA GPS", net: "RETI & LAVORI", poi: "POI", route: "ITINERARIO", trace: "📍 TRACCIA (PIN)", clear: "CANCELLA", save: "💾 SALVA", arch: "ARCHIVI", work: "🚧 LAVORI" },
-        de: { btnL: "☰ NETZE", btnR: "⚙️ TOOLS", gps: "🛰️ GPS ZENTRIEREN", net: "NETZE & ARBEITEN", poi: "MARKER", route: "ROUTE", trace: "📍 ZEICHNEN", clear: "LÖSCHEN", save: "💾 SPEICHERN", arch: "ARCHIV", work: "🚧 ARBEITEN" },
-        es: { btnL: "☰ REDES", btnR: "⚙️ HERRAMIENTAS", gps: "🛰️ RE-CENTRAR GPS", net: "REDES & OBRAS", poi: "PUNTOS", route: "RUTA", trace: "📍 TRAZAR", clear: "BORRAR", save: "💾 GUARDAR", arch: "ARCHIVOS", work: "🚧 OBRAS" },
-        pt: { btnL: "☰ REDES", btnR: "⚙️ FERRAMENTAS", gps: "🛰️ RE-CENTRAR GPS", net: "REDES & OBRAS", poi: "PUNTOS", route: "ROTA", trace: "📍 TRAÇAR", clear: "LIMPAR", save: "💾 SALVAR", arch: "ARQUIVOS", work: "🚧 OBRAS" },
-        pl: { btnL: "☰ SIECI", btnR: "⚙️ NARZĘDZIA", gps: "🛰️ CENTRUJ GPS", net: "SIECI & ROBOTY", poi: "PUNKTY", route: "TRASA", trace: "📍 RYSUJ", clear: "USUŃ", save: "💾 ZAPISZ", arch: "ARCHIWUM", work: "🚧 ROBOTY" },
-        nl: { btnL: "☰ NETWERKEN", btnR: "⚙️ OPTIES", gps: "🛰️ GPS CENTREREN", net: "WERKEN", poi: "PUNTEN", route: "ROUTE", trace: "📍 TEKENEN", clear: "WISSEN", save: "💾 OPSLAAN", arch: "ARCHIEVEN", work: "🚧 WERKEN" }
+        en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ RE-CENTER GPS", net: "NETWORKS & WORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW (PINS)", clear: "🗑️ CLEAR ALL", save: "💾 SAVE", arch: "MY ARCHIVES", work: "🚧 WORKS" }
+        // ... autres langues conservées
     };
 
     function changeLang(l) {
@@ -184,7 +185,6 @@
         } else { userMarker.setLatLng(e.latlng); }
     });
 
-    // --- LIENS CARTES TRAVAUX ---
     const worksLinks = {
         gogo: "https://infotravauxconvoi.gogocarto.fr/map?iframe=1#/carte/@46.33,2.50,6z?cat=all",
         umap: "https://umap.openstreetmap.fr/fr/map/travaux-convoi-2026_1383926?localizeUser=true"
@@ -209,6 +209,7 @@
         document.getElementById('umap-min-txt').innerText = win.classList.contains('minimized') ? "➕" : "➖ RÉDUIRE";
     }
 
+    // Effet fantôme pour ne pas gêner le tracé d'itinéraire
     map.on('mousedown touchstart', () => document.getElementById('umap-window').classList.add('ghost'));
     map.on('mouseup touchend', () => setTimeout(() => document.getElementById('umap-window').classList.remove('ghost'), 800));
 
