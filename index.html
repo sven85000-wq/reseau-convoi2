@@ -1,170 +1,250 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V40.16 - ULTRA</title>
+    <title>GPS CONVOI V40.27 - NAVIGATION GAUCHE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; background: #0f172a; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
-        #map { width: 100%; height: 100vh; z-index: 1; transition: transform 0.2s linear; }
-        #top-bar { position: fixed; top: 10px; left: 0; width: 100%; z-index: 9999; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 10px; box-sizing: border-box; pointer-events: none; }
-        .ctrl-btn, #center-group { pointer-events: auto; }
-        .ctrl-btn { padding: 10px 8px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 9px; min-width: 75px; text-align: center; background: #1e293b; }
-        #btn-reseaux { color: #f39c12; border-color: #f39c12; }
-        #btn-outils { color: #00d4ff; border-color: #00d4ff; }
-        #center-group { display: flex; flex-direction: column; align-items: center; gap: 5px; margin: 0 5px; }
-        #btn-nav { background: #ef4444; width: 120px; padding: 10px 5px; border-radius: 12px; border: 2px solid white; font-weight: bold; font-size: 9px; text-align: center; }
-        #dist-box { background: rgba(15, 23, 42, 0.9); padding: 4px 10px; border-radius: 15px; border: 1px solid #334155; text-align: center; }
-        #dist-val { font-size: 14px; font-weight: 900; color: #00d4ff; }
-        .sidebar { position: fixed; top: 0; height: 100vh; width: 85%; max-width: 320px; background: #1e293b; z-index: 10001; padding: 20px; display: none; overflow-y: auto; box-sizing: border-box; }
-        #side-left { left: 0; border-right: 4px solid #f39c12; }
-        #side-right { right: 0; border-left: 4px solid #00d4ff; }
-        .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; }
-        .row { display: flex; align-items: center; background: #334155; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 12px; }
-        .act-btn { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 8px; color: white; font-size: 10px; cursor: pointer; }
-        .nav-arrow { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 25px solid #4285F4; }
+        body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        #map { width: 100%; height: 100vh; z-index: 1; position: absolute; background: #242424; }
+
+        /* BOUTONS NAVIGATION */
+        .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 18px; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+        #btn-left { left: 10px; } 
+        #btn-right { right: 10px; }
+
+        /* BARRE DE LANGUES EN COLONNE À GAUCHE (Sous le bouton Réseaux) */
+        #lang-bar { 
+            position: fixed; top: 75px; left: 10px; z-index: 9000; 
+            display: flex; flex-direction: column; gap: 8px; 
+            background: rgba(0,0,0,0.85); padding: 10px; border-radius: 10px; 
+            border: 1px solid #444; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .flag { width: 32px; height: 22px; border: 1px solid #fff; cursor: pointer; opacity: 0.8; transition: 0.2s; flex-shrink: 0; }
+        .flag:hover { opacity: 1; transform: scale(1.15); border-color: #f39c12; }
+
+        /* SIDEBARS */
+        .sidebar { position: fixed; top: 0; height: 100vh; width: 320px; background: #1e2b37; color: white; padding: 20px; box-sizing: border-box; z-index: 10000; overflow-y: auto; display: none; }
+        #sidebar-left { left: 0; border-right: 4px solid #f39c12; }
+        #sidebar-right { right: 0; border-left: 4px solid #f39c12; }
+
+        h2 { font-size: 11px; color: #f39c12; border-bottom: 1px solid #5d6d7e; padding-bottom: 5px; margin-top: 15px; text-transform: uppercase; }
+        button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; font-size: 12px; }
+        .row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 5px; cursor: pointer; }
+        
+        #dist-panel { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; background: rgba(0,0,0,0.85); color: #2ecc71; padding: 8px 20px; border-radius: 20px; border: 2px solid #2ecc71; font-weight: bold; }
+        
+        /* STYLE POI & TOOLTIP */
+        .nav-arrow { transition: transform 0.5s ease-in-out; }
+        .poi-inner { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 18px; background: #333; }
+        .leaflet-tooltip-custom {
+            background: #2c3e50 !important; color: white !important;
+            border: 2px solid #f39c12 !important; border-radius: 5px !important;
+            font-weight: bold !important; padding: 6px 12px !important; font-size: 13px !important;
+        }
+        .archive-item { background: #253442; border: 1px solid #444; padding: 12px; margin-top: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
-    <div id="top-bar">
-        <div id="btn-reseaux" class="ctrl-btn" onclick="openSide('left')">☰ RÉSEAUX</div>
-        <div id="center-group">
-            <div id="btn-nav" onclick="toggleNav()">🔴 PRÉPARATION</div>
-            <div id="dist-box"><span id="dist-val">0.0</span> <small>KM</small></div>
+    <div id="btn-left" class="menu-btn" onclick="openMenu('sidebar-left')">☰ RÉSEAUX</div>
+    <div id="btn-right" class="menu-btn" onclick="openMenu('sidebar-right')">⚙️ OUTILS</div>
+
+    <div id="lang-bar">
+        <img src="https://flagcdn.com/w40/fr.png" class="flag" onclick="changeLang('fr')" title="Français">
+        <img src="https://flagcdn.com/w40/gb.png" class="flag" onclick="changeLang('en')" title="English">
+        <img src="https://flagcdn.com/w40/it.png" class="flag" onclick="changeLang('it')" title="Italiano">
+        <img src="https://flagcdn.com/w40/de.png" class="flag" onclick="changeLang('de')" title="Deutsch">
+        <img src="https://flagcdn.com/w40/es.png" class="flag" onclick="changeLang('es')" title="Español">
+        <img src="https://flagcdn.com/w40/pl.png" class="flag" onclick="changeLang('pl')" title="Polski">
+        <img src="https://flagcdn.com/w40/nl.png" class="flag" onclick="changeLang('nl')" title="Nederlands">
+    </div>
+
+    <div id="dist-panel" style="display:none">📍 <span id="km-val">0</span> km</div>
+
+    <div id="sidebar-left" class="sidebar">
+        <button style="background:#e74c3c; margin-bottom: 20px;" onclick="closeAll()">✖ FERMER</button>
+        <button style="background:#27ae60; padding:18px; font-size: 14px; margin-bottom: 20px;" onclick="startGPS()" id="t-gps">🛰️ GPS DIRECT (LIVE)</button>
+        <h2 id="t-net-title">RÉSEAUX VISIBLES</h2>
+        <div class="row" onclick="toggleL('gCat1')"><input type="checkbox" id="chk-gCat1" checked> Cat 1 / ATE</div>
+        <div class="row" onclick="toggleL('g48')"><input type="checkbox" id="chk-g48" checked> Réseau 48t</div>
+        <div class="row" onclick="toggleL('g72')"><input type="checkbox" id="chk-g72" checked> Réseau 72t</div>
+        <div class="row" onclick="toggleL('g94')"><input type="checkbox" id="chk-g94" checked> Réseau 94t</div>
+        <div class="row" onclick="toggleL('g120')"><input type="checkbox" id="chk-g120" checked> Réseau 120t+</div>
+    </div>
+
+    <div id="sidebar-right" class="sidebar">
+        <button style="background:#e74c3c; margin-bottom: 20px;" onclick="closeAll()">✖ FERMER</button>
+        <h2 id="t-poi-title">AIDES & POI</h2>
+        <input type="text" id="poiNote" placeholder="Écrire une note..." style="width:100%; padding:12px; margin-bottom:10px; background:#2c3e50; color:white; border:1px solid #5d6d7e; border-radius:6px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button style="background:#2980b9;" onclick="activatePoi('🅿️', '#2980b9')">🅿️ PARKING</button>
+            <button style="background:#7f8c8d;" onclick="activatePoi('🌉', '#7f8c8d')">🌉 PONT</button>
+            <button style="background:#c0392b;" onclick="activatePoi('⚠️', '#c0392b')">⚠️ ALERTE</button>
+            <button style="background:#d35400;" onclick="activatePoi('RESTO', '#d35400')">🍽️ RESTO</button>
         </div>
-        <div id="btn-outils" class="ctrl-btn" onclick="openSide('right')">⚙️ OUTILS</div>
-    </div>
-
-    <div id="side-left" class="sidebar">
-        <button class="close-btn" onclick="closeAll()">FERMER</button>
-        <h2>RÉSEAUX</h2>
-        <label class="row"><input type="checkbox" id="chk-gCat1" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</label>
-        <label class="row"><input type="checkbox" id="chk-g48" checked onchange="toggleL('g48')"> Réseau 48t</label>
-        <label class="row"><input type="checkbox" id="chk-g72" checked onchange="toggleL('g72')"> Réseau 72t</label>
-        <label class="row"><input type="checkbox" id="chk-g94" checked onchange="toggleL('g94')"> Réseau 94t</label>
-        <label class="row"><input type="checkbox" id="chk-g120" checked onchange="toggleL('g120')"> Réseau 120t+</label>
-    </div>
-
-    <div id="side-right" class="sidebar">
-        <button class="close-btn" onclick="closeAll()">FERMER</button>
-        <h2>TRAVAUX UMAP</h2>
-        <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="loadUmapData()">🔄 SYNCHRO DIRECTE</button>
-        <p id="umap-status" style="font-size: 10px; text-align: center; color: #94a3b8;">Attente...</p>
-        <hr>
-        <h2>OUTILS ROUTE</h2>
-        <button class="act-btn" style="background:#3b82f6;" onclick="startRouting()">📏 TRACER ROUTE</button>
-        <button class="act-btn" style="background:#22c55e;" onclick="exportGPX()">📤 EXPORT GPX</button>
-        <button class="act-btn" style="background:#ef4444;" onclick="clearAllData()">🗑️ EFFACER TOUT</button>
+        <h2 id="t-route-title">ITINÉRAIRE</h2>
+        <button id="t-route-btn" style="background:#2ecc71; color:black; height: 50px;" onclick="startRouting()">📍 TRACER AVEC ÉPINGLES</button>
+        <button id="t-clear-btn" style="background:#c0392b;" onclick="clearCurrentData()">🗑️ EFFACER LA CARTE</button>
+        <button style="background:#f39c12; color:black; margin-top:10px;" onclick="saveToArchive()" id="t-save">💾 SAUVEGARDER L'ARCHIVE</button>
+        <h2 id="t-arch-title">MES ARCHIVES</h2>
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <button style="background:#34495e; margin:0;" onclick="exportData()">📤 EXPORT</button>
+            <button style="background:#34495e; margin:0;" onclick="document.getElementById('importFile').click()">📥 IMPORT</button>
+            <input type="file" id="importFile" style="display:none" onchange="importData(this)">
+        </div>
+        <div id="archive-list"></div>
     </div>
 
     <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false });
+    const trans = {
+        fr: { btnL: "☰ RÉSEAUX", btnR: "⚙️ OUTILS", gps: "🛰️ GPS DIRECT", net: "RÉSEAUX VISIBLES", poi: "AIDES & POI", route: "ITINÉRAIRE", trace: "📍 TRACER (ÉPINGLES)", clear: "🗑️ EFFACER TOUT", save: "💾 SAUVEGARDER ARCHIVE", arch: "MES ARCHIVES" },
+        en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ LIVE GPS", net: "NETWORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW (PINS)", clear: "🗑️ CLEAR ALL", save: "💾 SAVE TO ARCHIVE", arch: "MY ARCHIVES" },
+        it: { btnL: "☰ RETI", btnR: "⚙️ STRUMENTI", gps: "🛰️ GPS LIVE", net: "RETI VISIBILI", poi: "AIUTI & POI", route: "ITINERARIO", trace: "📍 TRACCIA (PIN)", clear: "🗑️ CANCELLA TUTTO", save: "💾 SALVA ARCHIVIO", arch: "I MIEI ARCHIVI" },
+        de: { btnL: "☰ NETZE", btnR: "⚙️ TOOLS", gps: "🛰️ LIVE GPS", net: "NETZE", poi: "MARKER", route: "ROUTE", trace: "📍 ZEICHNEN", clear: "🗑️ LÖSCHEN", save: "💾 ARCHIVIEREN", arch: "ARCHIV" },
+        es: { btnL: "☰ REDES", btnR: "⚙️ HERRAMIENTAS", gps: "🛰️ GPS EN VIVO", net: "REDES", poi: "PUNTOS", route: "RUTA", trace: "📍 TRAZAR", clear: "🗑️ BORRAR", save: "💾 GUARDAR", arch: "ARCHIVOS" },
+        pl: { btnL: "☰ SIECI", btnR: "⚙️ NARZĘDZIA", gps: "🛰️ GPS NA ŻYWO", net: "SIECI", poi: "PUNKTY", route: "TRASA", trace: "📍 RYSUJ", clear: "🗑️ USUŃ", save: "💾 ZAPISZ", arch: "ARCHIWUM" },
+        nl: { btnL: "☰ NETWERKEN", btnR: "⚙️ OPTIES", gps: "🛰️ LIVE GPS", net: "NETWERKEN", poi: "PUNTEN", route: "ROUTE", trace: "📍 TEKENEN", clear: "🗑️ WISSEN", save: "💾 OPSLAAN", arch: "ARCHIEVEN" }
+    };
+
+    function changeLang(l) {
+        const d = trans[l] || trans.fr;
+        document.getElementById('btn-left').innerText = d.btnL;
+        document.getElementById('btn-right').innerText = d.btnR;
+        document.getElementById('t-gps').innerText = d.gps;
+        document.getElementById('t-net-title').innerText = d.net;
+        document.getElementById('t-poi-title').innerText = d.poi;
+        document.getElementById('t-route-title').innerText = d.route;
+        document.getElementById('t-route-btn').innerText = d.trace;
+        document.getElementById('t-clear-btn').innerText = d.clear;
+        document.getElementById('t-save').innerText = d.save;
+        document.getElementById('t-arch-title').innerText = d.arch;
+    }
+
+    var map = L.map('map', { center: [46.9, -0.5], zoom: 6, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    var routeLayer = L.polyline([], {color: '#00008B', weight: 8}).addTo(map);
-    var routePoints = [];
-    var markersLayer = L.featureGroup().addTo(map);
-    var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gUmap: L.layerGroup().addTo(map) };
-    
-    var userMarker = L.marker([0,0], {icon: L.divIcon({html:'<div class="nav-arrow"></div>', className:'', iconSize:[20,30]})});
+    var gPois = L.featureGroup().addTo(map);
+    var gRouteMarkers = L.featureGroup().addTo(map);
+    var routeLayer = L.polyline([], {color: '#002a5c', weight: 8, opacity: 0.9}).addTo(map);
+    var routePoints = []; 
+    var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
+    var userMarker = null;
 
-    function openSide(s) { closeAll(); document.getElementById('side-'+s).style.display = 'block'; }
-    function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
-
-    // --- LA NOUVELLE FONCTION UMAP (PLUS SIMPLE) ---
-    function loadUmapData() {
-        const url = "https://umap.openstreetmap.fr/fr/map/1383926/geojson/";
-        document.getElementById('umap-status').innerText = "Tentative...";
-
-        // On utilise un proxy différent (CorsProxy) qui est plus stable sur mobile
-        fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url + "?t=" + Date.now()))
-        .then(r => r.json())
-        .then(data => {
-            groups.gUmap.clearLayers();
-            L.geoJSON(data, {
-                pointToLayer: (f, latlng) => {
-                    let txt = (f.properties.name || "").toUpperCase();
-                    let icon = "⚠️";
-                    if(txt.includes("TRAVAUX")) icon = "🚧";
-                    if(txt.includes("BARR") || txt.includes("FERM")) icon = "⛔";
-                    
-                    return L.marker(latlng, {
-                        icon: L.divIcon({ html: `<div style="font-size:30px; filter:drop-shadow(0 2px 2px black);">${icon}</div>`, className: ''})
-                    }).bindPopup(f.properties.name + "<br>" + (f.properties.description || ""));
-                }
-            }).addTo(groups.gUmap);
-            document.getElementById('umap-status').innerText = "Dernière synchro : " + new Date().toLocaleTimeString();
-        })
-        .catch(e => {
-            document.getElementById('umap-status').innerText = "Erreur. Vérifiez que la carte est PUBLIQUE.";
-            console.error(e);
-        });
-    }
-
-    function toggleNav() {
-        let b = document.getElementById('btn-nav');
-        if(b.innerText.includes("🔴")) {
-            b.innerText = "🟢 NAVIGATION"; b.style.background = "#22c55e";
-            map.locate({watch: true, setView: true, enableHighAccuracy: true});
-        } else {
-            b.innerText = "🔴 PRÉPARATION"; b.style.background = "#ef4444";
-            map.removeLayer(userMarker); map.stopLocate();
-        }
-    }
-
-    map.on('locationfound', e => {
-        userMarker.setLatLng(e.latlng).addTo(map);
-    });
-
-    function toggleL(id) {
-        if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]);
-        else map.removeLayer(groups[id]);
-    }
-
-    function startRouting() {
-        closeAll(); map.on('click', e => {
-            let m = L.marker(e.latlng, {draggable:true}).addTo(markersLayer);
-            routePoints.push(m);
-            m.on('dragend', updateRoute);
-            updateRoute();
-        });
-    }
-
-    function updateRoute() {
-        if(routePoints.length < 2) return;
-        let c = routePoints.map(p => `${p.getLatLng().lng},${p.getLatLng().lat}`).join(';');
-        fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson`)
-        .then(r=>r.json()).then(d=>{ 
-            if(d.routes) {
-                routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(pt=>[pt[1],pt[0]]));
-                document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
-            }
-        });
-    }
-
-    function clearAllData() { routePoints=[]; markersLayer.clearLayers(); routeLayer.setLatLngs([]); }
-
-    // Démarrage Réseaux
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
     .then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
             let p = JSON.stringify(f.properties).toUpperCase();
-            let g = "gCat1", col = "#FFFF00";
-            if(p.includes("120")) { g="g120"; col="#22c55e"; }
-            else if(p.includes("94")) { g="g94"; col="#FF0000"; }
-            else if(p.includes("72")) { g="g72"; col="#f39c12"; }
-            else if(p.includes("48")) { g="g48"; col="#8b5cf6"; }
-            l.setStyle({color: col, weight: 2}); groups[g].addLayer(l); map.addLayer(groups[g]);
-        }});
+            let g = "gCat1", c = "#FFFF00";
+            if(p.includes("120")) { c="#1b5e20"; g="g120"; } 
+            else if(p.includes("94")) { c="#FF0000"; g="g94"; } 
+            else if(p.includes("72")) { c="#e67e22"; g="g72"; } 
+            else if(p.includes("48")) { c="#9b59b6"; g="g48"; }
+            l.setStyle({color: c, weight: 1.8, opacity: 0.8}); 
+            groups[g].addLayer(l);
+        }}).addTo(map);
+        Object.values(groups).forEach(g => map.addLayer(g));
     });
-    
-    // Premier chargement Umap
-    loadUmapData();
+
+    function startGPS() { closeAll(); map.locate({ watch: true, enableHighAccuracy: true }); }
+    map.on('locationfound', (e) => {
+        let heading = e.heading || 0;
+        if (!userMarker) {
+            let navIcon = L.divIcon({ className: 'nav-arrow', html: `<img src="https://cdn-icons-png.flaticon.com/512/5024/5024467.png" style="width:40px; height:40px; transform: rotate(${heading}deg);">`, iconSize: [40, 40], iconAnchor: [20, 20] });
+            userMarker = L.marker(e.latlng, { icon: navIcon }).addTo(map);
+            map.setView(e.latlng, 15);
+        } else {
+            userMarker.setLatLng(e.latlng);
+            userMarker.getElement().querySelector('img').style.transform = `rotate(${heading}deg)`;
+            map.panTo(e.latlng);
+        }
+    });
+
+    function activatePoi(type, color) {
+        closeAll(); map.off('click');
+        map.once('click', (e) => {
+            let note = document.getElementById('poiNote').value || "";
+            let html = type === 'RESTO' ? `<img src="https://www.relais-routiers.com/images/logo_relais.png" style="width:28px; height:28px;">` : type;
+            let icon = L.divIcon({ className: 'poi-icon-round', html: `<div class="poi-inner" style="background:${color};">${html}</div>`, iconSize: [34, 34], iconAnchor: [17, 17] });
+            let m = L.marker(e.latlng, {icon: icon}).addTo(gPois);
+            if(note) m.bindTooltip(note, { direction: 'top', className: 'leaflet-tooltip-custom' });
+            m.on('dblclick', () => gPois.removeLayer(m));
+            document.getElementById('poiNote').value = "";
+        });
+    }
+
+    function startRouting() { closeAll(); map.off('click'); map.on('click', (e) => addRouteMarker(e.latlng)); }
+    function addRouteMarker(latlng) {
+        let pinIcon = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/2776/2776067.png', iconSize: [25, 25], iconAnchor: [12, 24] });
+        let marker = L.marker(latlng, { draggable: true, icon: pinIcon }).addTo(gRouteMarkers);
+        routePoints.push(marker);
+        marker.on('dragend', updateRoute);
+        marker.on('contextmenu', () => { gRouteMarkers.removeLayer(marker); routePoints = routePoints.filter(p => p !== marker); updateRoute(); });
+        updateRoute();
+    }
+    function updateRoute() {
+        if (routePoints.length < 2) { routeLayer.setLatLngs([]); document.getElementById('dist-panel').style.display = 'none'; return; }
+        let coordsString = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';');
+        fetch(`https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson`)
+        .then(r => r.json()).then(d => {
+            if(d.routes && d.routes[0]) {
+                routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(x => [x[1], x[0]]));
+                document.getElementById('dist-panel').style.display = 'block';
+                document.getElementById('km-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
+            }
+        });
+    }
+
+    function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
+    function openMenu(id) { closeAll(); document.getElementById(id).style.display = 'block'; }
+    function closeAll() { document.getElementById('sidebar-left').style.display = 'none'; document.getElementById('sidebar-right').style.display = 'none'; }
+    function clearCurrentData() { routePoints = []; gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); gPois.clearLayers(); document.getElementById('dist-panel').style.display = 'none'; }
+
+    function saveToArchive() {
+        let n = prompt("Nom :"); if(!n) return;
+        let d = { name: n, pts: routePoints.map(m => m.getLatLng()), pois: [] };
+        gPois.eachLayer(l => { if(l.getLatLng) d.pois.push({ll: l.getLatLng(), note: l.getTooltip() ? l.getTooltip().getContent() : "", icon: l.options.icon.options.html}); });
+        let a = JSON.parse(localStorage.getItem('convoi_arch_v40') || "[]");
+        a.push(d); localStorage.setItem('convoi_arch_v40', JSON.stringify(a)); renderArch();
+    }
+    function renderArch() {
+        let l = document.getElementById('archive-list'); l.innerHTML = "";
+        let a = JSON.parse(localStorage.getItem('convoi_arch_v40') || "[]");
+        a.forEach((x, i) => {
+            let div = document.createElement('div'); div.className = 'archive-item';
+            div.innerHTML = `<span>${x.name}</span><div><button onclick="loadArch(${i})" style="width:auto;background:#27ae60;margin:0;padding:5px 10px;">📂</button><button onclick="delArch(${i})" style="width:auto;background:#e74c3c;margin:0;padding:5px 10px;">🗑️</button></div>`;
+            l.appendChild(div);
+        });
+    }
+    function delArch(i) { if(confirm("Supprimer ?")) { let a = JSON.parse(localStorage.getItem('convoi_arch_v40')); a.splice(i, 1); localStorage.setItem('convoi_arch_v40', JSON.stringify(a)); renderArch(); }}
+    function loadArch(i) {
+        let a = JSON.parse(localStorage.getItem('convoi_arch_v40'))[i]; if(!a) return; clearCurrentData();
+        a.pts.forEach(p => addRouteMarker(p));
+        a.pois.forEach(p => {
+            let icon = L.divIcon({ className: 'poi-icon-round', html: p.icon, iconSize: [34,34], iconAnchor: [17,17] });
+            let m = L.marker(p.ll, {icon: icon}).addTo(gPois);
+            if(p.note) m.bindTooltip(p.note, {direction: 'top', className: 'leaflet-tooltip-custom'});
+        });
+        closeAll();
+    }
+
+    function exportData() {
+        let data = localStorage.getItem('convoi_arch_v40'); if(!data) return;
+        let blob = new Blob([data], {type: "application/json"}); let url = URL.createObjectURL(blob);
+        let a = document.createElement('a'); a.href = url; a.download = "convoi.json"; a.click();
+    }
+    function importData(input) {
+        let file = input.files[0]; if(!file) return;
+        let reader = new FileReader();
+        reader.onload = function(e) { localStorage.setItem('convoi_arch_v40', e.target.result); renderArch(); };
+        reader.readAsText(file);
+    }
+
+    renderArch();
 </script>
 </body>
 </html>
