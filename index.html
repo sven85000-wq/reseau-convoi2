@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V42.0 - NETTOYÉ & COMPLET</title>
+    <title>GPS CONVOI V42.2 - FULL MULTILINGUE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -9,32 +9,35 @@
         body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; position: absolute; }
 
+        /* --- MODAL D'ACCUEIL --- */
+        #welcome-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 20000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; box-sizing: border-box;
+        }
+        .modal-content {
+            background: #1e2b37; color: white; border: 3px solid #f39c12;
+            border-radius: 15px; padding: 25px; max-width: 500px; text-align: center;
+            box-shadow: 0 0 30px rgba(243, 156, 18, 0.4);
+        }
+        .modal-content h1 { color: #f39c12; font-size: 20px; margin-top: 0; }
+        .modal-content p { font-size: 14px; line-height: 1.5; text-align: left; }
+        .warning-box { background: rgba(192, 57, 43, 0.2); border: 1px solid #c0392b; padding: 10px; border-radius: 8px; margin-top: 15px; }
+        
         /* --- FENÊTRE TRAVAUX --- */
         #umap-window {
-            position: fixed;
-            top: 70px;
-            right: 10px;
-            width: 280px; 
-            height: 350px; 
-            min-width: 180px;
-            min-height: 150px;
-            z-index: 15000;
-            border: 3px solid #f39c12;
-            border-radius: 12px;
-            background: #1e2b37;
-            display: none;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.9);
-            overflow: hidden;
-            touch-action: none;
+            position: fixed; top: 70px; right: 10px; width: 280px; height: 350px; 
+            min-width: 180px; min-height: 150px; z-index: 15000;
+            border: 3px solid #f39c12; border-radius: 12px; background: #1e2b37;
+            display: none; box-shadow: 0 8px 30px rgba(0,0,0,0.9); overflow: hidden; touch-action: none;
         }
-        
         #resize-handle {
             position: absolute; bottom: 0; right: 0; width: 45px; height: 45px;
             background: #f39c12; clip-path: polygon(100% 0, 100% 100%, 0 100%);
             z-index: 15005; display: flex; align-items: flex-end; justify-content: flex-end;
             padding: 5px; color: black; font-weight: bold; font-size: 20px; cursor: nwse-resize;
         }
-
         #umap-window.full-screen { top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; height: 100% !important; border-radius: 0; }
         #umap-window.minimized { height: 35px !important; width: 180px !important; }
 
@@ -47,15 +50,13 @@
         #btn-travaux-direct {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 9998; background: #f39c12; color: black; border: 2px solid #000;
-            padding: 10px 15px; border-radius: 10px; font-weight: bold; font-size: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); cursor: pointer;
+            padding: 10px 15px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer;
         }
 
         .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 18px; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
         #btn-left { left: 10px; } #btn-right { right: 10px; }
         #lang-bar { position: fixed; top: 75px; left: 10px; z-index: 9000; display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.85); padding: 8px; border-radius: 8px; }
         .flag { width: 30px; height: 20px; border: 1px solid #fff; cursor: pointer; }
-
         .sidebar { position: fixed; top: 0; height: 100vh; width: 310px; background: #1e2b37; color: white; padding: 20px; box-sizing: border-box; z-index: 10000; overflow-y: auto; display: none; }
         #sidebar-left { left: 0; border-right: 4px solid #f39c12; }
         #sidebar-right { right: 0; border-left: 4px solid #f39c12; }
@@ -66,6 +67,24 @@
     </style>
 </head>
 <body>
+
+    <div id="welcome-modal">
+        <div class="modal-content">
+            <h1 id="w-title">👋 Bonjour / Salut tout le monde !</h1>
+            <p id="w-text">
+                Voici une version optimisée pour votre acier de route avec la carte des convois.<br><br>
+                <b>Nouveauté :</b> Utilisez le bouton <b>🚧 TRAVAUX LIVE</b> pour ouvrir une petite fenêtre supplémentaire sur l'écran affichant la carte des travaux.
+                <br>• <b>Agrandir :</b> Glissez votre doigt sur le coin orange ↘ en bas à droite.
+                <br>• <b>Réduire :</b> Bouton "➖" pour minimiser la fenêtre.
+                <br>• <b>Plein écran :</b> Bouton "BOX" pour l'ouvrir entièrement.
+            </p>
+            <div class="warning-box">
+                <b id="w-warn-title" style="color: #e74c3c;">⚠️ ATTENTION :</b><br>
+                <span id="w-warn-text">Soyez vigilants lors de vos <b>Imports et Exports</b>. Nous ne sommes pas responsables si vous partagez des infos et qu'un incident survient sur la route. Toutes les données sont initialement stockées sur votre téléphone.</span>
+            </div>
+            <button style="background:#f39c12; color:black; margin-top:20px;" onclick="closeWelcome()">DÉMARRER / START</button>
+        </div>
+    </div>
 
     <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX LIVE</div>
 
@@ -103,7 +122,7 @@
         <button style="background:#e74c3c; margin-bottom: 20px;" onclick="closeAll()">✖ FERMER</button>
         <button style="background:#27ae60; padding:18px; margin-bottom: 20px;" onclick="startGPS()" id="t-gps">🛰️ RE-CENTRER GPS (LIVE)</button>
         <h2 id="t-net-title">RÉSEAUX & TRAVAUX</h2>
-        <div class="row" onclick="toggleUmap()" style="background: rgba(243, 156, 18, 0.3); border: 2px solid #f39c12; margin-bottom:15px; cursor:pointer;">
+        <div class="row" onclick="toggleUmap()" style="background: rgba(243, 156, 18, 0.3); border: 2px solid #f39c12; margin-bottom:15px; cursor:pointer; padding:10px; border-radius:5px;">
             <span style="font-size: 18px; margin-right: 10px;">🚧</span> <b>FENÊTRE TRAVAUX</b>
         </div>
         <div class="row"><input type="checkbox" id="chk-gCat1" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</div>
@@ -122,12 +141,11 @@
             <button style="background:#c0392b;" onclick="activatePoi('⚠️', '#c0392b')">⚠️ ALERTE</button>
             <button style="background:#d35400;" onclick="activatePoi('RESTO', '#d35400')">🍽️ RESTO</button>
         </div>
-        
         <h2 id="t-route-title">ITINÉRAIRE</h2>
         <button id="t-route-btn" style="background:#2ecc71; color:black;" onclick="startRouting()">📍 TRACER (ÉPINGLES)</button>
         <button id="t-clear-btn" style="background:#c0392b;" onclick="clearCurrentData()">🗑️ EFFACER TOUT</button>
         <button id="t-save" style="background:#f39c12; color:black;" onclick="saveToArchive()">💾 SAUVEGARDER</button>
-
+        
         <h2 style="color: #3498db;">GPX / IMPORT-EXPORT</h2>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <button style="background:#3498db;" onclick="exportGPX()">📤 EXPORT</button>
@@ -143,13 +161,15 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; }
+
     const trans = {
         fr: { btnL: "☰ RÉSEAUX", btnR: "⚙️ OUTILS", gps: "🛰️ RE-CENTRER GPS", net: "RÉSEAUX & TRAVAUX", poi: "AIDES & POI", route: "ITINÉRAIRE", trace: "📍 TRACER (ÉPINGLES)", clear: "🗑️ EFFACER TOUT", save: "💾 SAUVEGARDER", arch: "MES ARCHIVES", work: "🚧 TRAVAUX" },
         en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ RE-CENTER GPS", net: "NETWORKS & WORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW (PINS)", clear: "🗑️ CLEAR ALL", save: "💾 SAVE", arch: "MY ARCHIVES", work: "🚧 WORKS" },
         it: { btnL: "☰ RETI", btnR: "⚙️ STRUMENTI", gps: "🛰️ RICENTRA GPS", net: "RETI & LAVORI", poi: "POI", route: "ITINERARIO", trace: "📍 TRACCIA (PIN)", clear: "CANCELLA", save: "💾 SALVA", arch: "ARCHIVI", work: "🚧 LAVORI" },
         de: { btnL: "☰ NETZE", btnR: "⚙️ TOOLS", gps: "🛰️ GPS ZENTRIEREN", net: "NETZE & ARBEITEN", poi: "MARKER", route: "ROUTE", trace: "📍 ZEICHNEN", clear: "LÖSCHEN", save: "💾 SPEICHERN", arch: "ARCHIV", work: "🚧 ARBEITEN" },
         es: { btnL: "☰ REDES", btnR: "⚙️ HERRAMIENTAS", gps: "🛰️ RE-CENTRAR GPS", net: "REDES & OBRAS", poi: "PUNTOS", route: "RUTA", trace: "📍 TRAZAR", clear: "BORRAR", save: "GUARDAR", arch: "ARCHIVOS", work: "🚧 OBRAS" },
-        pt: { btnL: "☰ REDES", btnR: "⚙️ FERRAMENTAS", gps: "🛰️ RE-CENTRAR GPS", net: "REDES & OBRAS", poi: "PONTOS", route: "ROTA", trace: "📍 TRAÇAR", clear: "LIMPAR", save: "SALVAR", arch: "ARQUIVOS", work: "🚧 OBRAS" },
+        pt: { btnL: "☰ REDES", btnR: "⚙️ FERRAMENTAS", gps: "🛰️ RE-CENTRAR GPS", net: "REDES & OBRAS", poi: "PUNTOS", route: "ROTA", trace: "📍 TRAÇAR", clear: "LIMPAR", save: "SALVAR", arch: "ARQUIVOS", work: "🚧 OBRAS" },
         pl: { btnL: "☰ SIECI", btnR: "⚙️ NARZĘDZIA", gps: "🛰️ CENTRUJ GPS", net: "SIECI & ROBOTY", poi: "PUNKTY", route: "TRASA", trace: "📍 RYSUJ", clear: "USUŃ", save: "ZAPISZ", arch: "ARCHIWUM", work: "🚧 ROBOTY" },
         nl: { btnL: "☰ NETWERKEN", btnR: "⚙️ OPTIES", gps: "🛰️ GPS CENTREREN", net: "WERKEN", poi: "PUNTEN", route: "ROUTE", trace: "📍 TEKENEN", clear: "WISSEN", save: "OPSLAAN", arch: "ARCHIEVEN", work: "🚧 WERKEN" }
     };
@@ -246,7 +266,7 @@
         reader.readAsText(input.files[0]);
     }
 
-    // --- LOGIQUE STANDARD ---
+    // --- LOGIQUE GPS & RÉSEAUX ---
     function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); closeAll(); }
     map.on('locationfound', (e) => {
         if (!userMarker) { userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [14, 14] }) }).addTo(map); map.setView(e.latlng, 15);
