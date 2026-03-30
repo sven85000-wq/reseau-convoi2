@@ -1,51 +1,80 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V40.7 - ÉLITE NOTES</title>
+    <title>GPS CONVOI V40.14 - FINAL</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; background: #0f172a; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; }
-        #top-bar { position: fixed; top: 10px; left: 0; width: 100%; z-index: 9999; display: flex; justify-content: space-around; align-items: center; padding: 0 10px; box-sizing: border-box; }
-        .ctrl-btn { padding: 12px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 10px; min-width: 90px; text-align: center; }
+       
+        /* Barre supérieure */
+        #top-bar {
+            position: fixed; top: 10px; left: 0; width: 100%; z-index: 9999;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 0 10px; box-sizing: border-box; pointer-events: none;
+        }
+        .ctrl-btn, #center-group, .leaflet-control-layers { pointer-events: auto; }
+       
+        .ctrl-btn {
+            padding: 10px 8px; border-radius: 10px; font-weight: bold; cursor: pointer;
+            border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            font-size: 9px; min-width: 75px; text-align: center;
+        }
         #btn-reseaux { background: #1e293b; color: #f39c12; border-color: #f39c12; }
-        #btn-nav { background: #ef4444; width: 140px; }
         #btn-outils { background: #1e293b; color: #00d4ff; border-color: #00d4ff; }
-        #dist-box { background: rgba(15, 23, 42, 0.95); padding: 8px 15px; border-radius: 12px; border: 2px solid #334155; text-align: center; min-width: 100px; }
-        #dist-val { font-size: 20px; font-weight: 900; color: #00d4ff; display: block; }
-        .sidebar { position: fixed; top: 0; height: 100vh; width: 320px; background: #1e293b; z-index: 10001; padding: 20px; display: none; overflow-y: auto; box-shadow: 0 0 40px rgba(0,0,0,0.8); box-sizing: border-box; }
+
+        /* Groupe Central */
+        #center-group { display: flex; flex-direction: column; align-items: center; gap: 5px; margin: 0 5px; }
+        #btn-nav { background: #ef4444; width: 120px; padding: 10px 5px; border-radius: 12px; border: 2px solid white; font-weight: bold; font-size: 9px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+       
+        #dist-box {
+            background: rgba(15, 23, 42, 0.9); padding: 4px 10px; border-radius: 15px;
+            border: 1px solid #334155; text-align: center; min-width: 70px;
+        }
+        #dist-val { font-size: 14px; font-weight: 900; color: #00d4ff; }
+        #dist-label { font-size: 7px; color: #94a3b8; display: block; }
+
+        /* Positionnement du sélecteur en BAS à DROITE */
+        .leaflet-bottom.leaflet-right { bottom: 20px !important; right: 10px !important; }
+        .leaflet-control-layers {
+            border: 2px solid white !important;
+            background: #1e293b !important;
+            color: white !important;
+            border-radius: 10px !important;
+        }
+
+        /* Sidebars */
+        .sidebar { position: fixed; top: 0; height: 100vh; width: 85%; max-width: 320px; background: #1e293b; z-index: 10001; padding: 20px; display: none; overflow-y: auto; box-sizing: border-box; }
         #side-left { left: 0; border-right: 4px solid #f39c12; }
         #side-right { right: 0; border-left: 4px solid #00d4ff; }
-        .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; cursor: pointer; }
-        h2 { font-size: 11px; color: #f39c12; text-transform: uppercase; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-top: 20px; }
-        .row { display: flex; align-items: center; background: #334155; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
-        .row input { width: 22px; height: 22px; margin-right: 12px; }
-        .act-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 8px; color: white; cursor: pointer; font-size: 11px; }
-        .poi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .poi-btn { padding: 10px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 10px; cursor: pointer; }
-        .poi-btn.active { background: #f39c12; border-color: white; }
-        .archive-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 4px solid #22c55e; cursor: pointer; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
-        .del-arch { color: #ef4444; font-weight: bold; padding: 5px; }
        
-        /* Style des bulles de notes */
-        .leaflet-popup-content-wrapper { background: #1e293b; color: white; border: 1px solid #f39c12; font-weight: bold; }
-        .leaflet-popup-tip { background: #f39c12; }
+        .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; }
+        .row { display: flex; align-items: center; background: #334155; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 12px; }
+        .row input { width: 20px; height: 20px; margin-right: 12px; }
+        .act-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 8px; color: white; font-size: 11px; }
+
+        .poi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .poi-btn { padding: 10px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 10px; }
+        .nav-arrow { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 25px solid #4285F4; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+        .archive-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 4px solid #22c55e; font-size: 11px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
     <div id="top-bar">
         <div id="btn-reseaux" class="ctrl-btn" onclick="openSide('left')">☰ RÉSEAUX</div>
-        <div id="dist-box"><span id="dist-label" style="font-size:8px; color:#94a3b8;">DISTANCE</span><span id="dist-val">0.0</span> <span style="font-size:9px;">KM</span></div>
-        <div id="btn-nav" class="ctrl-btn" onclick="toggleNav()">🔴 PRÉPARATION</div>
+        <div id="center-group">
+            <div id="btn-nav" onclick="toggleNav()">🔴 PRÉPARATION</div>
+            <div id="dist-box"><span id="dist-label">KM RESTANT</span><span id="dist-val">0.0</span></div>
+        </div>
         <div id="btn-outils" class="ctrl-btn" onclick="openSide('right')">⚙️ OUTILS</div>
     </div>
 
     <div id="side-left" class="sidebar">
         <button class="close-btn" onclick="closeAll()">FERMER</button>
-        <h2>RÉSEAUX</h2>
+        <h2>RÉSEAUX (ÉPAISSEUR : 1.8)</h2>
         <div id="net-list">
             <label class="row"><input type="checkbox" id="chk-gCat1" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</label>
             <label class="row"><input type="checkbox" id="chk-g48" checked onchange="toggleL('g48')"> Réseau 48t</label>
@@ -57,131 +86,115 @@
 
     <div id="side-right" class="sidebar">
         <button class="close-btn" onclick="closeAll()">FERMER</button>
-        <h2>POSER POI + NOTE</h2>
+        <h2>POI + NOTES</h2>
         <div class="poi-grid">
-            <button class="poi-btn" id="btn-gas" onclick="setPoiMode('⛽', 'btn-gas')">⛽ STATION</button>
-            <button class="poi-btn" id="btn-bridge" onclick="setPoiMode('🌉', 'btn-bridge')">🌉 PONT</button>
-            <button class="poi-btn" id="btn-rest" onclick="setPoiMode('🍴', 'btn-rest')">🍴 RESTAU</button>
-            <button class="poi-btn" id="btn-park" onclick="setPoiMode('🅿️', 'btn-park')">🅿️ PARKING</button>
+            <button class="poi-btn" onclick="setPoiMode('⛽', 'btn-gas')">⛽ STATION</button>
+            <button class="poi-btn" onclick="setPoiMode('🌉', 'btn-bridge')">🌉 PONT</button>
+            <button class="poi-btn" onclick="setPoiMode('🍴', 'btn-rest')">🍴 RESTAU</button>
+            <button class="poi-btn" onclick="setPoiMode('🅿️', 'btn-park')">🅿️ PARKING</button>
         </div>
-        <h2>ACTIONS</h2>
-        <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="startRouting()">📏 TRACER ROUTE (BLEU FONCÉ)</button>
+        <h2>ÉDITION</h2>
+        <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="startRouting()">📏 TRACER ROUTE</button>
         <button class="act-btn" style="background:#3b82f6;" onclick="saveArchive()">💾 SAUVEGARDER</button>
         <div style="display:flex; gap:5px;">
             <button class="act-btn" style="background:#22c55e;" onclick="exportGPX()">📤 EXPORT</button>
             <button class="act-btn" style="background:#8b5cf6;" onclick="document.getElementById('file-in').click()">📥 IMPORT</button>
         </div>
         <input type="file" id="file-in" style="display:none" accept=".gpx" onchange="importGPX(event)">
-        <div id="archive-list"></div>
-        <button class="act-btn" style="background:#ef4444; margin-top:20px;" onclick="clearAllData()">🗑️ EFFACER CARTE</button>
+        <div id="archive-list" style="margin-top:10px;"></div>
+        <button class="act-btn" style="background:#ef4444; margin-top:20px;" onclick="clearAllData()">🗑️ TOUT EFFACER</button>
     </div>
 
     <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
+    var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
 
-    var routeLayer = L.polyline([], {color: '#00008B', weight: 7, opacity: 0.9}).addTo(map);
+    var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false, layers: [osm] });
+    L.control.layers({ "📍 Plan": osm, "🛰️ Sat": satellite }, null, { position: 'bottomright' }).addTo(map);
+
+    var routeLayer = L.polyline([], {color: '#00008B', weight: 8, opacity: 0.9}).addTo(map);
     var routePoints = [];
     var markersLayer = L.featureGroup().addTo(map);
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
-    var userMarker = L.marker([0,0], {icon: L.divIcon({html:'<b style="font-size:32px; filter:drop-shadow(0 2px 4px black);">⬆️</b>', className:''})});
+   
+    var arrowIcon = L.divIcon({ html: '<div class="nav-arrow"></div>', className: '', iconSize: [20, 30], iconAnchor: [10, 15] });
+    var userMarker = L.marker([0,0], {icon: arrowIcon});
 
     function openSide(s) { closeAll(); document.getElementById('side-'+s).style.display = 'block'; }
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
 
-    // --- NAVIGATION ---
     function toggleNav() {
         let b = document.getElementById('btn-nav');
-        let lbl = document.getElementById('dist-label');
         if(b.innerText.includes("🔴")) {
             b.innerText = "🟢 NAVIGATION"; b.style.background = "#22c55e";
-            lbl.innerText = "RESTE À FAIRE"; lbl.style.color = "#22c55e";
             map.locate({watch: true, setView: true, enableHighAccuracy: true});
         } else {
             b.innerText = "🔴 PRÉPARATION"; b.style.background = "#ef4444";
-            lbl.innerText = "DISTANCE"; lbl.style.color = "#00d4ff";
-            map.stopLocate();
+            map.removeLayer(userMarker); map.stopLocate();
         }
     }
 
     map.on('locationfound', e => {
         userMarker.setLatLng(e.latlng).addTo(map);
-        if(document.getElementById('btn-nav').innerText.includes("🟢") && routePoints.length > 0) {
+        if(routePoints.length > 0) {
             let last = routePoints[routePoints.length - 1].getLatLng();
             document.getElementById('dist-val').innerText = (e.latlng.distanceTo(last) / 1000).toFixed(1);
         }
     });
 
-    // --- RÉSEAUX ---
     function toggleL(id) {
         if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]);
         else map.removeLayer(groups[id]);
     }
 
-    // --- POI AVEC NOTES AU SURVOL ---
-    function setPoiMode(emoji, btnId) {
+    function setPoiMode(emoji) {
         closeAll();
-        document.querySelectorAll('.poi-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(btnId).classList.add('active');
         map.off('click');
         map.on('click', e => {
-            let note = prompt("Saisir une note (Hauteur, Nom...) :");
+            let note = prompt("Note du point :");
             if(note !== null) {
-                let m = L.marker(e.latlng, {
-                    icon: L.divIcon({html:`<div style="font-size:26px; filter:drop-shadow(0 2px 2px black);">${emoji}</div>`, className:''})
-                }).addTo(markersLayer);
-               
-                // On attache la bulle
-                m.bindPopup(note);
-
-                // Événements Survol (Hover)
-                m.on('mouseover', function(ev) { this.openPopup(); });
-                m.on('mouseout', function(ev) { this.closePopup(); });
-               
-                // Double clic pour supprimer
+                let m = L.marker(e.latlng, { icon: L.divIcon({html:`<div style="font-size:26px; filter:drop-shadow(0 2px 2px black);">${emoji}</div>`, className:''}) }).addTo(markersLayer);
+                m.bindPopup(note); m.on('mouseover', function() { this.openPopup(); }); m.on('mouseout', function() { this.closePopup(); });
                 m.on('dblclick', () => map.removeLayer(m));
             }
-            document.getElementById(btnId).classList.remove('active');
             map.off('click');
         });
     }
 
-    // --- TRACÉ ---
     function startRouting() {
         closeAll(); map.off('click');
         map.on('click', e => {
             let m = L.marker(e.latlng, {draggable:true}).addTo(markersLayer);
             routePoints.push(m);
             m.on('dragend', updateRoute);
-            m.on('dblclick', () => { map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
+            m.on('dblclick', (ev) => { L.DomEvent.stopPropagation(ev); map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
             updateRoute();
         });
     }
 
     function updateRoute() {
-        if(routePoints.length < 2) return;
+        if(routePoints.length < 2) { routeLayer.setLatLngs([]); return; }
         let c = routePoints.map(p => `${p.getLatLng().lng},${p.getLatLng().lat}`).join(';');
         fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson`)
         .then(r=>r.json()).then(d=>{
-            if(d.routes) {
+            if(d.routes && d.routes[0]) {
                 routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(pt=>[pt[1],pt[0]]));
                 document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
             }
         });
     }
 
-    // --- EXPORT / IMPORT / ARCHIVES ---
     function exportGPX() {
         let coords = routeLayer.getLatLngs();
-        if(coords.length === 0) return alert("Pas de tracé.");
+        if(coords.length === 0) return alert("Tracé vide.");
         let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>';
         coords.forEach(p => gpx += `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`);
         gpx += '</trkseg></trk></gpx>';
         let b = new Blob([gpx], {type: 'application/gpx+xml'});
-        let link = document.createElement('a'); link.href = URL.createObjectURL(b); link.download = 'convoi_elite.gpx'; link.click();
+        let link = document.createElement('a'); link.href = URL.createObjectURL(b); link.download = 'convoi.gpx'; link.click();
     }
 
     function importGPX(event) {
@@ -195,6 +208,7 @@
             for(let p of pts) {
                 let m = L.marker([p.getAttribute("lat"), p.getAttribute("lon")], {draggable:true}).addTo(markersLayer);
                 routePoints.push(m);
+                m.on('dblclick', () => { map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
             }
             updateRoute();
         };
@@ -204,20 +218,24 @@
     function saveArchive() {
         let n = prompt("Nom du convoi :"); if(!n) return;
         let data = { name: n, pts: routePoints.map(p => p.getLatLng()) };
-        let arch = JSON.parse(localStorage.getItem('gps_v7') || '[]');
-        arch.push(data); localStorage.setItem('gps_v7', JSON.stringify(arch));
+        let arch = JSON.parse(localStorage.getItem('gps_v14') || '[]');
+        arch.push(data); localStorage.setItem('gps_v14', JSON.stringify(arch));
         renderArchives();
     }
 
     function renderArchives() {
         let div = document.getElementById('archive-list'); div.innerHTML = '';
-        let arch = JSON.parse(localStorage.getItem('gps_v7') || '[]');
+        let arch = JSON.parse(localStorage.getItem('gps_v14') || '[]');
         arch.forEach((a, i) => {
             let item = document.createElement('div'); item.className = 'archive-item';
-            item.innerHTML = `<span>📂 ${a.name}</span> <span class="del-arch" onclick="deleteArch(${i}); event.stopPropagation();">✖</span>`;
+            item.innerHTML = `<span>📂 ${a.name}</span> <span style="color:#ef4444;" onclick="deleteArch(${i}); event.stopPropagation();">✖</span>`;
             item.onclick = () => {
                 clearAllData();
-                a.pts.forEach(p => { let m = L.marker([p.lat, p.lng], {draggable:true}).addTo(markersLayer); routePoints.push(m); });
+                a.pts.forEach(p => {
+                    let m = L.marker([p.lat, p.lng], {draggable:true}).addTo(markersLayer);
+                    routePoints.push(m);
+                    m.on('dblclick', () => { map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
+                });
                 updateRoute(); closeAll();
             };
             div.appendChild(item);
@@ -225,28 +243,26 @@
     }
 
     function deleteArch(i) {
-        let arch = JSON.parse(localStorage.getItem('gps_v7'));
-        arch.splice(i, 1); localStorage.setItem('gps_v7', JSON.stringify(arch));
+        let arch = JSON.parse(localStorage.getItem('gps_v14'));
+        arch.splice(i, 1); localStorage.setItem('gps_v14', JSON.stringify(arch));
         renderArchives();
     }
 
     function clearAllData() { routePoints=[]; markersLayer.clearLayers(); routeLayer.setLatLngs([]); document.getElementById('dist-val').innerText="0.0"; }
 
-    // Chargement réseaux
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
     .then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
             let p = JSON.stringify(f.properties).toUpperCase();
             let g = "gCat1", col = "#FFFF00";
-            if(p.includes("120")) { g="g120"; col="#1b5e20"; }
+            if(p.includes("120")) { g="g120"; col="#22c55e"; }
             else if(p.includes("94")) { g="g94"; col="#FF0000"; }
-            else if(p.includes("72")) { g="g72"; col="#e67e22"; }
-            else if(p.includes("48")) { g="g48"; col="#9b59b6"; }
-            l.setStyle({color: col, weight: 3}); groups[g].addLayer(l); map.addLayer(groups[g]);
+            else if(p.includes("72")) { g="g72"; col="#f39c12"; }
+            else if(p.includes("48")) { g="g48"; col="#8b5cf6"; }
+            l.setStyle({color: col, weight: 1.8, opacity: 0.85}); groups[g].addLayer(l); map.addLayer(groups[g]);
         }});
     });
     renderArchives();
 </script>
 </body>
 </html>
-
