@@ -8,17 +8,17 @@
     <style>
         body { margin: 0; padding: 0; background: #0f172a; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; transition: transform 0.2s linear; }
-        
+       
         #top-bar { position: fixed; top: 10px; left: 0; width: 100%; z-index: 9999; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 10px; box-sizing: border-box; pointer-events: none; }
         .ctrl-btn, #center-group, .leaflet-control-layers { pointer-events: auto; }
-        
+       
         .ctrl-btn { padding: 10px 8px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 9px; min-width: 75px; text-align: center; }
         #btn-reseaux { background: #1e293b; color: #f39c12; border-color: #f39c12; }
         #btn-outils { background: #1e293b; color: #00d4ff; border-color: #00d4ff; }
 
         #center-group { display: flex; flex-direction: column; align-items: center; gap: 5px; margin: 0 5px; }
         #btn-nav { background: #ef4444; width: 120px; padding: 10px 5px; border-radius: 12px; border: 2px solid white; font-weight: bold; font-size: 9px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        
+       
         #dist-box { background: rgba(15, 23, 42, 0.9); padding: 4px 10px; border-radius: 15px; border: 1px solid #334155; text-align: center; min-width: 70px; }
         #dist-val { font-size: 14px; font-weight: 900; color: #00d4ff; }
         #dist-label { font-size: 7px; color: #94a3b8; display: block; }
@@ -29,10 +29,10 @@
         .sidebar { position: fixed; top: 0; height: 100vh; width: 85%; max-width: 320px; background: #1e293b; z-index: 10001; padding: 20px; display: none; overflow-y: auto; box-sizing: border-box; }
         #side-left { left: 0; border-right: 4px solid #f39c12; }
         #side-right { right: 0; border-left: 4px solid #00d4ff; }
-        
+       
         .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; }
         .row { display: flex; align-items: center; background: #334155; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 12px; }
-        
+       
         #side-right h2 { font-size: 14px; margin-bottom: 10px; }
         .act-btn { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 8px; color: white; font-size: 10px; cursor: pointer; }
 
@@ -105,7 +105,7 @@
     var routePoints = [];
     var markersLayer = L.featureGroup().addTo(map);
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gUmap: L.layerGroup() };
-    
+   
     var arrowIcon = L.divIcon({ html: '<div class="nav-arrow"></div>', className: '', iconSize: [20, 30], iconAnchor: [10, 15] });
     var userMarker = L.marker([0,0], {icon: arrowIcon});
 
@@ -121,33 +121,39 @@
         }
     }
 
-    // Nouvelle fonction pour charger les icônes réelles de uMap
+    // FONCTION MISE À JOUR : Analyse des textes pour afficher les icônes
     function loadUmapData() {
+        // Ajout d'un paramètre aléatoire pour forcer le rafraîchissement des données
         fetch("https://umap.openstreetmap.fr/fr/map/1383897/geojson/?" + Date.now())
         .then(r => r.json()).then(data => {
             groups.gUmap.clearLayers();
             L.geoJSON(data, {
                 pointToLayer: (f, latlng) => {
-                    // On récupère le nom de l'icône uMap ou on met un warning par défaut
-                    let iconEmoji = f.properties._umap_options?.iconClass || "⚠️";
-                    // Si c'est un nom d'icône uMap connu, on essaie de le traduire en emoji simple
-                    if(iconEmoji.includes("Drop")) iconEmoji = "📍";
-                    if(iconEmoji.includes("Circle")) iconEmoji = "🔴";
-                    
+                    let texte = (f.properties.name || "").toUpperCase();
+                    let iconEmoji = "⚠️"; // Icône par défaut
+
+                    // On change l'icône selon le mot-clé trouvé dans uMap
+                    if (texte.includes("TRAVAUX")) iconEmoji = "🚧";
+                    if (texte.includes("BARRÉE") || texte.includes("INTERDIT")) iconEmoji = "⛔";
+                    if (texte.includes("PONT")) iconEmoji = "🌉";
+                    if (texte.includes("DÉVIATION")) iconEmoji = "↪️";
+                    if (texte.includes("STATION") || texte.includes("GAZ")) iconEmoji = "⛽";
+                   
                     return L.marker(latlng, {
                         icon: L.divIcon({
-                            html:`<div style="font-size:26px; filter:drop-shadow(0 2px 2px black);">${iconEmoji}</div>`, 
+                            html:`<div style="font-size:28px; filter:drop-shadow(0 2px 3px black);">${iconEmoji}</div>`,
                             className:''
                         })
                     }).bindPopup(`<b>${f.properties.name || "Alerte"}</b><br>${f.properties.description || ""}`);
                 },
                 style: (f) => {
-                    return { color: f.properties.color || "#00d4ff", weight: 5 };
+                    // Style pour les lignes (déviations ou routes barrées tracées)
+                    return { color: "#ff4444", weight: 6, opacity: 0.8, dashArray: '10, 10' };
                 }
             }).addTo(groups.gUmap);
             map.addLayer(groups.gUmap);
-            alert("Mise à jour uMap effectuée avec vos icônes.");
-        }).catch(e => console.log("Erreur uMap"));
+            alert("Synchronisation uMap terminée avec succès.");
+        }).catch(e => console.log("Erreur de liaison uMap : ", e));
     }
 
     function toggleNav() {
@@ -206,7 +212,7 @@
         if(routePoints.length < 2) { routeLayer.setLatLngs([]); return; }
         let c = routePoints.map(p => `${p.getLatLng().lng},${p.getLatLng().lat}`).join(';');
         fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson`)
-        .then(r=>r.json()).then(d=>{ 
+        .then(r=>r.json()).then(d=>{
             if(d.routes && d.routes[0]) {
                 routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(pt=>[pt[1],pt[0]]));
                 document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
@@ -258,9 +264,9 @@
             item.innerHTML = `<span>📂 ${a.name}</span> <span style="color:#ef4444;" onclick="deleteArch(${i}); event.stopPropagation();">✖</span>`;
             item.onclick = () => {
                 clearAllData();
-                a.pts.forEach(p => { 
-                    let m = L.marker([p.lat, p.lng], {draggable:true}).addTo(markersLayer); 
-                    routePoints.push(m); 
+                a.pts.forEach(p => {
+                    let m = L.marker([p.lat, p.lng], {draggable:true}).addTo(markersLayer);
+                    routePoints.push(m);
                     m.on('dblclick', () => { map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
                 });
                 updateRoute(); closeAll();
@@ -277,7 +283,10 @@
 
     function clearAllData() { routePoints=[]; markersLayer.clearLayers(); routeLayer.setLatLngs([]); document.getElementById('dist-val').innerText="0.0"; }
 
+    // Chargement initial
     loadUmapData();
+   
+    // Chargement du réseau GitHub
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
     .then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
