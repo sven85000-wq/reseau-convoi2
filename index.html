@@ -1,43 +1,29 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V40.16 - VERSION INTÉGRALE</title>
+    <title>GPS CONVOI V40.16 - ULTRA</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; background: #0f172a; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; transition: transform 0.2s linear; }
-        
-        /* BARRE DU HAUT */
         #top-bar { position: fixed; top: 10px; left: 0; width: 100%; z-index: 9999; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 10px; box-sizing: border-box; pointer-events: none; }
-        .ctrl-btn, #center-group, .leaflet-control-layers { pointer-events: auto; }
-        
-        .ctrl-btn { padding: 10px 8px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 9px; min-width: 75px; text-align: center; }
-        #btn-reseaux { background: #1e293b; color: #f39c12; border-color: #f39c12; }
-        #btn-outils { background: #1e293b; color: #00d4ff; border-color: #00d4ff; }
-
+        .ctrl-btn, #center-group { pointer-events: auto; }
+        .ctrl-btn { padding: 10px 8px; border-radius: 10px; font-weight: bold; cursor: pointer; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 9px; min-width: 75px; text-align: center; background: #1e293b; }
+        #btn-reseaux { color: #f39c12; border-color: #f39c12; }
+        #btn-outils { color: #00d4ff; border-color: #00d4ff; }
         #center-group { display: flex; flex-direction: column; align-items: center; gap: 5px; margin: 0 5px; }
-        #btn-nav { background: #ef4444; width: 120px; padding: 10px 5px; border-radius: 12px; border: 2px solid white; font-weight: bold; font-size: 9px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        
-        #dist-box { background: rgba(15, 23, 42, 0.9); padding: 4px 10px; border-radius: 15px; border: 1px solid #334155; text-align: center; min-width: 70px; }
+        #btn-nav { background: #ef4444; width: 120px; padding: 10px 5px; border-radius: 12px; border: 2px solid white; font-weight: bold; font-size: 9px; text-align: center; }
+        #dist-box { background: rgba(15, 23, 42, 0.9); padding: 4px 10px; border-radius: 15px; border: 1px solid #334155; text-align: center; }
         #dist-val { font-size: 14px; font-weight: 900; color: #00d4ff; }
-        #dist-label { font-size: 7px; color: #94a3b8; display: block; }
-
-        /* MENUS LATERAUX */
         .sidebar { position: fixed; top: 0; height: 100vh; width: 85%; max-width: 320px; background: #1e293b; z-index: 10001; padding: 20px; display: none; overflow-y: auto; box-sizing: border-box; }
         #side-left { left: 0; border-right: 4px solid #f39c12; }
         #side-right { right: 0; border-left: 4px solid #00d4ff; }
-        
-        .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; cursor: pointer; }
+        .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; }
         .row { display: flex; align-items: center; background: #334155; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 12px; }
         .act-btn { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 8px; color: white; font-size: 10px; cursor: pointer; }
-        
-        .poi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .poi-btn { padding: 8px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 9px; cursor: pointer; }
-        
-        .nav-arrow { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 25px solid #4285F4; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-        .archive-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 4px solid #22c55e; font-size: 11px; display: flex; justify-content: space-between; }
+        .nav-arrow { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 25px solid #4285F4; }
     </style>
 </head>
 <body>
@@ -46,130 +32,80 @@
         <div id="btn-reseaux" class="ctrl-btn" onclick="openSide('left')">☰ RÉSEAUX</div>
         <div id="center-group">
             <div id="btn-nav" onclick="toggleNav()">🔴 PRÉPARATION</div>
-            <div id="dist-box"><span id="dist-label">KM RESTANT</span><span id="dist-val">0.0</span></div>
+            <div id="dist-box"><span id="dist-val">0.0</span> <small>KM</small></div>
         </div>
         <div id="btn-outils" class="ctrl-btn" onclick="openSide('right')">⚙️ OUTILS</div>
     </div>
 
     <div id="side-left" class="sidebar">
         <button class="close-btn" onclick="closeAll()">FERMER</button>
-        <h2>RÉSEAUX CONVOIS</h2>
-        <div id="net-list">
-            <label class="row"><input type="checkbox" id="chk-gCat1" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</label>
-            <label class="row"><input type="checkbox" id="chk-g48" checked onchange="toggleL('g48')"> Réseau 48t</label>
-            <label class="row"><input type="checkbox" id="chk-g72" checked onchange="toggleL('g72')"> Réseau 72t</label>
-            <label class="row"><input type="checkbox" id="chk-g94" checked onchange="toggleL('g94')"> Réseau 94t</label>
-            <label class="row"><input type="checkbox" id="chk-g120" checked onchange="toggleL('g120')"> Réseau 120t+</label>
-            <hr>
-            <label class="row" style="color:#00d4ff;"><input type="checkbox" id="chk-gUmap" checked onchange="toggleL('gUmap')"> 🚧 UMAP (TOUS CALQUES)</label>
-        </div>
+        <h2>RÉSEAUX</h2>
+        <label class="row"><input type="checkbox" id="chk-gCat1" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</label>
+        <label class="row"><input type="checkbox" id="chk-g48" checked onchange="toggleL('g48')"> Réseau 48t</label>
+        <label class="row"><input type="checkbox" id="chk-g72" checked onchange="toggleL('g72')"> Réseau 72t</label>
+        <label class="row"><input type="checkbox" id="chk-g94" checked onchange="toggleL('g94')"> Réseau 94t</label>
+        <label class="row"><input type="checkbox" id="chk-g120" checked onchange="toggleL('g120')"> Réseau 120t+</label>
     </div>
 
     <div id="side-right" class="sidebar">
         <button class="close-btn" onclick="closeAll()">FERMER</button>
-        
-        <h2>TRAVAUX LIVE</h2>
-        <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="loadUmapMultiLayers()">🔄 ACTUALISER UMAP</button>
-        <p id="umap-status" style="font-size: 9px; text-align: center; color: #94a3b8;">Attente synchro...</p>
-        
+        <h2>TRAVAUX UMAP</h2>
+        <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="loadUmapData()">🔄 SYNCHRO DIRECTE</button>
+        <p id="umap-status" style="font-size: 10px; text-align: center; color: #94a3b8;">Attente...</p>
         <hr>
-        <h2>POI + NOTES</h2>
-        <div class="poi-grid">
-            <button class="poi-btn" onclick="setPoiMode('⛽')">⛽ STATION</button>
-            <button class="poi-btn" onclick="setPoiMode('🌉')">🌉 PONT</button>
-            <button class="poi-btn" onclick="setPoiMode('🍴')">🍴 RESTAU</button>
-            <button class="poi-btn" onclick="setPoiMode('🅿️')">🅿️ PARKING</button>
-        </div>
-
-        <hr>
-        <h2>ÉDITION ROUTE</h2>
-        <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="startRouting()">📏 TRACER ROUTE</button>
-        <button class="act-btn" style="background:#3b82f6;" onclick="saveArchive()">💾 SAUVEGARDER</button>
-        
-        <div style="display:flex; gap:5px;">
-            <button class="act-btn" style="background:#22c55e;" onclick="exportGPX()">📤 EXPORT</button>
-            <button class="act-btn" style="background:#8b5cf6;" onclick="document.getElementById('file-in').click()">📥 IMPORT</button>
-        </div>
-        <input type="file" id="file-in" style="display:none" accept=".gpx" onchange="importGPX(event)">
-        
-        <div id="archive-list" style="margin-top:10px;"></div>
-        <button class="act-btn" style="background:#ef4444; margin-top:20px;" onclick="clearAllData()">🗑️ TOUT EFFACER</button>
+        <h2>OUTILS ROUTE</h2>
+        <button class="act-btn" style="background:#3b82f6;" onclick="startRouting()">📏 TRACER ROUTE</button>
+        <button class="act-btn" style="background:#22c55e;" onclick="exportGPX()">📤 EXPORT GPX</button>
+        <button class="act-btn" style="background:#ef4444;" onclick="clearAllData()">🗑️ EFFACER TOUT</button>
     </div>
 
     <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // --- INITIALISATION ---
-    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
-    var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
-    var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false, layers: [osm] });
-    L.control.layers({ "📍 Plan": osm, "🛰️ Sat": satellite }, null, { position: 'bottomright' }).addTo(map);
+    var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    var routeLayer = L.polyline([], {color: '#00008B', weight: 8, opacity: 0.9}).addTo(map);
+    var routeLayer = L.polyline([], {color: '#00008B', weight: 8}).addTo(map);
     var routePoints = [];
     var markersLayer = L.featureGroup().addTo(map);
-    var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gUmap: L.layerGroup() };
+    var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gUmap: L.layerGroup().addTo(map) };
     
-    var arrowIcon = L.divIcon({ html: '<div class="nav-arrow"></div>', className: '', iconSize: [20, 30], iconAnchor: [10, 15] });
-    var userMarker = L.marker([0,0], {icon: arrowIcon});
+    var userMarker = L.marker([0,0], {icon: L.divIcon({html:'<div class="nav-arrow"></div>', className:'', iconSize:[20,30]})});
 
     function openSide(s) { closeAll(); document.getElementById('side-'+s).style.display = 'block'; }
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
 
-    // --- LOGIQUE MULTI-CALQUES UMAP (1383926) ---
-    async function loadUmapMultiLayers() {
-        document.getElementById('umap-status').innerText = "Lecture de tous les calques...";
-        const mapId = "1383926";
-        const proxy = "https://api.allorigins.win/raw?url=";
-        const mapUrl = `https://umap.openstreetmap.fr/fr/map/${mapId}/`;
+    // --- LA NOUVELLE FONCTION UMAP (PLUS SIMPLE) ---
+    function loadUmapData() {
+        const url = "https://umap.openstreetmap.fr/fr/map/1383926/geojson/";
+        document.getElementById('umap-status').innerText = "Tentative...";
 
-        try {
-            const response = await fetch(proxy + encodeURIComponent(mapUrl + "?t=" + Date.now()));
-            const html = await response.text();
-            const regex = /"datalayers":\s*(\[[^\]]+\])/;
-            const match = html.match(regex);
-            
-            if (!match) throw new Error("Carte vide.");
-            const datalayers = JSON.parse(match[1]);
+        // On utilise un proxy différent (CorsProxy) qui est plus stable sur mobile
+        fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url + "?t=" + Date.now()))
+        .then(r => r.json())
+        .then(data => {
             groups.gUmap.clearLayers();
-            let ptsCount = 0;
-
-            for (let layer of datalayers) {
-                const layerUrl = `https://umap.openstreetmap.fr/fr/datalayer/${layer.id}/`;
-                const lRes = await fetch(proxy + encodeURIComponent(layerUrl));
-                const lData = await lRes.json();
-
-                L.geoJSON(lData, {
-                    pointToLayer: (f, latlng) => {
-                        let text = ((f.properties.name || "") + " " + (f.properties.description || "")).toUpperCase();
-                        let emoji = "⚠️"; 
-
-                        if (text.includes("TRAVAUX")) emoji = "🚧";
-                        else if (text.includes("BARR") || text.includes("FERM")) emoji = "⛔";
-                        else if (text.includes("PONT")) emoji = "🌉";
-                        else if (text.includes("DÉVIA")) emoji = "↪️";
-                        else if (text.includes("STATI") || text.includes("GAZ")) emoji = "⛽";
-                        else if (text.includes("PARK")) emoji = "🅿️";
-                        
-                        ptsCount++;
-                        return L.marker(latlng, {
-                            icon: L.divIcon({
-                                html: `<div style="font-size:32px; filter:drop-shadow(0 2px 4px black); text-align:center;">${emoji}</div>`,
-                                className: ''
-                            })
-                        }).bindPopup(`<b>[${layer.name}]</b><br><b>${f.properties.name || ""}</b><br>${f.properties.description || ""}`);
-                    }
-                }).addTo(groups.gUmap);
-            }
-            map.addLayer(groups.gUmap);
-            document.getElementById('umap-status').innerText = "Synchro OK : " + ptsCount + " points";
-        } catch (e) {
-            document.getElementById('umap-status').innerText = "Erreur synchro";
-        }
+            L.geoJSON(data, {
+                pointToLayer: (f, latlng) => {
+                    let txt = (f.properties.name || "").toUpperCase();
+                    let icon = "⚠️";
+                    if(txt.includes("TRAVAUX")) icon = "🚧";
+                    if(txt.includes("BARR") || txt.includes("FERM")) icon = "⛔";
+                    
+                    return L.marker(latlng, {
+                        icon: L.divIcon({ html: `<div style="font-size:30px; filter:drop-shadow(0 2px 2px black);">${icon}</div>`, className: ''})
+                    }).bindPopup(f.properties.name + "<br>" + (f.properties.description || ""));
+                }
+            }).addTo(groups.gUmap);
+            document.getElementById('umap-status').innerText = "Dernière synchro : " + new Date().toLocaleTimeString();
+        })
+        .catch(e => {
+            document.getElementById('umap-status').innerText = "Erreur. Vérifiez que la carte est PUBLIQUE.";
+            console.error(e);
+        });
     }
 
-    // --- NAVIGATION ---
     function toggleNav() {
         let b = document.getElementById('btn-nav');
         if(b.innerText.includes("🔴")) {
@@ -178,129 +114,42 @@
         } else {
             b.innerText = "🔴 PRÉPARATION"; b.style.background = "#ef4444";
             map.removeLayer(userMarker); map.stopLocate();
-            document.getElementById('map').style.transform = `rotate(0deg)`;
         }
     }
 
     map.on('locationfound', e => {
         userMarker.setLatLng(e.latlng).addTo(map);
-        if (e.heading !== null && e.heading !== undefined) { 
-            document.getElementById('map').style.transform = `rotate(${-e.heading}deg)`; 
-        }
-        if(routePoints.length > 0) {
-            let last = routePoints[routePoints.length - 1].getLatLng();
-            document.getElementById('dist-val').innerText = (e.latlng.distanceTo(last) / 1000).toFixed(1);
-        }
     });
 
-    // --- OUTILS ROUTE & GPX ---
     function toggleL(id) {
         if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]);
         else map.removeLayer(groups[id]);
     }
 
-    function setPoiMode(emoji) {
-        closeAll(); map.off('click');
-        map.on('click', e => {
-            let note = prompt("Note :");
-            if(note) {
-                L.marker(e.latlng, { icon: L.divIcon({html:`<div style="font-size:26px; filter:drop-shadow(0 2px 2px black);">${emoji}</div>`, className:''}) })
-                .addTo(markersLayer).bindPopup(note);
-            }
-            map.off('click');
-        });
-    }
-
     function startRouting() {
-        closeAll(); map.off('click');
-        map.on('click', e => {
+        closeAll(); map.on('click', e => {
             let m = L.marker(e.latlng, {draggable:true}).addTo(markersLayer);
             routePoints.push(m);
             m.on('dragend', updateRoute);
-            m.on('dblclick', (ev) => { L.DomEvent.stopPropagation(ev); map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
             updateRoute();
         });
     }
 
     function updateRoute() {
-        if(routePoints.length < 2) { routeLayer.setLatLngs([]); return; }
+        if(routePoints.length < 2) return;
         let c = routePoints.map(p => `${p.getLatLng().lng},${p.getLatLng().lat}`).join(';');
         fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson`)
         .then(r=>r.json()).then(d=>{ 
-            if(d.routes && d.routes[0]) {
+            if(d.routes) {
                 routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(pt=>[pt[1],pt[0]]));
                 document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
             }
         });
     }
 
-    function exportGPX() {
-        let coords = routeLayer.getLatLngs();
-        if(coords.length === 0) return alert("Tracé vide.");
-        let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>';
-        coords.forEach(p => gpx += `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`);
-        gpx += '</trkseg></trk></gpx>';
-        let b = new Blob([gpx], {type: 'application/gpx+xml'});
-        let link = document.createElement('a'); link.href = URL.createObjectURL(b); link.download = 'convoi.gpx'; link.click();
-    }
+    function clearAllData() { routePoints=[]; markersLayer.clearLayers(); routeLayer.setLatLngs([]); }
 
-    function importGPX(event) {
-        let file = event.target.files[0]; if(!file) return;
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            let parser = new DOMParser();
-            let xml = parser.parseFromString(e.target.result, "text/xml");
-            let pts = xml.getElementsByTagName("trkpt");
-            clearAllData();
-            for(let p of pts) {
-                let m = L.marker([p.getAttribute("lat"), p.getAttribute("lon")], {draggable:true}).addTo(markersLayer);
-                routePoints.push(m);
-                m.on('dblclick', () => { map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
-            }
-            updateRoute();
-        };
-        reader.readAsText(file);
-    }
-
-    function saveArchive() {
-        let n = prompt("Nom du convoi :"); if(!n) return;
-        let data = { name: n, pts: routePoints.map(p => p.getLatLng()) };
-        let arch = JSON.parse(localStorage.getItem('gps_v16_arch') || '[]');
-        arch.push(data); localStorage.setItem('gps_v16_arch', JSON.stringify(arch));
-        renderArchives();
-    }
-
-    function renderArchives() {
-        let div = document.getElementById('archive-list'); div.innerHTML = '';
-        let arch = JSON.parse(localStorage.getItem('gps_v16_arch') || '[]');
-        arch.forEach((a, i) => {
-            let item = document.createElement('div'); item.className = 'archive-item';
-            item.innerHTML = `<span>📂 ${a.name}</span> <span style="color:#ef4444; cursor:pointer;" onclick="deleteArch(${i}); event.stopPropagation();">✖</span>`;
-            item.onclick = () => {
-                clearAllData();
-                a.pts.forEach(p => { 
-                    let m = L.marker([p.lat, p.lng], {draggable:true}).addTo(markersLayer); 
-                    routePoints.push(m); 
-                    m.on('dblclick', () => { map.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); });
-                });
-                updateRoute(); closeAll();
-            };
-            div.appendChild(item);
-        });
-    }
-
-    function deleteArch(i) {
-        let arch = JSON.parse(localStorage.getItem('gps_v16_arch'));
-        arch.splice(i, 1); localStorage.setItem('gps_v16_arch', JSON.stringify(arch));
-        renderArchives();
-    }
-
-    function clearAllData() { routePoints=[]; markersLayer.clearLayers(); routeLayer.setLatLngs([]); document.getElementById('dist-val').innerText="0.0"; }
-
-    // --- DÉMARRAGE ET RÉSEAUX ---
-    loadUmapMultiLayers();
-    setInterval(loadUmapMultiLayers, 300000); // 5 min auto
-
+    // Démarrage Réseaux
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
     .then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
@@ -310,10 +159,12 @@
             else if(p.includes("94")) { g="g94"; col="#FF0000"; }
             else if(p.includes("72")) { g="g72"; col="#f39c12"; }
             else if(p.includes("48")) { g="g48"; col="#8b5cf6"; }
-            l.setStyle({color: col, weight: 1.8, opacity: 0.85}); groups[g].addLayer(l); map.addLayer(groups[g]);
+            l.setStyle({color: col, weight: 2}); groups[g].addLayer(l); map.addLayer(groups[g]);
         }});
     });
-    renderArchives();
+    
+    // Premier chargement Umap
+    loadUmapData();
 </script>
 </body>
 </html>
