@@ -121,39 +121,37 @@
         }
     }
 
-    // FONCTION MISE À JOUR : Analyse des textes pour afficher les icônes
+    // FONCTION MISE À JOUR AVEC TON NOUVEAU NUMÉRO : 1383926
     function loadUmapData() {
-        // Ajout d'un paramètre aléatoire pour forcer le rafraîchissement des données
-        fetch("https://umap.openstreetmap.fr/fr/map/1383897/geojson/?" + Date.now())
+        fetch("https://umap.openstreetmap.fr/fr/map/1383926/geojson/?" + Date.now())
         .then(r => r.json()).then(data => {
             groups.gUmap.clearLayers();
             L.geoJSON(data, {
                 pointToLayer: (f, latlng) => {
                     let texte = (f.properties.name || "").toUpperCase();
-                    let iconEmoji = "⚠️"; // Icône par défaut
+                    let iconEmoji = "⚠️";
 
-                    // On change l'icône selon le mot-clé trouvé dans uMap
                     if (texte.includes("TRAVAUX")) iconEmoji = "🚧";
-                    if (texte.includes("BARRÉE") || texte.includes("INTERDIT")) iconEmoji = "⛔";
+                    if (texte.includes("BARRÉE") || texte.includes("INTERDIT") || texte.includes("FERMÉ")) iconEmoji = "⛔";
                     if (texte.includes("PONT")) iconEmoji = "🌉";
                     if (texte.includes("DÉVIATION")) iconEmoji = "↪️";
                     if (texte.includes("STATION") || texte.includes("GAZ")) iconEmoji = "⛽";
+                    if (texte.includes("PARKING") || texte.includes("ATTENTE")) iconEmoji = "🅿️";
                    
                     return L.marker(latlng, {
                         icon: L.divIcon({
-                            html:`<div style="font-size:28px; filter:drop-shadow(0 2px 3px black);">${iconEmoji}</div>`,
+                            html:`<div style="font-size:30px; filter:drop-shadow(0 2px 4px black);">${iconEmoji}</div>`,
                             className:''
                         })
-                    }).bindPopup(`<b>${f.properties.name || "Alerte"}</b><br>${f.properties.description || ""}`);
+                    }).bindPopup(`<b>${f.properties.name || "Alerte Travaux"}</b><br>${f.properties.description || ""}`);
                 },
                 style: (f) => {
-                    // Style pour les lignes (déviations ou routes barrées tracées)
-                    return { color: "#ff4444", weight: 6, opacity: 0.8, dashArray: '10, 10' };
+                    return { color: "#ef4444", weight: 6, opacity: 0.8, dashArray: '10, 15' };
                 }
             }).addTo(groups.gUmap);
             map.addLayer(groups.gUmap);
-            alert("Synchronisation uMap terminée avec succès.");
-        }).catch(e => console.log("Erreur de liaison uMap : ", e));
+            alert("Synchronisation effectuée sur la carte 1383926.");
+        }).catch(e => console.log("Erreur uMap (Vérifiez si la carte est publique)"));
     }
 
     function toggleNav() {
@@ -283,10 +281,10 @@
 
     function clearAllData() { routePoints=[]; markersLayer.clearLayers(); routeLayer.setLatLngs([]); document.getElementById('dist-val').innerText="0.0"; }
 
-    // Chargement initial
+    // Chargement auto des travaux au démarrage
     loadUmapData();
    
-    // Chargement du réseau GitHub
+    // Réseaux GitHub
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
     .then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
