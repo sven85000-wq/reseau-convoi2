@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V40.95 - VERSION COMPLÈTE</title>
+    <title>GPS CONVOI V41.0 - ÉDITION FINALE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -9,31 +9,54 @@
         body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; position: absolute; background: #242424; }
 
-        /* FENÊTRE UMAP INCRUSTÉE */
+        /* FENÊTRE UMAP SMART */
         #umap-window {
             position: fixed;
-            top: 70px;
+            top: 130px;
             right: 10px;
             width: 320px;
-            height: 450px;
+            height: 420px;
             z-index: 15000;
             border: 3px solid #f39c12;
             border-radius: 12px;
             background: #1e2b37;
             display: none;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            overflow: hidden;
+            transition: opacity 0.3s, height 0.3s;
         }
-        .umap-bar { background: #f39c12; color: #000; padding: 8px 12px; font-weight: bold; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
-        #umap-frame { width: 100%; height: calc(100% - 35px); border: none; }
+        #umap-window.minimized { height: 38px; overflow: hidden; }
+        #umap-window.ghost { opacity: 0.15; pointer-events: none; }
 
-        /* INTERFACE & BOUTONS */
+        @media (max-width: 480px) {
+            #umap-window { width: 94%; right: 3%; height: 45vh; top: 125px; }
+        }
+
+        .umap-bar { background: #f39c12; color: #000; padding: 8px 12px; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        #umap-frame { width: 100%; height: calc(100% - 38px); border: none; }
+
+        /* BOUTON DIRECT TRAVAUX SUR CARTE */
+        #btn-travaux-direct {
+            position: fixed;
+            top: 75px;
+            right: 10px;
+            z-index: 9998;
+            background: #f39c12;
+            color: black;
+            border: 2px solid #000;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        /* INTERFACE & BOUTONS PRINCIPAUX */
         .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 18px; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
         #btn-left { left: 10px; } #btn-right { right: 10px; }
 
         #lang-bar { position: fixed; top: 75px; left: 10px; z-index: 9000; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.85); padding: 10px; border-radius: 10px; border: 1px solid #444; }
         .flag { width: 32px; height: 22px; border: 1px solid #fff; cursor: pointer; transition: 0.2s; }
-        .flag:hover { transform: scale(1.1); border-color: #f39c12; }
 
         .sidebar { position: fixed; top: 0; height: 100vh; width: 320px; background: #1e2b37; color: white; padding: 20px; box-sizing: border-box; z-index: 10000; overflow-y: auto; display: none; }
         #sidebar-left { left: 0; border-right: 4px solid #f39c12; }
@@ -49,10 +72,12 @@
 </head>
 <body>
 
+    <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX LIVE</div>
+
     <div id="umap-window">
-        <div class="umap-bar">
-            <span>🚧 INFOS TRAVAUX LIVE</span>
-            <span onclick="toggleUmap()" style="cursor:pointer; background:#c0392b; color:white; padding:2px 8px; border-radius:4px;">X</span>
+        <div class="umap-bar" onclick="minimizeUmap()">
+            <span id="umap-min-txt">➖ RÉDUIRE</span>
+            <span onclick="toggleUmap(); event.stopPropagation();" style="background:#c0392b; color:white; padding:2px 8px; border-radius:4px;">X</span>
         </div>
         <iframe id="umap-frame" src=""></iframe>
     </div>
@@ -77,7 +102,7 @@
         
         <h2 id="t-net-title">RÉSEAUX & TRAVAUX</h2>
         <div class="row" onclick="toggleUmap()" style="background: rgba(243, 156, 18, 0.2); border: 1.2px solid #f39c12;">
-            <span style="font-size: 18px; margin-right: 10px;">⚠️</span> <b>VOIR TRAVAUX (FENÊTRE)</b>
+            <span style="font-size: 18px; margin-right: 10px;">⚠️</span> <b>FENÊTRE TRAVAUX</b>
         </div>
         <div class="row" onclick="toggleL('gCat1')"><input type="checkbox" id="chk-gCat1" checked> Cat 1 / ATE</div>
         <div class="row" onclick="toggleL('g48')"><input type="checkbox" id="chk-g48" checked> Réseau 48t</div>
@@ -116,16 +141,16 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // --- DICTIONNAIRE COMPLET ---
+    // --- DICTIONNAIRE COMPLET (V40.16) ---
     const trans = {
-        fr: { btnL: "☰ RÉSEAUX", btnR: "⚙️ OUTILS", gps: "🛰️ GPS DIRECT", net: "RÉSEAUX & TRAVAUX", poi: "AIDES & POI", route: "ITINÉRAIRE", trace: "📍 TRACER (ÉPINGLES)", clear: "🗑️ EFFACER TOUT", save: "💾 SAUVEGARDER", arch: "MES ARCHIVES" },
-        en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ LIVE GPS", net: "NETWORKS & WORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW (PINS)", clear: "🗑️ CLEAR ALL", save: "💾 SAVE", arch: "MY ARCHIVES" },
-        it: { btnL: "☰ RETI", btnR: "⚙️ STRUMENTI", gps: "🛰️ GPS LIVE", net: "RETI & LAVORI", poi: "AIUTI & POI", route: "ITINERARIO", trace: "📍 TRACCIA (PIN)", clear: "CANCELLA TUTTO", save: "💾 SALVA", arch: "ARCHIVI" },
-        de: { btnL: "☰ NETZE", btnR: "⚙️ TOOLS", gps: "🛰️ LIVE GPS", net: "NETZE & ARBEITEN", poi: "MARKER", route: "ROUTE", trace: "📍 ZEICHNEN", clear: "LÖSCHEN", save: "💾 SPEICHERN", arch: "ARCHIV" },
-        es: { btnL: "☰ REDES", btnR: "⚙️ HERRAMIENTAS", gps: "🛰️ GPS EN VIVO", net: "REDES & OBRAS", poi: "PUNTOS", route: "RUTA", trace: "📍 TRAZAR", clear: "BORRAR", save: "💾 GUARDAR", arch: "ARCHIVOS" },
-        pt: { btnL: "☰ REDES", btnR: "⚙️ FERRAMENTAS", gps: "🛰️ GPS AO VIVO", net: "REDES & OBRAS", poi: "PONTOS", route: "ROTA", trace: "📍 TRAÇAR", clear: "LIMPAR", save: "💾 SALVAR", arch: "ARQUIVOS" },
-        pl: { btnL: "☰ SIECI", btnR: "⚙️ NARZĘDZIA", gps: "🛰️ GPS NA ŻYWO", net: "SIECI & ROBOTY", poi: "PUNKTY", route: "TRASA", trace: "📍 RYSUJ", clear: "USUŃ", save: "💾 ZAPISZ", arch: "ARCHIWUM" },
-        nl: { btnL: "☰ NETWERKEN", btnR: "⚙️ OPTIES", gps: "🛰️ LIVE GPS", net: "NETWERKEN", poi: "PUNTEN", route: "ROUTE", trace: "📍 TEKENEN", clear: "WISSEN", save: "💾 OPSLAAN", arch: "ARCHIEVEN" }
+        fr: { btnL: "☰ RÉSEAUX", btnR: "⚙️ OUTILS", gps: "🛰️ GPS DIRECT", net: "RÉSEAUX & TRAVAUX", poi: "AIDES & POI", route: "ITINÉRAIRE", trace: "📍 TRACER (ÉPINGLES)", clear: "🗑️ EFFACER TOUT", save: "💾 SAUVEGARDER", arch: "MES ARCHIVES", work: "🚧 TRAVAUX LIVE" },
+        en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ LIVE GPS", net: "NETWORKS & WORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW (PINS)", clear: "🗑️ CLEAR ALL", save: "💾 SAVE", arch: "MY ARCHIVES", work: "🚧 LIVE WORKS" },
+        it: { btnL: "☰ RETI", btnR: "⚙️ STRUMENTI", gps: "🛰️ GPS LIVE", net: "RETI & LAVORI", poi: "POI", route: "ITINERARIO", trace: "📍 TRACCIA (PIN)", clear: "CANCELLA", save: "💾 SALVA", arch: "ARCHIVI", work: "🚧 LAVORI LIVE" },
+        de: { btnL: "☰ NETZE", btnR: "⚙️ TOOLS", gps: "🛰️ LIVE GPS", net: "NETZE & ARBEITEN", poi: "MARKER", route: "ROUTE", trace: "📍 ZEICHNEN", clear: "LÖSCHEN", save: "💾 SPEICHERN", arch: "ARCHIV", work: "🚧 ARBEITEN LIVE" },
+        es: { btnL: "☰ REDES", btnR: "⚙️ HERRAMIENTAS", gps: "🛰️ GPS EN VIVO", net: "REDES & OBRAS", poi: "PUNTOS", route: "RUTA", trace: "📍 TRAZAR", clear: "BORRAR", save: "💾 GUARDAR", arch: "ARCHIVOS", work: "🚧 OBRAS LIVE" },
+        pt: { btnL: "☰ REDES", btnR: "⚙️ FERRAMENTAS", gps: "🛰️ GPS AO VIVO", net: "REDES & OBRAS", poi: "PONTOS", route: "ROTA", trace: "📍 TRAÇAR", clear: "LIMPAR", save: "💾 SALVAR", arch: "ARQUIVOS", work: "🚧 OBRAS LIVE" },
+        pl: { btnL: "☰ SIECI", btnR: "⚙️ NARZĘDZIA", gps: "🛰️ GPS NA ŻYWO", net: "SIECI & ROBOTY", poi: "PUNKTY", route: "TRASA", trace: "📍 RYSUJ", clear: "USUŃ", save: "💾 ZAPISZ", arch: "ARCHIWUM", work: "🚧 ROBOTY LIVE" },
+        nl: { btnL: "☰ NETWERKEN", btnR: "⚙️ OPTIES", gps: "🛰️ LIVE GPS", net: "WERKEN", poi: "PUNTEN", route: "ROUTE", trace: "📍 TEKENEN", clear: "WISSEN", save: "💾 OPSLAAN", arch: "ARCHIEVEN", work: "🚧 WERKEN LIVE" }
     };
 
     function changeLang(l) {
@@ -140,9 +165,10 @@
         document.getElementById('t-clear-btn').innerText = d.clear;
         document.getElementById('t-save').innerText = d.save;
         document.getElementById('t-arch-title').innerText = d.arch;
+        document.getElementById('btn-travaux-direct').innerText = d.work;
     }
 
-    // --- INITIALISATION CARTE ---
+    // --- CARTE ---
     var map = L.map('map', { center: [46.9, -0.5], zoom: 6, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
@@ -153,43 +179,34 @@
     var userMarker = null;
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
 
-    // --- UMAP FENÊTRE ---
+    // --- GPS ---
+    function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); closeAll(); }
+    map.on('locationfound', (e) => {
+        if (!userMarker) { userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [14, 14] }) }).addTo(map); map.setView(e.latlng, 15);
+        } else { userMarker.setLatLng(e.latlng); }
+    });
+
+    // --- GESTION UMAP ---
     function toggleUmap() {
         const win = document.getElementById('umap-window');
         const frame = document.getElementById('umap-frame');
-        const url = "https://umap.openstreetmap.fr/fr/map/travaux-convoi-2026_1383926?localizeUser=true";
         if (win.style.display === 'none' || win.style.display === '') {
-            frame.src = url; win.style.display = 'block'; closeAll();
+            frame.src = "https://umap.openstreetmap.fr/fr/map/travaux-convoi-2026_1383926?localizeUser=true";
+            win.style.display = 'block'; closeAll();
         } else { win.style.display = 'none'; frame.src = ""; }
     }
 
-    // --- GPX EXPORT/IMPORT ---
-    function exportGPX() {
-        if (routeLayer.getLatLngs().length === 0) return;
-        let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="GPS CONVOI"><trk><trkseg>';
-        routeLayer.getLatLngs().forEach(pt => { gpx += `<trkpt lat="${pt.lat}" lon="${pt.lng}"></trkpt>`; });
-        gpx += '</trkseg></trk></gpx>';
-        let blob = new Blob([gpx], {type: "application/gpx+xml"});
-        let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "convoi.gpx"; a.click();
+    function minimizeUmap() {
+        const win = document.getElementById('umap-window');
+        win.classList.toggle('minimized');
+        document.getElementById('umap-min-txt').innerText = win.classList.contains('minimized') ? "➕ AGRANDIR" : "➖ RÉDUIRE";
     }
 
-    function importGPX(input) {
-        let file = input.files[0]; if(!file) return;
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            let parser = new DOMParser();
-            let xml = parser.parseFromString(e.target.result, "text/xml");
-            let pts = xml.getElementsByTagName("trkpt");
-            let latlngs = [];
-            for(let i=0; i<pts.length; i++) {
-                latlngs.push([parseFloat(pts[i].getAttribute("lat")), parseFloat(pts[i].getAttribute("lon"))]);
-            }
-            if(latlngs.length > 0) { clearCurrentData(); routeLayer.setLatLngs(latlngs); map.fitBounds(routeLayer.getBounds()); }
-        };
-        reader.readAsText(file);
-    }
+    // Effet Fantôme pendant le tracé
+    map.on('mousedown touchstart', () => document.getElementById('umap-window').classList.add('ghost'));
+    map.on('mouseup touchend', () => setTimeout(() => document.getElementById('umap-window').classList.remove('ghost'), 1000));
 
-    // --- RÉSEAUX GITHUB ---
+    // --- RESEAUX GITHUB ---
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
     .then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
@@ -204,29 +221,21 @@
         Object.keys(groups).forEach(k => map.addLayer(groups[k]));
     });
 
-    // --- NAVIGATION ---
-    function startGPS() { closeAll(); map.locate({ watch: true, enableHighAccuracy: true }); }
-    map.on('locationfound', (e) => {
-        if (!userMarker) { userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [14, 14] }) }).addTo(map); map.setView(e.latlng, 15);
-        } else { userMarker.setLatLng(e.latlng); }
-    });
-
-    // --- INTERFACE ---
+    // --- OUTILS ---
     function openMenu(id) { closeAll(); document.getElementById(id).style.display = 'block'; }
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
+    function clearCurrentData() { gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); gPois.clearLayers(); routePoints=[]; }
 
     function activatePoi(type, color) {
         closeAll(); map.once('click', (e) => {
-            let note = document.getElementById('poiNote').value;
-            let icon = L.divIcon({ className: 'poi-icon', html: `<div class="poi-inner" style="background:${color};">${type}</div>`, iconSize: [34, 34], iconAnchor: [17, 17] });
-            let m = L.marker(e.latlng, {icon: icon}).addTo(gPois);
-            if(note) m.bindTooltip(note, { direction: 'top' });
+            let n = document.getElementById('poiNote').value;
+            L.marker(e.latlng, {icon: L.divIcon({ className:'poi', html:`<div class="poi-inner" style="background:${color}">${type}</div>`, iconSize:[34,34], iconAnchor:[17,17]})}).addTo(gPois).bindTooltip(n);
         });
     }
 
     function startRouting() { closeAll(); map.on('click', (e) => {
-        let m = L.marker(e.latlng, { draggable: true }).addTo(gRouteMarkers);
+        let m = L.marker(e.latlng, {draggable:true}).addTo(gRouteMarkers);
         routePoints.push(m); m.on('dragend', updateRoute); updateRoute();
     }); }
 
@@ -237,7 +246,23 @@
         .then(r => r.json()).then(d => { if(d.routes) routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(x => [x[1], x[0]])); });
     }
 
-    function clearCurrentData() { gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); gPois.clearLayers(); routePoints=[]; }
+    function exportGPX() {
+        let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>';
+        routeLayer.getLatLngs().forEach(pt => { gpx += `<trkpt lat="${pt.lat}" lon="${pt.lng}"></trkpt>`; });
+        gpx += '</trkseg></trk></gpx>';
+        let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx])); a.download = "convoi.gpx"; a.click();
+    }
+
+    function importGPX(input) {
+        let reader = new FileReader();
+        reader.onload = (e) => {
+            let pts = new DOMParser().parseFromString(e.target.result, "text/xml").getElementsByTagName("trkpt");
+            let latlngs = [];
+            for(let i=0; i<pts.length; i++) latlngs.push([pts[i].getAttribute("lat"), pts[i].getAttribute("lon")]);
+            if(latlngs.length > 0) { clearCurrentData(); routeLayer.setLatLngs(latlngs); map.fitBounds(routeLayer.getBounds()); }
+        };
+        reader.readAsText(input.files[0]);
+    }
 
     function saveToArchive() {
         let n = prompt("Nom :"); if(!n) return;
@@ -260,7 +285,6 @@
         clearCurrentData(); a.pts.forEach(p => { let m = L.marker(p, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); });
         updateRoute(); closeAll();
     }
-
     renderArch();
 </script>
 </body>
