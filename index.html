@@ -152,7 +152,7 @@
     const trans = {
         fr: { btnL: "☰ RÉSEAUX", btnR: "⚙️ OUTILS", gps: "🛰️ GPS DIRECT", net: "RÉSEAUX VISIBLES", poi: "AIDES & POI", route: "ITINÉRAIRE", trace: "📍 TRACER (ÉPINGLES)", clear: "🗑️ EFFACER TOUT", save: "💾 SAUVEGARDER ARCHIVE", arch: "MES ARCHIVES" },
         en: { btnL: "☰ NETWORKS", btnR: "⚙️ TOOLS", gps: "🛰️ LIVE GPS", net: "NETWORKS", poi: "MARKERS", route: "ROUTING", trace: "📍 DRAW (PINS)", clear: "🗑️ CLEAR ALL", save: "💾 SAVE TO ARCHIVE", arch: "MY ARCHIVES" },
-        it: { btnL: "☰ RETI", btnR: "⚙️ STRUMENTI", gps: "🛰️ GPS LIVE", net: "RETI VISIBILI", poi: "AIUTI & POI", route: "ITINERARIO", trace: "📍 TRACCIA (PIN)", clear: "🗑️ CANCELLA TUTTO", save: "💾 SALVA ARCHIVIO", arch: "I MIEI ARCHIVI" },
+        it: { btnL: "☰ RETI", btnR: "⚙️ STRUMENTI", gps: "🛰️ GPS LIVE", net: "RETI VISIBILI", poi: "AIUTI & POI", route: "ITINERARIO", trace: "📍 TRACCIA (PIN)", clear: "CANCELLA TUTTO", save: "💾 SALVA ARCHIVIO", arch: "I MIEI ARCHIVI" },
         de: { btnL: "☰ NETZE", btnR: "⚙️ TOOLS", gps: "🛰️ LIVE GPS", net: "NETZE", poi: "MARKER", route: "ROUTE", trace: "📍 ZEICHNEN", clear: "LÖSCHEN", save: "💾 ARCHIVIEREN", arch: "ARCHIV" },
         es: { btnL: "☰ REDES", btnR: "⚙️ HERRAMIENTAS", gps: "🛰️ GPS EN VIVO", net: "REDES", poi: "PUNTOS", route: "RUTA", trace: "📍 TRAZAR", clear: "BORRAR", save: "💾 GUARDAR", arch: "ARCHIVOS" },
         pt: { btnL: "☰ REDES", btnR: "⚙️ FERRAMENTAS", gps: "🛰️ GPS AO VIVO", net: "REDES VISÍVEIS", poi: "PONTOS", route: "ITINERÁRIO", trace: "📍 TRAÇAR (PINS)", clear: "🗑️ LIMPAR TUDO", save: "💾 SALVAR ARQUIVO", arch: "MEUS ARQUIVOS" },
@@ -179,11 +179,10 @@
 
     var gPois = L.featureGroup().addTo(map);
     var gRouteMarkers = L.featureGroup().addTo(map);
-    var gTravaux = L.featureGroup().addTo(map); // Groupe pour les données uMap
+    var gTravaux = L.featureGroup().addTo(map); 
     var routeLayer = L.polyline([], {color: '#002a5c', weight: 8, opacity: 0.9}).addTo(map);
     var routePoints = []; 
     
-    // Ajout de gTravaux dans les groupes gérables par le menu
     var groups = { 
         gCat1: L.layerGroup(), 
         g48: L.layerGroup(), 
@@ -194,31 +193,44 @@
     };
     var userMarker = null;
 
-    // --- CHARGEMENT DES TRAVAUX UMAP (VOTRE LIEN) ---
+    // --- MISE À JOUR LIVE UMAP (CORRECTIF DYNAMIQUE) ---
     function loadUmapData() {
-        const urlUmap = "https://umap.openstreetmap.fr/fr/map/travaux-convoi-2026_1383926/geojson";
-        fetch(urlUmap)
-        .then(r => r.json())
-        .then(data => {
-            gTravaux.clearLayers();
-            L.geoJSON(data, {
-                pointToLayer: (f, latlng) => {
-                    return L.marker(latlng, {
-                        icon: L.divIcon({
-                            className: 'trav-icon',
-                            html: '<div style="background:#e67e22; border:2px solid #fff; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:14px; box-shadow: 0 0 5px rgba(0,0,0,0.5);">🚧</div>',
-                            iconSize: [24, 24], iconAnchor: [12, 12]
-                        })
-                    });
-                },
-                onEachFeature: (f, l) => {
-                    let note = f.properties.name || f.properties.description || "Travaux";
-                    l.bindTooltip(note, { direction: 'top', className: 'leaflet-tooltip-custom' });
-                }
-            }).addTo(gTravaux);
-        }).catch(e => console.log("Erreur uMap:", e));
+        // Lien direct de vos données sans passer par la page complète
+        const baseUmap = "https://umap.openstreetmap.fr/fr/map/travaux-convoi-2026_1383926/geojson";
+        
+        fetch(baseUmap)
+        .then(r => { if(!r.ok) throw new Error(); return r.json(); })
+        .then(data => processUmap(data))
+        .catch(() => {
+            // Tentative via Proxy si uMap bloque l'accès direct
+            fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(baseUmap))
+            .then(r => r.json())
+            .then(d => processUmap(JSON.parse(d.contents)))
+            .catch(e => console.log("Données Travaux indisponibles."));
+        });
     }
+
+    function processUmap(data) {
+        gTravaux.clearLayers();
+        L.geoJSON(data, {
+            pointToLayer: (f, latlng) => {
+                return L.marker(latlng, {
+                    icon: L.divIcon({
+                        className: 'trav-icon',
+                        html: '<div style="background:#e67e22; border:2px solid #fff; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:14px; box-shadow: 0 0 8px rgba(0,0,0,0.6);">🚧</div>',
+                        iconSize: [26, 26], iconAnchor: [13, 13]
+                    })
+                });
+            },
+            onEachFeature: (f, l) => {
+                let note = f.properties.name || f.properties.description || "Travaux";
+                l.bindTooltip(note, { direction: 'top', className: 'leaflet-tooltip-custom' });
+            }
+        }).addTo(gTravaux);
+    }
+
     loadUmapData();
+    setInterval(loadUmapData, 600000); // 10 min
 
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
     .then(r => r.json()).then(data => {
@@ -232,7 +244,7 @@
             l.setStyle({color: c, weight: 1.8, opacity: 0.8}); 
             groups[g].addLayer(l);
         }}).addTo(map);
-        Object.values(groups).forEach(g => map.addLayer(g));
+        Object.keys(groups).forEach(k => { if(k !== 'gTravaux') map.addLayer(groups[k]); });
     });
 
     function startGPS() { closeAll(); map.locate({ watch: true, enableHighAccuracy: true }); }
