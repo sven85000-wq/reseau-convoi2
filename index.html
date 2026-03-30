@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V40.16 - FUSION FINALE</title>
+    <title>GPS CONVOI V40.16 - VERSION INTÉGRALE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -9,6 +9,7 @@
         body { margin: 0; padding: 0; background: #0f172a; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; transition: transform 0.2s linear; }
         
+        /* BARRE DU HAUT */
         #top-bar { position: fixed; top: 10px; left: 0; width: 100%; z-index: 9999; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 10px; box-sizing: border-box; pointer-events: none; }
         .ctrl-btn, #center-group, .leaflet-control-layers { pointer-events: auto; }
         
@@ -23,6 +24,7 @@
         #dist-val { font-size: 14px; font-weight: 900; color: #00d4ff; }
         #dist-label { font-size: 7px; color: #94a3b8; display: block; }
 
+        /* MENUS LATERAUX */
         .sidebar { position: fixed; top: 0; height: 100vh; width: 85%; max-width: 320px; background: #1e293b; z-index: 10001; padding: 20px; display: none; overflow-y: auto; box-sizing: border-box; }
         #side-left { left: 0; border-right: 4px solid #f39c12; }
         #side-right { right: 0; border-left: 4px solid #00d4ff; }
@@ -30,8 +32,10 @@
         .close-btn { background: #ef4444; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; margin-bottom: 20px; cursor: pointer; }
         .row { display: flex; align-items: center; background: #334155; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 12px; }
         .act-btn { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 8px; color: white; font-size: 10px; cursor: pointer; }
+        
         .poi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .poi-btn { padding: 8px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 9px; cursor: pointer; }
+        
         .nav-arrow { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 25px solid #4285F4; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
         .archive-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 4px solid #22c55e; font-size: 11px; display: flex; justify-content: space-between; }
     </style>
@@ -49,22 +53,25 @@
 
     <div id="side-left" class="sidebar">
         <button class="close-btn" onclick="closeAll()">FERMER</button>
-        <h2>RÉSEAUX (1.8)</h2>
+        <h2>RÉSEAUX CONVOIS</h2>
         <div id="net-list">
             <label class="row"><input type="checkbox" id="chk-gCat1" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</label>
             <label class="row"><input type="checkbox" id="chk-g48" checked onchange="toggleL('g48')"> Réseau 48t</label>
             <label class="row"><input type="checkbox" id="chk-g72" checked onchange="toggleL('g72')"> Réseau 72t</label>
             <label class="row"><input type="checkbox" id="chk-g94" checked onchange="toggleL('g94')"> Réseau 94t</label>
             <label class="row"><input type="checkbox" id="chk-g120" checked onchange="toggleL('g120')"> Réseau 120t+</label>
-            <label class="row" style="color:#00d4ff;"><input type="checkbox" id="chk-gUmap" checked onchange="toggleL('gUmap')"> 🚧 UMAP LIVE</label>
+            <hr>
+            <label class="row" style="color:#00d4ff;"><input type="checkbox" id="chk-gUmap" checked onchange="toggleL('gUmap')"> 🚧 UMAP (TOUS CALQUES)</label>
         </div>
     </div>
 
     <div id="side-right" class="sidebar">
         <button class="close-btn" onclick="closeAll()">FERMER</button>
-        <h2>TRAVAUX EN DIRECT</h2>
-        <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="protectedLoadUmap()">🔄 ACTUALISER UMAP</button>
-        <p id="umap-status" style="font-size: 9px; text-align: center; color: #94a3b8; margin-top: -5px;">Attente synchro...</p>
+        
+        <h2>TRAVAUX LIVE</h2>
+        <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="loadUmapMultiLayers()">🔄 ACTUALISER UMAP</button>
+        <p id="umap-status" style="font-size: 9px; text-align: center; color: #94a3b8;">Attente synchro...</p>
+        
         <hr>
         <h2>POI + NOTES</h2>
         <div class="poi-grid">
@@ -73,15 +80,18 @@
             <button class="poi-btn" onclick="setPoiMode('🍴')">🍴 RESTAU</button>
             <button class="poi-btn" onclick="setPoiMode('🅿️')">🅿️ PARKING</button>
         </div>
+
         <hr>
-        <h2>ÉDITION</h2>
+        <h2>ÉDITION ROUTE</h2>
         <button class="act-btn" style="background:#00d4ff; color:#0f172a;" onclick="startRouting()">📏 TRACER ROUTE</button>
         <button class="act-btn" style="background:#3b82f6;" onclick="saveArchive()">💾 SAUVEGARDER</button>
+        
         <div style="display:flex; gap:5px;">
             <button class="act-btn" style="background:#22c55e;" onclick="exportGPX()">📤 EXPORT</button>
             <button class="act-btn" style="background:#8b5cf6;" onclick="document.getElementById('file-in').click()">📥 IMPORT</button>
         </div>
         <input type="file" id="file-in" style="display:none" accept=".gpx" onchange="importGPX(event)">
+        
         <div id="archive-list" style="margin-top:10px;"></div>
         <button class="act-btn" style="background:#ef4444; margin-top:20px;" onclick="clearAllData()">🗑️ TOUT EFFACER</button>
     </div>
@@ -90,7 +100,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // --- CONFIGURATION CARTE ---
+    // --- INITIALISATION ---
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
     var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
     var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false, layers: [osm] });
@@ -104,59 +114,59 @@
     var arrowIcon = L.divIcon({ html: '<div class="nav-arrow"></div>', className: '', iconSize: [20, 30], iconAnchor: [10, 15] });
     var userMarker = L.marker([0,0], {icon: arrowIcon});
 
-    // --- INTERFACE ---
     function openSide(s) { closeAll(); document.getElementById('side-'+s).style.display = 'block'; }
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display='none'); }
 
-    // --- LOGIQUE UMAP (1383926) ---
-    function protectedLoadUmap() {
-        let pass = prompt("Code de validation :");
-        if(pass === "1234") { loadUmapData(); } else { alert("Accès refusé."); }
-    }
-
-    function loadUmapData() {
-        const urlUmap = "https://umap.openstreetmap.fr/fr/map/1383926/geojson/";
+    // --- LOGIQUE MULTI-CALQUES UMAP (1383926) ---
+    async function loadUmapMultiLayers() {
+        document.getElementById('umap-status').innerText = "Lecture de tous les calques...";
+        const mapId = "1383926";
         const proxy = "https://api.allorigins.win/raw?url=";
-        
-        console.log("Tentative de chargement uMap...");
+        const mapUrl = `https://umap.openstreetmap.fr/fr/map/${mapId}/`;
 
-        fetch(proxy + encodeURIComponent(urlUmap + "?t=" + Date.now()))
-        .then(response => {
-            if (!response.ok) throw new Error('Erreur de réponse proxy');
-            return response.json();
-        })
-        .then(data => {
-            groups.gUmap.clearLayers();
-            L.geoJSON(data, {
-                pointToLayer: (feature, latlng) => {
-                    let texte = ((feature.properties.name || "") + " " + (feature.properties.description || "")).toUpperCase();
-                    let icone = "⚠️"; 
-
-                    if (texte.includes("TRAVAUX")) icone = "🚧";
-                    else if (texte.includes("BARR") || texte.includes("FERM")) icone = "⛔";
-                    else if (texte.includes("PONT")) icone = "🌉";
-                    else if (texte.includes("DÉVIA")) icone = "↪️";
-                    else if (texte.includes("PARK")) icone = "🅿️";
-                    else if (texte.includes("STATI")) icone = "⛽";
-                    
-                    return L.marker(latlng, {
-                        icon: L.divIcon({
-                            html: `<div style="font-size:32px; filter:drop-shadow(0 2px 4px black); text-align:center;">${icone}</div>`, 
-                            className: ''
-                        })
-                    }).bindPopup(`<b>${feature.properties.name || "Alerte"}</b><br>${feature.properties.description || ""}`);
-                }
-            }).addTo(groups.gUmap);
+        try {
+            const response = await fetch(proxy + encodeURIComponent(mapUrl + "?t=" + Date.now()));
+            const html = await response.text();
+            const regex = /"datalayers":\s*(\[[^\]]+\])/;
+            const match = html.match(regex);
             
+            if (!match) throw new Error("Carte vide.");
+            const datalayers = JSON.parse(match[1]);
+            groups.gUmap.clearLayers();
+            let ptsCount = 0;
+
+            for (let layer of datalayers) {
+                const layerUrl = `https://umap.openstreetmap.fr/fr/datalayer/${layer.id}/`;
+                const lRes = await fetch(proxy + encodeURIComponent(layerUrl));
+                const lData = await lRes.json();
+
+                L.geoJSON(lData, {
+                    pointToLayer: (f, latlng) => {
+                        let text = ((f.properties.name || "") + " " + (f.properties.description || "")).toUpperCase();
+                        let emoji = "⚠️"; 
+
+                        if (text.includes("TRAVAUX")) emoji = "🚧";
+                        else if (text.includes("BARR") || text.includes("FERM")) emoji = "⛔";
+                        else if (text.includes("PONT")) emoji = "🌉";
+                        else if (text.includes("DÉVIA")) emoji = "↪️";
+                        else if (text.includes("STATI") || text.includes("GAZ")) emoji = "⛽";
+                        else if (text.includes("PARK")) emoji = "🅿️";
+                        
+                        ptsCount++;
+                        return L.marker(latlng, {
+                            icon: L.divIcon({
+                                html: `<div style="font-size:32px; filter:drop-shadow(0 2px 4px black); text-align:center;">${emoji}</div>`,
+                                className: ''
+                            })
+                        }).bindPopup(`<b>[${layer.name}]</b><br><b>${f.properties.name || ""}</b><br>${f.properties.description || ""}`);
+                    }
+                }).addTo(groups.gUmap);
+            }
             map.addLayer(groups.gUmap);
-            document.getElementById('chk-gUmap').checked = true;
-            document.getElementById('umap-status').innerText = "Synchro : " + new Date().toLocaleTimeString();
-            alert("Mise à jour réussie : " + data.features.length + " alertes trouvées.");
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Erreur de connexion uMap. Vérifiez internet.");
-        });
+            document.getElementById('umap-status').innerText = "Synchro OK : " + ptsCount + " points";
+        } catch (e) {
+            document.getElementById('umap-status').innerText = "Erreur synchro";
+        }
     }
 
     // --- NAVIGATION ---
@@ -183,7 +193,7 @@
         }
     });
 
-    // --- FONCTIONS RÉSEAUX & OUTILS ---
+    // --- OUTILS ROUTE & GPX ---
     function toggleL(id) {
         if(document.getElementById('chk-'+id).checked) map.addLayer(groups[id]);
         else map.removeLayer(groups[id]);
@@ -192,7 +202,7 @@
     function setPoiMode(emoji) {
         closeAll(); map.off('click');
         map.on('click', e => {
-            let note = prompt("Note du point :");
+            let note = prompt("Note :");
             if(note) {
                 L.marker(e.latlng, { icon: L.divIcon({html:`<div style="font-size:26px; filter:drop-shadow(0 2px 2px black);">${emoji}</div>`, className:''}) })
                 .addTo(markersLayer).bindPopup(note);
@@ -255,17 +265,17 @@
     function saveArchive() {
         let n = prompt("Nom du convoi :"); if(!n) return;
         let data = { name: n, pts: routePoints.map(p => p.getLatLng()) };
-        let arch = JSON.parse(localStorage.getItem('gps_v15') || '[]');
-        arch.push(data); localStorage.setItem('gps_v15', JSON.stringify(arch));
+        let arch = JSON.parse(localStorage.getItem('gps_v16_arch') || '[]');
+        arch.push(data); localStorage.setItem('gps_v16_arch', JSON.stringify(arch));
         renderArchives();
     }
 
     function renderArchives() {
         let div = document.getElementById('archive-list'); div.innerHTML = '';
-        let arch = JSON.parse(localStorage.getItem('gps_v15') || '[]');
+        let arch = JSON.parse(localStorage.getItem('gps_v16_arch') || '[]');
         arch.forEach((a, i) => {
             let item = document.createElement('div'); item.className = 'archive-item';
-            item.innerHTML = `<span>📂 ${a.name}</span> <span style="color:#ef4444;" onclick="deleteArch(${i}); event.stopPropagation();">✖</span>`;
+            item.innerHTML = `<span>📂 ${a.name}</span> <span style="color:#ef4444; cursor:pointer;" onclick="deleteArch(${i}); event.stopPropagation();">✖</span>`;
             item.onclick = () => {
                 clearAllData();
                 a.pts.forEach(p => { 
@@ -280,16 +290,16 @@
     }
 
     function deleteArch(i) {
-        let arch = JSON.parse(localStorage.getItem('gps_v15'));
-        arch.splice(i, 1); localStorage.setItem('gps_v15', JSON.stringify(arch));
+        let arch = JSON.parse(localStorage.getItem('gps_v16_arch'));
+        arch.splice(i, 1); localStorage.setItem('gps_v16_arch', JSON.stringify(arch));
         renderArchives();
     }
 
     function clearAllData() { routePoints=[]; markersLayer.clearLayers(); routeLayer.setLatLngs([]); document.getElementById('dist-val').innerText="0.0"; }
 
-    // --- DÉMARRAGE ---
-    loadUmapData();
-    setInterval(loadUmapData, 300000); // Auto-synchro 5 min
+    // --- DÉMARRAGE ET RÉSEAUX ---
+    loadUmapMultiLayers();
+    setInterval(loadUmapMultiLayers, 300000); // 5 min auto
 
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json")
     .then(r => r.json()).then(data => {
