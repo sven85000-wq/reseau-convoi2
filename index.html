@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V40.30 - ACCUEIL TEAM</title>
+    <title>GPS CONVOI V40.31 - SÉCURITÉ TEAM</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -13,18 +13,20 @@
         #welcome-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 20000;
-            display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
+            display: flex; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box;
         }
         .welcome-card {
-            background: #1e2b37; border: 3px solid #f39c12; border-radius: 15px;
-            max-width: 500px; width: 100%; padding: 25px; color: white; text-align: center;
+            background: #1e2b37; border: 3px solid #f39c12; border-radius: 12px;
+            max-width: 450px; width: 100%; padding: 18px; color: white; text-align: center;
             box-shadow: 0 0 30px rgba(243, 156, 18, 0.3);
+            max-height: 90vh; overflow-y: auto;
         }
-        .welcome-card h1 { color: #f39c12; margin-top: 0; font-size: 22px; }
-        .welcome-card p { font-size: 15px; line-height: 1.6; text-align: left; }
+        .welcome-card h1 { color: #f39c12; margin: 0 0 10px 0; font-size: 19px; }
+        .welcome-card p { font-size: 13.5px; line-height: 1.4; text-align: left; margin: 0; }
+        .warning-box { color: #ff4d4d; font-weight: bold; border: 1px solid #ff4d4d; padding: 8px; margin-top: 10px; border-radius: 5px; font-size: 12px; }
         .welcome-btn { 
-            background: #27ae60; color: white; border: none; padding: 15px 30px; 
-            font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 20px; font-size: 16px; width: 100%;
+            background: #27ae60; color: white; border: none; padding: 12px; 
+            font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 15px; width: 100%;
         }
 
         /* BOUTONS NAVIGATION */
@@ -32,7 +34,6 @@
         #btn-left { left: 10px; } 
         #btn-right { right: 10px; }
 
-        /* DRAPEAUX À GAUCHE */
         #lang-bar { 
             position: fixed; top: 75px; left: 10px; z-index: 9000; 
             display: flex; flex-direction: column; gap: 8px; 
@@ -42,7 +43,6 @@
         .flag { width: 32px; height: 22px; border: 1px solid #fff; cursor: pointer; opacity: 0.8; transition: 0.2s; flex-shrink: 0; }
         .flag:hover { opacity: 1; transform: scale(1.15); border-color: #f39c12; }
 
-        /* SIDEBARS FLUIDES SANS SCROLLBAR VISIBLE */
         .sidebar { 
             position: fixed; top: 0; height: 100vh; width: 320px; 
             background: #1e2b37; color: white; padding: 20px; 
@@ -61,7 +61,6 @@
         
         #dist-panel { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; background: rgba(0,0,0,0.85); color: #2ecc71; padding: 8px 20px; border-radius: 20px; border: 2px solid #2ecc71; font-weight: bold; }
         
-        /* CURSEUR GPS STYLE GOOGLE */
         .gps-dot-container { position: relative; width: 20px; height: 20px; }
         .gps-dot { width: 14px; height: 14px; background: #4285F4; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
         .gps-arrow { 
@@ -81,11 +80,14 @@
         <div class="welcome-card">
             <h1>Bonjour ! Salut la team 👋</h1>
             <p>
-                Salut aux chauffeurs et aux voitures pilotes ! Voici votre outil de navigation :<br><br>
-                ⬅️ <b>À GAUCHE :</b> Bouton <b>RÉSEAUX</b> pour cocher vos catégories. En dessous, les drapeaux pour traduire l'interface selon le pays.<br><br>
-                ➡️ <b>À DROITE :</b> Bouton <b>OUTILS</b> pour poser vos POI, tracer vos itinéraires et gérer vos archives.<br><br>
-                🚀 <b>IMPORTANT :</b> Prenez bien le temps de préparer la carte (choix des réseaux + tracé). Ensuite, appuyez sur <b>🛰️ GPS DIRECT</b> dans le menu de gauche pour lancer la navigation réelle. La carte suivra alors votre position !
+                Salut aux chauffeurs et aux voitures pilotes !<br><br>
+                ⬅️ <b>GAUCHE :</b> Bouton <b>RÉSEAUX</b> pour les catégories et drapeaux pour la langue.<br>
+                ➡️ <b>DROITE :</b> Bouton <b>OUTILS</b> pour POI, Tracés et Archives.<br><br>
+                🚀 <b>GUIDAGE :</b> Une fois prêt, <b>retournez dans le menu GAUCHE</b> et appuyez sur <b>🛰️ GPS DIRECT</b>. La carte suivra votre véhicule.<br>
             </p>
+            <div class="warning-box">
+                NOTE D'INFORMATION : Si vous partagez des points (GPX) avec des collègues (hauteurs de ponts, etc.), nous déclinons toute responsabilité en cas d'incident. Vous êtes responsables de vos partages.
+            </div>
             <button class="welcome-btn" onclick="document.getElementById('welcome-screen').style.display='none'">OK, C'EST PARTI !</button>
         </div>
     </div>
@@ -254,7 +256,7 @@
     function clearCurrentData() { routePoints = []; gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); gPois.clearLayers(); document.getElementById('dist-panel').style.display = 'none'; }
 
     function saveToArchive() {
-        let n = prompt("Nom de l'archive :"); if(!n) return;
+        let n = prompt("Nom :"); if(!n) return;
         let d = { name: n, pts: routePoints.map(m => m.getLatLng()), pois: [] };
         gPois.eachLayer(l => { if(l.getLatLng) d.pois.push({ll: l.getLatLng(), note: l.getTooltip() ? l.getTooltip().getContent() : "", icon: l.options.icon.options.html}); });
         let a = JSON.parse(localStorage.getItem('convoi_arch_v40') || "[]");
@@ -269,7 +271,7 @@
             l.appendChild(div);
         });
     }
-    function delArch(i) { if(confirm("Supprimer l'archive ?")) { let a = JSON.parse(localStorage.getItem('convoi_arch_v40')); a.splice(i, 1); localStorage.setItem('convoi_arch_v40', JSON.stringify(a)); renderArch(); }}
+    function delArch(i) { if(confirm("Supprimer ?")) { let a = JSON.parse(localStorage.getItem('convoi_arch_v40')); a.splice(i, 1); localStorage.setItem('convoi_arch_v40', JSON.stringify(a)); renderArch(); }}
     function loadArch(i) {
         let a = JSON.parse(localStorage.getItem('convoi_arch_v40'))[i]; if(!a) return; clearCurrentData();
         a.pts.forEach(p => addRouteMarker(p));
@@ -284,7 +286,7 @@
     function exportData() {
         let data = localStorage.getItem('convoi_arch_v40'); if(!data) return;
         let blob = new Blob([data], {type: "application/json"}); let url = URL.createObjectURL(blob);
-        let a = document.createElement('a'); a.href = url; a.download = "convoi_archives.json"; a.click();
+        let a = document.createElement('a'); a.href = url; a.download = "convoi.json"; a.click();
     }
     function importData(input) {
         let file = input.files[0]; if(!file) return;
