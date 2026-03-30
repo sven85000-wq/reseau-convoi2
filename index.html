@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V42.6 - TRAVAUX DIRECT</title>
+    <title>GPS CONVOI V42.6 - GOGO PRIORITAIRE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -96,7 +96,7 @@
             <span onclick="minimizeUmap()" style="cursor:pointer">➖ RÉDUIRE</span>
             <div><span onclick="toggleFullScreen()" style="background:#2ecc71; color:white; padding:2px 6px; border-radius:4px; margin-right:5px; cursor:pointer">BOX</span><span onclick="toggleUmap()" style="background:#c0392b; color:white; padding:2px 6px; border-radius:4px; cursor:pointer">X</span></div>
         </div>
-        <div class="umap-tabs"><button id="tab-umap" class="active" onclick="switchFrame('umap')">UMAP</button><button id="tab-gogo" onclick="switchFrame('gogo')">GOGO</button></div>
+        <div class="umap-tabs"><button id="tab-gogo" class="active" onclick="switchFrame('gogo')">GOGO</button><button id="tab-umap" onclick="switchFrame('umap')">UMAP</button></div>
         <iframe id="umap-frame" src=""></iframe>
         <div id="resize-handle"></div>
     </div>
@@ -205,7 +205,7 @@
     function toggleUmap() {
         const win = document.getElementById('umap-window');
         if (win.style.display === 'none' || win.style.display === '') {
-            switchFrame('umap'); // Ouvre UMAP par défaut
+            switchFrame('gogo'); // GOGO PRIORITAIRE
             win.style.display = 'block'; closeAll();
         } else { win.style.display = 'none'; }
     }
