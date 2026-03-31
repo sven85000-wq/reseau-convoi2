@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>CARTE RESEAU ET CARTE TRAVAUX</title>
+    <title>CARTE RESEAU ET TRAVAUX V40.18</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -9,7 +9,7 @@
         body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; position: absolute; }
 
-        /* --- ACCUEIL RÉDUIT ET SCROLLABLE --- */
+        /* --- ACCUEIL --- */
         #welcome-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 20000;
@@ -18,36 +18,50 @@
         }
         .modal-content {
             background: #1e2b37; color: white; border: 3px solid #f39c12;
-            border-radius: 15px; padding: 15px; max-width: 500px; 
+            border-radius: 15px; padding: 15px; max-width: 500px;
             max-height: 90vh; display: flex; flex-direction: column;
         }
         .modal-scroll { overflow-y: auto; padding-right: 5px; }
         .modal-text { text-align: left; font-size: 13px; line-height: 1.4; }
-        .modal-text p { margin-bottom: 10px; border-bottom: 1px solid rgba(243,156,18,0.2); padding-bottom: 5px; }
         
         .warning-flash {
-            border: 2px solid #ff0000; background: rgba(255,0,0,0.2); 
+            border: 2px solid #ff0000; background: rgba(255,0,0,0.2);
             padding: 8px; border-radius: 10px; margin: 10px 0;
             animation: blinker 1.5s linear infinite; font-weight: bold; color: #ff4d4d; font-size: 11px;
         }
         @keyframes blinker { 50% { opacity: 0.6; } }
 
-        /* --- INTERFACE --- */
+        /* --- INTERFACE CENTRALE --- */
         #distance-info {
-            position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+            position: fixed; top: 115px; left: 50%; transform: translateX(-50%);
             z-index: 9997; background: rgba(30, 43, 55, 0.95); color: #f39c12;
-            padding: 8px 18px; border-radius: 30px; border: 2px solid #f39c12;
-            font-weight: bold; font-size: 15px; pointer-events: none; display: none;
+            padding: 5px 15px; border-radius: 20px; border: 2px solid #f39c12;
+            font-weight: bold; font-size: 14px; pointer-events: none; display: none;
         }
+        
+        #btn-travaux-direct { 
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%); 
+            z-index: 9998; background: #f39c12; color: black; border: 2px solid #000; 
+            padding: 10px 15px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; 
+        }
+
+        #btn-gps-toggle {
+            position: fixed; top: 62px; left: 50%; transform: translateX(-50%);
+            z-index: 9998; color: white; border: 2px solid #000;
+            padding: 8px 20px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer;
+            transition: all 0.3s; width: 140px; text-align: center;
+        }
+        .gps-off { background: #c0392b; } /* Rouge */
+        .gps-on { background: #27ae60; }  /* Vert */
+
         #umap-window {
-            position: fixed; top: 70px; right: 10px; width: 280px; height: 350px; 
-            z-index: 15000; border: 3px solid #f39c12; border-radius: 12px; 
+            position: fixed; top: 70px; right: 10px; width: 280px; height: 350px;
+            z-index: 15000; border: 3px solid #f39c12; border-radius: 12px;
             background: #1e2b37; display: none; overflow: hidden;
         }
         .umap-bar { background: #f39c12; color: #000; padding: 8px; font-weight: bold; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
         #umap-frame { width: 100%; height: calc(100% - 35px); border: none; background: white; }
 
-        #btn-travaux-direct { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 9998; background: #f39c12; color: black; border: 2px solid #000; padding: 10px 15px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .menu-btn { position: fixed; top: 15px; z-index: 9999; background: #2c3e50; color: white; border: 2px solid #f39c12; padding: 12px 18px; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
         #btn-left { left: 10px; } #btn-right { right: 10px; }
 
@@ -59,7 +73,7 @@
         button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; }
         .row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; }
         
-        /* --- GPS & POI --- */
+        /* --- GPS ICON --- */
         .gps-dot { width: 16px; height: 16px; background: #4285F4; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .poi-maps-style { display: flex; align-items: center; justify-content: center; background: white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.4); border: 1px solid #ccc; }
         .poi-inner { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
@@ -68,14 +82,14 @@
 </head>
 <body>
 
-    <div id="welcome-modal">
+     <div id="welcome-modal">
         <div class="modal-content">
             <h2 style="margin-top:0; color:#f39c12;">👋 Outil Convoi</h2>
             <div class="modal-scroll">
                 <div class="modal-text">
                     <p><b>1. BOUTON RÉSEAUX :</b> Choisissez le réseau routier à afficher (Cat 1, 48t, 72t, 94t ou 120t+).</p>
                     <p><b>2. BOUTON OUTILS :</b> Placez vos points d'intérêt personnels en cliquant sur la carte. Tracez vos routes en cliquant sur la carte et effacez-les sans perdre vos points. Pour charger un trajet, utilisez vos archives en bas du menu.</p>
-                    <p><b>3. BOUTON TRAVAUX:</b> Le bouton central ouvre la carte travaux dans une petite fenêtre a droite. Utilisez <b>BOX</b> pour le plein écran et rappuyez dessus pour le reduire.</p>
+                    <p><b>3. BOUTON TRAVAUX LIVE :</b> Le bouton central ouvre la carte travaux dans une petite fenêtre a droite. Utilisez <b>BOX</b> pour le plein écran et rappueyez dessus pour le reduire.</p>
                 </div>
                 <div class="warning-flash">
                     ⚠️ ATTENTION :<br>
@@ -89,8 +103,9 @@
         </div>
     </div>
 
+    <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX LIVE</div>
+    <div id="btn-gps-toggle" class="gps-off" onclick="toggleGPSFollow()">🛑 MODE ROUTE</div>
     <div id="distance-info">📏 <span id="dist-val">0</span> km</div>
-    <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX</div>
 
     <div id="umap-window">
         <div class="umap-bar">
@@ -108,7 +123,6 @@
 
     <div id="sidebar-left" class="sidebar">
         <button style="background:#e74c3c;" onclick="closeAll()">✖ FERMER</button>
-        <button style="background:#27ae60;" onclick="reCenterGPS()">🛰️ RE-CENTRER GPS</button>
         <h2>RÉSEAUX & TRAVAUX</h2>
         <div class="row"><input type="checkbox" checked onchange="toggleL('gCat1')"> Cat 1 / ATE</div>
         <div class="row"><input type="checkbox" checked onchange="toggleL('g48')"> Réseau 48t</div>
@@ -146,72 +160,114 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; startGPS(); }
+    
     var map = L.map('map', { center: [46.9, -0.5], zoom: 6, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     var gPois = L.featureGroup().addTo(map);
     var gRouteMarkers = L.featureGroup().addTo(map);
     var routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map);
-    var routePoints = []; 
+    var routePoints = [];
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
+    
+    var isFollowingGPS = false;
 
+    // --- LOGIQUE GPS & CENTRAGE ---
     function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); }
+    
     map.on('locationfound', (e) => {
-        if (!window.userMarker) window.userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(map);
-        else window.userMarker.setLatLng(e.latlng);
+        if (!window.userMarker) {
+            window.userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(map);
+        } else {
+            window.userMarker.setLatLng(e.latlng);
+        }
         window.userPos = e.latlng;
+        if (isFollowingGPS) { map.setView(e.latlng, map.getZoom()); }
     });
-    function reCenterGPS() { if (window.userPos) { map.setView(window.userPos, 15); closeAll(); } }
 
+    function toggleGPSFollow() {
+        isFollowingGPS = !isFollowingGPS;
+        const btn = document.getElementById('btn-gps-toggle');
+        if (isFollowingGPS) {
+            btn.innerText = "🚛 EN ROUTE...";
+            btn.className = "gps-on";
+            if (window.userPos) map.setView(window.userPos, 15);
+        } else {
+            btn.innerText = "🛑 MODE ROUTE";
+            btn.className = "gps-off";
+        }
+    }
+
+    // Désactive le suivi si l'utilisateur déplace la carte à la main
+    map.on('dragstart', () => { 
+        if (isFollowingGPS) {
+            isFollowingGPS = false;
+            const btn = document.getElementById('btn-gps-toggle');
+            btn.innerText = "🛑 MODE ROUTE";
+            btn.className = "gps-off";
+        }
+    });
+
+    // --- UMAP & INTERFACE ---
     function toggleUmap() {
         const win = document.getElementById('umap-window');
         win.style.display = (win.style.display === 'none' || win.style.display === '') ? 'block' : 'none';
         if (win.style.display === 'block') closeAll();
     }
-
     function toggleFullScreen() {
         let w = document.getElementById('umap-window');
-        if(w.style.width === '100%') { 
-            w.style.width='280px'; w.style.height='350px'; w.style.top='70px'; w.style.right='10px';
-        } else { 
-            w.style.width='100%'; w.style.height='100%'; w.style.top='0'; w.style.right='0';
-        }
+        if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; w.style.top='70px'; w.style.right='10px'; } 
+        else { w.style.width='100%'; w.style.height='100%'; w.style.top='0'; w.style.right='0'; }
     }
     function minimizeUmap() { let w = document.getElementById('umap-window'); w.style.height = (w.style.height==='35px'?'350px':'35px'); }
 
-    function activatePoi(type, color) { 
+    // --- POI & ROUTES ---
+    function activatePoi(type, color) {
         closeAll(); map.once('click', (e) => {
             let m = L.marker(e.latlng, { icon: L.divIcon({ className:'poi-maps-style', html:`<div class="poi-inner" style="background:${color}">${type}</div>`, iconSize:[26,26], iconAnchor:[13,13] }) }).addTo(gPois);
             m.on('click', () => gPois.removeLayer(m));
         });
     }
-
     function activateRelais() {
         closeAll(); map.once('click', (e) => {
             let m = L.marker(e.latlng, { icon: L.divIcon({ className: '', html: '<div class="poi-relais">R</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) }).addTo(gPois);
             m.on('click', () => gPois.removeLayer(m));
         });
     }
-
     function openMenu(id) { closeAll(); document.getElementById(id).style.display = 'block'; }
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
 
-    function startRouting() { closeAll(); map.on('click', (e) => { let m = L.marker(e.latlng, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); updateRoute(); }); }
-    function updateRoute() { 
-        if (routePoints.length < 2) return; 
-        let coords = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';'); 
-        fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`).then(r => r.json()).then(d => { 
-            if(d.routes) {
-                routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(x => [x[1], x[0]]));
-                document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
-                document.getElementById('distance-info').style.display = 'block';
-            }
-        }); 
+    function startRouting() { 
+        closeAll(); 
+        map.on('click', function(e) {
+            let m = L.marker(e.latlng, {draggable:true}).addTo(gRouteMarkers);
+            routePoints.push(m);
+            m.on('dragend', updateRoute);
+            updateRoute();
+        });
     }
-
-    function clearCurrentData() { gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); gPois.clearLayers(); routePoints=[]; document.getElementById('distance-info').style.display = 'none'; }
+    function updateRoute() {
+        if (routePoints.length < 2) return;
+        let coords = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';');
+        fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`)
+        .then(r => r.json()).then(d => {
+            if(d.routes && d.routes.length > 0) {
+                routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(x => [x[1], x[0]]));
+                showDistance(d.routes[0].distance);
+            }
+        });
+    }
+    function showDistance(meters) {
+        document.getElementById('dist-val').innerText = (meters / 1000).toFixed(1);
+        document.getElementById('distance-info').style.display = 'block';
+    }
+    function clearCurrentData() { 
+        gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); gPois.clearLayers(); 
+        routePoints=[]; document.getElementById('distance-info').style.display = 'none'; map.off('click');
+    }
     
+    // Réseaux
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json").then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
             let p = JSON.stringify(f.properties).toUpperCase(), g = "gCat1", c = "#FFFF00";
@@ -221,14 +277,47 @@
         Object.keys(groups).forEach(k => map.addLayer(groups[k]));
     });
 
-    function saveToArchive() { let n = prompt("Nom :"); if(!n) return; let a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) }); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); }
-    function renderArch() { let l = document.getElementById('archive-list'); l.innerHTML = ""; JSON.parse(localStorage.getItem('convoi_arch') || "[]").forEach((x, i) => { let d = document.createElement('div'); d.style.display="flex"; d.innerHTML = `<button onclick="loadArch(${i})" style="background:#34495e; flex:1; margin-bottom:2px;">📂 ${x.name}</button><button onclick="deleteArch(${i})" style="background:#c0392b; width:45px; margin-bottom:2px;">✖</button>`; l.appendChild(d); }); }
+    // Archives & GPX
+    function saveToArchive() { 
+        let n = prompt("Nom du trajet :"); if(!n) return; 
+        let a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); 
+        a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) }); 
+        localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); 
+    }
+    function renderArch() { 
+        let l = document.getElementById('archive-list'); l.innerHTML = ""; 
+        JSON.parse(localStorage.getItem('convoi_arch') || "[]").forEach((x, i) => { 
+            let d = document.createElement('div'); d.style.display="flex"; 
+            d.innerHTML = `<button onclick="loadArch(${i})" style="background:#34495e; flex:1; margin-bottom:2px;">📂 ${x.name}</button><button onclick="deleteArch(${i})" style="background:#c0392b; width:45px; margin-bottom:2px;">✖</button>`; 
+            l.appendChild(d); 
+        }); 
+    }
     function deleteArch(i) { if(confirm("Supprimer ?")) { let a = JSON.parse(localStorage.getItem('convoi_arch')); a.splice(i, 1); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); } }
-    function loadArch(i) { let a = JSON.parse(localStorage.getItem('convoi_arch'))[i]; clearCurrentData(); a.pts.forEach(p => { let m = L.marker(p, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); }); updateRoute(); closeAll(); }
+    function loadArch(i) { 
+        let a = JSON.parse(localStorage.getItem('convoi_arch'))[i]; clearCurrentData(); 
+        a.pts.forEach(p => { let m = L.marker(p, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); }); 
+        updateRoute(); closeAll(); 
+    }
     renderArch();
 
-    function exportGPX() { let pts = routeLayer.getLatLngs(); if(!pts.length) return; let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>' + pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') + '</trkseg></trk></gpx>'; let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx], {type: 'application/gpx+xml'})); a.download = "itineraire.gpx"; a.click(); }
-    function importGPX(i) { let r = new FileReader(); r.onload = (e) => { let xml = new DOMParser().parseFromString(e.target.result, "text/xml"), pts = Array.from(xml.getElementsByTagName("trkpt")).map(p => [p.getAttribute("lat"), p.getAttribute("lon")]); if(pts.length) { clearCurrentData(); routeLayer.setLatLngs(pts); map.fitBounds(routeLayer.getBounds()); } }; r.readAsText(i.files[0]); }
+    function exportGPX() { 
+        let pts = routeLayer.getLatLngs(); if(!pts.length) return; 
+        let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>' + pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') + '</trkseg></trk></gpx>'; 
+        let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx], {type: 'application/gpx+xml'})); a.download = "itineraire.gpx"; a.click(); 
+    }
+    function importGPX(input) { 
+        let r = new FileReader(); 
+        r.onload = (e) => { 
+            let xml = new DOMParser().parseFromString(e.target.result, "text/xml");
+            let pts = Array.from(xml.getElementsByTagName("trkpt")).map(p => L.latLng(parseFloat(p.getAttribute("lat")), parseFloat(p.getAttribute("lon")))); 
+            if(pts.length > 0) { 
+                clearCurrentData(); routeLayer.setLatLngs(pts); 
+                let totalDist = 0; for (let j = 0; j < pts.length - 1; j++) { totalDist += pts[j].distanceTo(pts[j+1]); }
+                showDistance(totalDist); map.fitBounds(routeLayer.getBounds()); closeAll();
+            } 
+        }; 
+        r.readAsText(input.files[0]); 
+    }
 </script>
 </body>
 </html>
