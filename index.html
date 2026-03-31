@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>GPS CONVOI V42.16 - BASE FINALE</title>
+    <title>GPS CONVOI V42.17 - BASE FINALE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -9,7 +9,7 @@
         body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; position: absolute; }
 
-        /* --- ACCUEIL CONDENSÉ --- */
+        /* --- ACCUEIL 3 PARAGRAPHES --- */
         #welcome-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 20000;
@@ -18,15 +18,17 @@
         }
         .modal-content {
             background: #1e2b37; color: white; border: 3px solid #f39c12;
-            border-radius: 15px; padding: 25px; max-width: 550px; text-align: center;
+            border-radius: 15px; padding: 25px; max-width: 600px; text-align: center;
         }
         .modal-text { text-align: left; font-size: 13px; line-height: 1.5; margin-bottom: 15px; }
+        .modal-text p { margin-bottom: 12px; border-bottom: 1px solid rgba(243,156,18,0.2); padding-bottom: 8px; }
+        
         .warning-flash {
             border: 2px solid #ff0000; background: rgba(255,0,0,0.2); 
             padding: 12px; border-radius: 10px; margin-top: 10px;
-            animation: blinker 1.5s linear infinite; font-weight: bold;
+            animation: blinker 1.5s linear infinite; font-weight: bold; color: #ff4d4d;
         }
-        @keyframes blinker { 50% { opacity: 0.5; } }
+        @keyframes blinker { 50% { opacity: 0.6; } }
 
         /* --- INTERFACE --- */
         #distance-info {
@@ -68,12 +70,15 @@
         <div class="modal-content">
             <h1>👋 Bienvenue sur votre nouvel outil de convoi !</h1>
             <div class="modal-text">
-                Vous pouvez utiliser le menu <b>Outils à droite</b> pour placer vos points d'intérêt personnels et faire votre tracé, vous pouvez les enregistrer sous le téléphone. Vous pouvez importer et exporter des <b>GPX</b> à vos confrères.<br><br>
-                À <b>gauche</b> se trouve le réseau routier. En cliquant sur <b>Travaux Live</b>, une fenêtre s'ouvrira avec la carte des travaux. Vous pouvez appuyer sur le bouton <b>BOX</b> pour passer en plein écran (téléphone/tablette), et rappuyer dessus pour revenir en petite fenêtre ou l'éteindre avec la <b>croix</b>. Vous pouvez refaire la manip autant que vous voulez.
+                <p><b>1. RÉSEAUX (Gauche) :</b> Utilisez la colonne de gauche pour choisir et afficher le réseau routier qui vous convient (Cat 1, 48t, 72t, 94t ou 120t+).</p>
+                
+                <p><b>2. OUTILS & TRACÉS (Droite) :</b> À droite, placez vos points d'intérêt (POI) qui resteront affichés sur votre carte. Vous pouvez tracer vos routes et les effacer indépendamment des points d'intérêt. Rien ne se charge automatiquement : pour retrouver un tracé, cliquez sur les dossiers de vos archives en bas du menu. Vous pouvez également importer et exporter des fichiers GPX.</p>
+                
+                <p><b>3. TRAVAUX LIVE :</b> Le bouton central ouvre une fenêtre dédiée à la carte des travaux. Le bouton <b>BOX</b> permet de basculer en plein écran sur votre téléphone ou tablette, et la croix permet de la fermer à tout moment.</p>
             </div>
             <div class="warning-flash">
-                ⚠️ ATTENTION SÉCURITÉ :<br>
-                <span style="font-size: 11px;">Je ne suis pas responsable en cas d'erreur sur l'importation ou l'exportation d'un GPX que vous partagez avec vos collègues. Si il y a des erreurs de données (ex: hauteurs de pont), soyez vigilant. Attention !</span>
+                ⚠️ ATTENTION :<br>
+                <span style="font-size: 11px;">Soyez extrêmement vigilants lors du partage d'informations ou de fichiers GPX avec vos confrères. En cas d'erreur de données, le site ne pourra être tenu responsable. Tout ce que vous partagez est sous votre entière responsabilité. Attention aux erreurs !</span>
             </div>
             <button style="background:#f39c12; color:black; margin-top:20px; width: 100%;" onclick="closeWelcome()">DÉMARRER / START</button>
         </div>
@@ -222,3 +227,4 @@
 </script>
 </body>
 </html>
+
