@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>CARTE RESEAU ET TRAVAUX V40.16</title>
+    <title>CARTE RESEAU ET TRAVAUX FRANCE ET EUROPE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -63,7 +63,7 @@
             padding: 5px 15px; border-radius: 20px; border: 2px solid #f39c12;
             font-weight: bold; font-size: 14px; pointer-events: none; display: none;
         }
-        
+       
         #btn-travaux-direct {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 9998; background: #f39c12; color: black; border: 2px solid #000;
@@ -97,7 +97,7 @@
         h2 { font-size: 11px; color: #f39c12; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 15px; text-transform: uppercase; }
         button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; }
         .row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; }
-        
+       
         /* --- GPS & POI ICONS --- */
         .gps-dot { width: 16px; height: 16px; background: #4285F4; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .poi-maps-style { display: flex; align-items: center; justify-content: center; background: white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.4); border: 1px solid #ccc; }
@@ -133,9 +133,9 @@
                 <div class="lang-dot" onclick="changeLang('fr')" title="FR">🇫🇷</div>
                 <div class="lang-dot" onclick="changeLang('fr')" title="BE-FR">🇧🇪</div>
                 <div class="lang-dot" onclick="changeLang('nl')" title="BE-NL">🇧🇪</div>
-                
+               
                 <div class="lang-dot" onclick="changeLang('en')" title="UK">🇬🇧</div>
-                <div class="lang-dot" onclick="changeLang('en')" title="SCO">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
+                <div class="lang-dot" onclick="changeLang('en')" title="SCO">🏴󐁧󐁢󐁳󐁣󐁴󐁿</div>
                 <div class="lang-dot" onclick="changeLang('de')" title="DE">🇩🇪</div>
                 <div class="lang-dot" onclick="changeLang('es')" title="ES">🇪🇸</div>
                 <div class="lang-dot" onclick="changeLang('it')" title="IT">🇮🇹</div>
@@ -167,11 +167,12 @@
                     <p><b>1. BOUTON RÉSEAUX :</b> Choisissez le réseau routier à afficher (Cat 1, 48t, 72t, 94t ou 120t+).</p>
                     <p><b>2. BOUTON OUTILS :</b> Placez vos points d'intérêt personnels en cliquant sur la carte. Tracez vos routes en cliquant sur la carte et effacez-les sans perdre vos points. Pour charger un trajet, utilisez vos archives en bas du menu.</p>
                     <p><b>3. BOUTON TRAVAUX :</b> Le bouton central ouvre la carte travaux dans une petite fenêtre a droite. Utilisez <b>BOX</b> pour le plein écran et rappuyez dessus pour le reduire.</p>
+                   
                     <p style="background: rgba(52, 152, 219, 0.2); padding: 8px; border-radius: 5px; font-size: 11px; border-left: 3px solid #3498db;">
-                        ℹ️ <b>CONFIDENTIALITÉ :</b> L'autorisation de position sert uniquement à afficher votre camion sur l'écran. <b>Aucune donnée n'est envoyée vers un serveur.</b> Je n'ai aucun accès à votre position.
+                        ℹ️ <b>CONFIDENTIALITÉ :</b> L'autorisation de position sert uniquement à afficher votre camion sur l'écran. <b>Aucune donnée n'est enregistrée ou envoyée vers un serveur.</b> Je n'ai aucun accès à votre position réelle.
                     </p>
                 </div>
-                
+               
                 <div class="warning-flash">
                     ⚠️ ATTENTION :<br>
                     Le site n'est pas responsable en cas d'erreur sur les données partagées en gpx. Tout partage est sous votre responsabilité. Soyez vigilants !
@@ -258,7 +259,7 @@
     }
 
     function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; startGPS(); }
-    
+   
     var map = L.map('map', { center: [48.0, 10.0], zoom: 5, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
@@ -267,13 +268,13 @@
     var routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map);
     var routePoints = [];
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gEurope: L.layerGroup() };
-    
+   
     var isFollowingGPS = false;
 
     // --- DONNÉES EUROPE ---
     const countries = [
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
-        { n: "Écosse", lat: 56.49, lon: -4.20, u: "https://www.traffic.gov.scot/", f: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+        { n: "Écosse", lat: 56.49, lon: -4.20, u: "https://www.traffic.gov.scot/", f: "🏴󐁧󐁢󐁳󐁣󐁴󐁿" },
         { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
         { n: "Belgique (Wallonie)", lat: 50.35, lon: 4.85, u: "https://sofico.org/fr/chantiers/", f: "🇧🇪" },
         { n: "België (Vlaanderen)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/reistijden", f: "🇧🇪" },
@@ -413,23 +414,38 @@
         let gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>' + pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') + '</trkseg></trk></gpx>';
         let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx], {type: 'application/gpx+xml'})); a.download = "itineraire.gpx"; a.click();
     }
-    
+   
+    // --- IMPORTATION AVEC CALCUL KILOMETRES ---
     function importGPX(input) {
         let r = new FileReader();
         r.onload = (e) => {
             let xml = new DOMParser().parseFromString(e.target.result, "text/xml");
             let xmlPts = Array.from(xml.getElementsByTagName("trkpt"));
+           
             if(xmlPts.length > 0) {
                 clearCurrentData();
+               
+                // Recréer les épingles (marqueurs)
                 xmlPts.forEach(p => {
                     let lat = parseFloat(p.getAttribute("lat"));
                     let lon = parseFloat(p.getAttribute("lon"));
-                    let m = L.marker(L.latLng(lat, lon), {draggable:true}).addTo(gRouteMarkers);
+                    let pos = L.latLng(lat, lon);
+                   
+                    let m = L.marker(pos, {draggable:true}).addTo(gRouteMarkers);
                     routePoints.push(m);
                     m.on('dragend', updateRoute);
                 });
+
+                // Lancer le calcul OSRM et afficher les kilomètres
                 updateRoute();
-                setTimeout(() => { if (routeLayer.getLatLngs().length > 0) map.fitBounds(routeLayer.getBounds()); }, 500);
+               
+                // Ajuster la vue sur le tracé importé
+                setTimeout(() => {
+                    if (routeLayer.getLatLngs().length > 0) {
+                        map.fitBounds(routeLayer.getBounds());
+                    }
+                }, 500);
+               
                 closeAll();
             }
         };
@@ -438,4 +454,3 @@
 </script>
 </body>
 </html>
-
