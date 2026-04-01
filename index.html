@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>CARTE RESEAU ET TRAVAUX V40.16.2</title>
+    <title>CARTE RESEAU ET TRAVAUX FRANCE / EUROPE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -133,7 +133,6 @@
                 <div class="lang-dot" onclick="changeLang('fr')">🇧🇪</div>
                 <div class="lang-dot" onclick="changeLang('nl')">🇧🇪</div>
                 <div class="lang-dot" onclick="changeLang('en')">🇬🇧</div>
-                <div class="lang-dot" onclick="changeLang('en')">🏴󐁧󐁢󐁳󐁣󐁴󐁿</div>
                 <div class="lang-dot" onclick="changeLang('de')">🇩🇪</div>
                 <div class="lang-dot" onclick="changeLang('es')">🇪🇸</div>
                 <div class="lang-dot" onclick="changeLang('it')">🇮🇹</div>
@@ -172,13 +171,8 @@
                     <b>CONFIDENTIALITÉ :</b> L'autorisation de position sert uniquement à afficher votre camion sur l'écran. Aucune donnée n'est enregistrée ou envoyée vers un serveur. Je n'ai aucun accès à votre position réelle.
                 </div>
 
-                <div class="warning-red">
-                    ⚠️ <b>ATTENTION :</b><br>
-                    Le site n'est pas responsable en cas d'erreur sur les données partagées en gpx. Tout partage est sous votre responsabilité. Soyez vigilants !
-                </div>
-
                 <div class="conclusion-green">
-                    Profitez bien de l'application, éclatez-vous ! J'espère que cet outil vous sera utile. Bonne roulade à tous et au plaisir de vous croiser un de ces jours sur la route !
+                    Profitez bien de l'application, éclatez-vous ! J'espère que cet outil vous sera utile. Bonne roulade à tous et au plaisir de vous croiser un de ces jours sur la route ! Sven
                 </div>
             </div>
            
@@ -227,15 +221,8 @@
         </div>
         <h2>ITINÉRAIRE</h2>
         <button style="background:#2ecc71; color:black;" onclick="startRouting()">📍 TRACER (ÉPINGLES)</button>
-        <button style="background:#8e44ad;" onclick="fixRoute()">🔒 FIXER (EFFACER POINTS)</button>
         <button style="background:#c0392b;" onclick="clearCurrentData()">🗑️ EFFACER TOUT</button>
         <button style="background:#f39c12; color:black;" onclick="saveToArchive()">💾 SAUVEGARDER</button>
-        <h2 style="color:#3498db;">GPX</h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-            <button style="background:#3498db;" onclick="exportGPX()">📤 EXPORT</button>
-            <button style="background:#3498db;" onclick="document.getElementById('fileIn').click()">📥 IMPORT</button>
-            <input type="file" id="fileIn" style="display:none" accept=".gpx" onchange="importGPX(this)">
-        </div>
         <h2>MES ARCHIVES</h2>
         <div id="archive-list"></div>
     </div>
@@ -258,10 +245,8 @@
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gEurope: L.layerGroup() };
     var isFollowingGPS = false, isRoutingActive = false;
 
-    // --- LOGIQUE PAYS EUROPE ---
     const countries = [
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
-        { n: "Écosse", lat: 56.49, lon: -4.20, u: "https://www.traffic.gov.scot/", f: "🏴󐁧󐁢󐁳󐁣󐁴󐁿" },
         { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
         { n: "Belgique (W)", lat: 50.35, lon: 4.85, u: "https://sofico.org/fr/chantiers/", f: "🇧🇪" },
         { n: "België (V)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/reistijden", f: "🇧🇪" },
@@ -297,7 +282,6 @@
         L.marker([c.lat, c.lon], {icon: f}).addTo(groups.gEurope).bindPopup(`<div style='text-align:center;'><b>${c.n}</b><br><a href='${c.u}' target='_blank' class='btn-popup'>VOIR LES TRAVAUX</a></div>`);
     });
 
-    // --- GPS ---
     function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); }
     map.on('locationfound', (e) => {
         if (!window.userMarker) window.userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(map);
@@ -313,12 +297,10 @@
         if (isFollowingGPS && window.userPos) map.setView(window.userPos, 15);
     }
 
-    // --- TRAVAUX UMAP ---
     function toggleUmap() { var w = document.getElementById('umap-window'); w.style.display = (w.style.display==='none'?'block':'none'); }
     function toggleFullScreen() { var w = document.getElementById('umap-window'); if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; } else { w.style.width='100%'; w.style.height='100%'; } }
     function minimizeUmap() { var w = document.getElementById('umap-window'); w.style.height = (w.style.height==='35px'?'350px':'35px'); }
 
-    // --- POI ---
     function activatePoi(t, c) {
         closeAll();
         map.once('click', (e) => {
@@ -342,7 +324,6 @@
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
 
-    // --- ITINÉRAIRE ---
     function startRouting() {
         closeAll();
         if (isRoutingActive) return;
@@ -373,14 +354,6 @@
         });
     }
 
-    // EFFACER LES POINTS MAIS GARDER LE TRACÉ
-    function fixRoute() {
-        isRoutingActive = false;
-        map.off('click');
-        document.getElementById('map').style.cursor = '';
-        gRouteMarkers.clearLayers();
-    }
-
     function clearCurrentData() {
         isRoutingActive = false;
         map.off('click');
@@ -392,7 +365,6 @@
     }
 
     function saveToArchive() {
-        if (routePoints.length < 2) return alert("Rien à sauvegarder.");
         var n = prompt("Nom du trajet :"); if(!n) return;
         var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
         a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) });
@@ -426,47 +398,7 @@
             routePoints.push(m);
             m.on('dragend', updateRoute);
         });
-        updateRoute();
-        closeAll();
-        // EFFACER LES POINTS AUTOMATIQUEMENT APRÈS CHARGEMENT (1sec de délai pour calcul)
-        setTimeout(() => { gRouteMarkers.clearLayers(); }, 1200);
-    }
-
-    function exportGPX() {
-        var pts = routeLayer.getLatLngs();
-        if(!pts || pts.length === 0) return alert("Pas de trajet à exporter !");
-        var gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="ConvoiApp"><trk><trkseg>' +
-                  pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') +
-                  '</trkseg></trk></gpx>';
-       
-        var blob = new Blob([gpx], {type: 'application/gpx+xml'});
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = "itineraire.gpx";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
-   
-    function importGPX(input) {
-        var r = new FileReader();
-        r.onload = (e) => {
-            var xml = new DOMParser().parseFromString(e.target.result, "text/xml");
-            var pts = Array.from(xml.getElementsByTagName("trkpt"));
-            if(pts.length > 0) {
-                clearCurrentData();
-                pts.forEach((p, index) => {
-                    if(index % 20 === 0 || index === pts.length-1) {
-                        var m = L.marker([p.getAttribute("lat"), p.getAttribute("lon")], { draggable: true }).addTo(gRouteMarkers);
-                        routePoints.push(m);
-                        m.on('dragend', updateRoute);
-                    }
-                });
-                updateRoute(); closeAll();
-            }
-        };
-        r.readAsText(input.files[0]);
+        updateRoute(); closeAll();
     }
 
     renderArch();
