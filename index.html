@@ -79,7 +79,6 @@
         .poi-inner { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
         .poi-relais { width: 24px; height: 24px; background: #00561b; border: 2px solid #e30613; border-radius: 50%; color: white; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
 
-        /* Bulle Note au survol */
         .note-tooltip { background: #fff9c4; color: #333; border: 1px solid #fbc02d; font-weight: bold; padding: 5px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
@@ -92,11 +91,11 @@
                 <div class="modal-text">
                     <p><b>1. BOUTON RÉSEAUX :</b> Choisissez le réseau routier à afficher (Cat 1, 48t, 72t, 94t ou 120t+).</p>
                     <p><b>2. BOUTON OUTILS :</b> Placez vos points d'intérêt personnels en cliquant sur la carte. Tracez vos routes en cliquant sur la carte et effacez-les sans perdre vos points. Pour charger un trajet, utilisez vos archives en bas du menu.</p>
-                    <p><b>3. BOUTON TRAVAUX LIVE :</b> Le bouton central ouvre la carte travaux dans une petite fenêtre a droite. Utilisez <b>BOX</b> pour le plein écran et rappuyez dessus pour le reduire.</p>
+                    <p><b>3. BOUTON TRAVAUX LIVE :</b> Le bouton central ouvre la carte travaux dans une petite fenêtre a droite. Utilisez <b>BOX</b> pour le plein écran et rappueyez dessus pour le reduire.</p>
                 </div>
                 <div class="warning-flash">
                     ⚠️ ATTENTION :<br>
-                    Le site n'est pas responsable en cas d'erreur sur les données partagées en gpx. Tout partage est sous votre responsabilité. Soyez vigilants !
+                    Le site n'est pas responsable en cas d'erreur sur les données partagées en gpx les hauteurs de pont. Tout partage est sous votre responsabilité. Soyez vigilants !
                 </div>
                 <div class="modal-text">
                     <p style="border:none; color:#2ecc71;font-style:italic;">Profitez bien de l'application, éclatez-vous ! J'espère que cet outil vous sera utile. Bonne roulade à tous et au plaisir de vous croiser un de ces jours sur la route !</p>
@@ -199,17 +198,22 @@
     function toggleFullScreen() { let w = document.getElementById('umap-window'); if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; w.style.top='70px'; w.style.right='10px'; } else { w.style.width='100%'; w.style.height='100%'; w.style.top='0'; w.style.right='0'; } }
     function minimizeUmap() { let w = document.getElementById('umap-window'); w.style.height = (w.style.height==='35px'?'350px':'35px'); }
 
-    // --- POI AVEC NOTES & RETRAIT ---
+    // --- POI CORRIGÉS (PLUS D'INTERFÉRENCE ROUTE) ---
     function activatePoi(type, color) {
-        closeAll(); map.once('click', (e) => {
+        closeAll(); 
+        map.off('click'); // On désactive les autres écouteurs avant de poser
+        map.once('click', (e) => {
             let note = prompt("Note pour ce point :", "");
             let m = L.marker(e.latlng, { icon: L.divIcon({ className:'poi-maps-style', html:`<div class="poi-inner" style="background:${color}">${type}</div>`, iconSize:[26,26], iconAnchor:[13,13] }) }).addTo(gPois);
             if(note) m.bindTooltip(note, { className: 'note-tooltip', sticky: true });
             m.bindPopup(`<b>${type}</b><br>${note}<br><br><button onclick="gPois.removeLayer(map._layers['${m._leaflet_id}'])" style="background:red;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">Retirer</button>`);
         });
     }
+
     function activateRelais() {
-        closeAll(); map.once('click', (e) => {
+        closeAll(); 
+        map.off('click'); // On désactive les autres écouteurs avant de poser
+        map.once('click', (e) => {
             let note = prompt("Note pour ce Resto :", "");
             let m = L.marker(e.latlng, { icon: L.divIcon({ className: '', html: '<div class="poi-relais">R</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) }).addTo(gPois);
             if(note) m.bindTooltip(note, { className: 'note-tooltip', sticky: true });
@@ -224,6 +228,7 @@
     // --- ITINÉRAIRE ---
     function startRouting() {
         closeAll();
+        map.off('click'); // Sécurité
         map.on('click', function(e) {
             let m = L.marker(e.latlng, {draggable:true}).addTo(gRouteMarkers);
             routePoints.push(m);
@@ -242,7 +247,6 @@
     }
     function showDistance(meters) { document.getElementById('dist-val').innerText = (meters / 1000).toFixed(1); document.getElementById('distance-info').style.display = 'block'; }
     
-    // Modification ICI : On n'efface QUE la route, pas les POI
     function clearCurrentData() { 
         if(confirm("Effacer l'itinéraire actuel ? (Les POI resteront)")) {
             gRouteMarkers.clearLayers(); 
