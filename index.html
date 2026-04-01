@@ -241,6 +241,7 @@
     var routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map), routePoints = [];
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gEurope: L.layerGroup() };
     var isFollowingGPS = false;
+    var isRoutingActive = false; // Flag pour le mode tracé
 
     const countries = [
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
@@ -321,9 +322,15 @@
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
 
+    // --- CORRECTION DU TRACÉ ---
     function startRouting() { 
         closeAll(); 
-        map.on('click', (e) => { 
+        if (isRoutingActive) return; // Évite de doubler les écouteurs
+        isRoutingActive = true;
+        document.getElementById('map').style.cursor = 'crosshair';
+
+        map.on('click', function(e) {
+            if(!isRoutingActive) return;
             var m = L.marker(e.latlng, { draggable: true }).addTo(gRouteMarkers);
             routePoints.push(m);
             m.on('dragend', updateRoute);
@@ -332,18 +339,30 @@
     }
 
     function updateRoute() {
-        if (routePoints.length < 2) return;
+        if (routePoints.length < 2) {
+            routeLayer.setLatLngs([]);
+            return;
+        }
         var coords = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';');
         fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`).then(r => r.json()).then(d => {
-            if(d.routes[0]) {
+            if(d.routes && d.routes[0]) {
                 routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(x => [x[1], x[0]]));
                 document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
                 document.getElementById('distance-info').style.display = 'block';
             }
-        });
+        }).catch(err => console.log("Erreur OSRM:", err));
     }
 
-    function clearCurrentData() { gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); routePoints=[]; document.getElementById('distance-info').style.display = 'none'; }
+    function clearCurrentData() { 
+        isRoutingActive = false;
+        map.off('click');
+        document.getElementById('map').style.cursor = '';
+        gRouteMarkers.clearLayers(); 
+        routeLayer.setLatLngs([]); 
+        routePoints=[]; 
+        document.getElementById('distance-info').style.display = 'none'; 
+    }
+    // ----------------------------
 
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json").then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
