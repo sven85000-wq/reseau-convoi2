@@ -109,6 +109,9 @@
         .archive-item { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
         .btn-archive-load { flex-grow: 1; text-align: left; background: #34495e; padding: 10px; margin: 0; }
         .btn-archive-del { width: 40px !important; background: #c0392b; padding: 10px; margin: 0; flex-shrink: 0; }
+       
+        /* Style pour rendre les marqueurs de tracé invisibles */
+        .invisible-marker { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -122,6 +125,7 @@
                 <div class="lang-dot" onclick="changeLang('fr')">🇧🇪</div>
                 <div class="lang-dot" onclick="changeLang('nl')">🇧🇪</div>
                 <div class="lang-dot" onclick="changeLang('en')">🇬🇧</div>
+                <div class="lang-dot" onclick="changeLang('en')">🏴󐁧󐁢󐁳󐁣󐁴󐁿</div>
                 <div class="lang-dot" onclick="changeLang('de')">🇩🇪</div>
                 <div class="lang-dot" onclick="changeLang('es')">🇪🇸</div>
                 <div class="lang-dot" onclick="changeLang('it')">🇮🇹</div>
@@ -166,11 +170,11 @@
                     <p style="border:none; color:#2ecc71;font-style:italic;">Profitez bien de l'application, éclatez-vous ! J'espère que cet outil vous sera utile. Bonne roulade à tous et au plaisir de vous croiser un de ces jours sur la route !</p>
                 </div>
             </div>
-            <button style="background:#27ae60; color:white; margin-top:10px; width: 100%;" onclick="closeWelcome()">J'AI COMPRIS / START</button>
+            <button style="background:#27ae60; color:white; margin-top:10px; width: 100%;" onclick="closeWelcome()">DÉMARRER / START</button>
         </div>
     </div>
 
-    <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX FRANCE</div>
+    <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX</div>
     <div id="btn-gps-toggle" class="gps-off" onclick="toggleGPSFollow()">🛑 MODE ROUTE</div>
     <div id="distance-info">📏 <span id="dist-val">0</span> km</div>
 
@@ -243,6 +247,7 @@
 
     const countries = [
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
+        { n: "Écosse", lat: 56.49, lon: -4.20, u: "https://www.traffic.gov.scot/", f: "🏴󐁧󐁢󐁳󐁣󐁴󐁿" },
         { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
         { n: "Belgique (W)", lat: 50.35, lon: 4.85, u: "https://sofico.org/fr/chantiers/", f: "🇧🇪" },
         { n: "België (V)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/reistijden", f: "🇧🇪" },
@@ -294,25 +299,13 @@
     function toggleFullScreen() { var w = document.getElementById('umap-window'); if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; } else { w.style.width='100%'; w.style.height='100%'; } }
     function minimizeUmap() { var w = document.getElementById('umap-window'); w.style.height = (w.style.height==='35px'?'350px':'35px'); }
 
-    // --- NOUVELLE FONCTION POUR LES POI (CLIC / DBLCLIC) ---
-    function setupPoiEvents(m) {
-        m.on('dblclick', function() {
-            gPois.removeLayer(this);
-        });
-    }
+    function setupPoiEvents(m) { m.on('dblclick', function() { gPois.removeLayer(this); }); }
 
     function activatePoi(t, c) {
         closeAll();
         map.once('click', (e) => {
             var n = prompt("Note :");
-            var m = L.marker(e.latlng, {
-                icon: L.divIcon({
-                    className:'poi-maps-style',
-                    html:`<div class="poi-inner" style="background:${c}">${t}</div>`,
-                    iconSize:[26,26],
-                    iconAnchor:[13,13]
-                })
-            }).addTo(gPois);
+            var m = L.marker(e.latlng, { icon: L.divIcon({ className:'poi-maps-style', html:`<div class="poi-inner" style="background:${c}">${t}</div>`, iconSize:[26,26], iconAnchor:[13,13] }) }).addTo(gPois);
             if(n) m.bindPopup(`<b>Note :</b><br>${n}`);
             setupPoiEvents(m);
         });
@@ -321,16 +314,8 @@
     function activateRelais() {
         closeAll();
         map.once('click', (e) => {
-            var m = L.marker(e.latlng, {
-                icon: L.divIcon({
-                    className: '',
-                    html: '<div class="poi-relais">R</div>',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                })
-            }).addTo(gPois);
-            var n = prompt("Note Resto :");
-            if(n) m.bindPopup(`<b>Resto :</b><br>${n}`);
+            var m = L.marker(e.latlng, { icon: L.divIcon({ className: '', html: '<div class="poi-relais">R</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) }).addTo(gPois);
+            var n = prompt("Note Resto :"); if(n) m.bindPopup(`<b>Resto :</b><br>${n}`);
             setupPoiEvents(m);
         });
     }
@@ -339,7 +324,21 @@
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
 
-    function startRouting() { closeAll(); map.on('click', (e) => { var m = L.marker(e.latlng, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); updateRoute(); }); }
+    // --- TRACÉ SANS VISIBILITÉ DES POINTS ---
+    function startRouting() {
+        closeAll();
+        map.on('click', (e) => {
+            // On crée un marqueur invisible
+            var m = L.marker(e.latlng, {
+                icon: L.divIcon({ className: 'invisible-marker' }),
+                draggable: true
+            }).addTo(gRouteMarkers);
+            routePoints.push(m);
+            m.on('dragend', updateRoute);
+            updateRoute();
+        });
+    }
+
     function updateRoute() {
         if (routePoints.length < 2) return;
         var coords = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';');
@@ -351,6 +350,7 @@
             }
         });
     }
+
     function clearCurrentData() { gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); routePoints=[]; document.getElementById('distance-info').style.display = 'none'; }
 
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json").then(r => r.json()).then(data => {
@@ -363,35 +363,34 @@
     });
 
     function saveToArchive() { var n = prompt("Nom du trajet :"); if(!n) return; var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) }); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); }
-   
-    function deleteArch(i) {
-        if(confirm("Supprimer cette archive ?")) {
-            var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
-            a.splice(i, 1);
-            localStorage.setItem('convoi_arch', JSON.stringify(a));
-            renderArch();
-        }
-    }
+    function deleteArch(i) { if(confirm("Supprimer cette archive ?")) { var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.splice(i, 1); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); } }
 
     function renderArch() {
         var l = document.getElementById('archive-list'); l.innerHTML = "";
         var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
         a.forEach((x, i) => {
             var d = document.createElement('div'); d.className = "archive-item";
-            d.innerHTML = `
-                <button onclick="loadArch(${i})" class="btn-archive-load">📂 ${x.name}</button>
-                <button onclick="deleteArch(${i})" class="btn-archive-del">✖</button>
-            `;
+            d.innerHTML = `<button onclick="loadArch(${i})" class="btn-archive-load">📂 ${x.name}</button><button onclick="deleteArch(${i})" class="btn-archive-del">✖</button>`;
             l.appendChild(d);
         });
     }
 
-    function loadArch(i) { var a = JSON.parse(localStorage.getItem('convoi_arch'))[i]; clearCurrentData(); a.pts.forEach(p => { var m = L.marker(p, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); }); updateRoute(); closeAll(); }
+    function loadArch(i) {
+        var a = JSON.parse(localStorage.getItem('convoi_arch'))[i];
+        clearCurrentData();
+        a.pts.forEach(p => {
+            var m = L.marker(p, { icon: L.divIcon({ className: 'invisible-marker' }), draggable: true }).addTo(gRouteMarkers);
+            routePoints.push(m);
+            m.on('dragend', updateRoute);
+        });
+        updateRoute();
+        closeAll();
+    }
    
     renderArch();
 
     function exportGPX() { var pts = routeLayer.getLatLngs(); if(!pts.length) return; var gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>' + pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') + '</trkseg></trk></gpx>'; var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx], {type: 'application/gpx+xml'})); a.download = "itineraire.gpx"; a.click(); }
-    function importGPX(input) { var r = new FileReader(); r.onload = (e) => { var xml = new DOMParser().parseFromString(e.target.result, "text/xml"); var pts = Array.from(xml.getElementsByTagName("trkpt")); if(pts.length > 0) { clearCurrentData(); pts.forEach(p => { var m = L.marker([p.getAttribute("lat"), p.getAttribute("lon")], {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); }); updateRoute(); setTimeout(() => map.fitBounds(routeLayer.getBounds()), 500); closeAll(); } }; r.readAsText(input.files[0]); }
+    function importGPX(input) { var r = new FileReader(); r.onload = (e) => { var xml = new DOMParser().parseFromString(e.target.result, "text/xml"); var pts = Array.from(xml.getElementsByTagName("trkpt")); if(pts.length > 0) { clearCurrentData(); pts.forEach(p => { var m = L.marker([p.getAttribute("lat"), p.getAttribute("lon")], { icon: L.divIcon({ className: 'invisible-marker' }), draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); }); updateRoute(); setTimeout(() => map.fitBounds(routeLayer.getBounds()), 500); closeAll(); } }; r.readAsText(input.files[0]); }
 </script>
 </body>
 </html>
