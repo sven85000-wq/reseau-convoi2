@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>CARTE RESEAU ET TRAVAUX FRANCE - EUROPE</title>
+    <title>CARTE RESEAU ET TRAVAUX FRANCE / EUROPE</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -9,12 +9,9 @@
         body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; position: absolute; }
 
-        /* --- SUPPRESSION TOTALE ET DÉFINITIVE DE L'INTERFACE GOOGLE --- */
-        .goog-te-banner-frame.skiptranslate,
-        .goog-te-gadget-icon,
-        .goog-te-gadget-simple img,
-        .goog-te-spinner-pos,
-        .goog-te-menu-value span { display: none !important; }
+        /* --- SUPPRESSION INTERFACE GOOGLE --- */
+        .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon, .goog-te-gadget-simple img,
+        .goog-te-spinner-pos, .goog-te-menu-value span { display: none !important; }
         body { top: 0px !important; }
         .goog-tooltip, .goog-tooltip:hover { display: none !important; }
         .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
@@ -34,7 +31,6 @@
         }
         .modal-scroll { overflow-y: auto; padding-right: 5px; }
 
-        /* --- BANDEAU DE PAYS --- */
         .lang-header {
             display: flex; flex-wrap: wrap; justify-content: center;
             gap: 6px; padding-bottom: 12px; margin-bottom: 10px;
@@ -109,7 +105,10 @@
         }
 
         .btn-popup { display: inline-block; background: #f39c12; color: black; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 5px; }
-        .note-tooltip { background: #fff9c4; color: #333; border: 1px solid #fbc02d; font-weight: bold; padding: 5px; border-radius: 4px; font-size: 12px; }
+       
+        .archive-item { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+        .btn-archive-load { flex-grow: 1; text-align: left; background: #34495e; padding: 10px; margin: 0; }
+        .btn-archive-del { width: 40px !important; background: #c0392b; padding: 10px; margin: 0; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -119,53 +118,59 @@
     <div id="welcome-modal">
         <div class="modal-content">
             <div class="lang-header">
-                <div class="lang-dot" onclick="changeLang('fr')" title="FR">🇫🇷</div>
-                <div class="lang-dot" onclick="changeLang('fr')" title="BE-FR">🇧🇪</div>
-                <div class="lang-dot" onclick="changeLang('nl')" title="BE-NL">🇧🇪</div>
-                <div class="lang-dot" onclick="changeLang('en')" title="UK">🇬🇧</div>
-                <div class="lang-dot" onclick="changeLang('de')" title="DE">🇩🇪</div>
-                <div class="lang-dot" onclick="changeLang('es')" title="ES">🇪🇸</div>
-                <div class="lang-dot" onclick="changeLang('it')" title="IT">🇮🇹</div>
-                <div class="lang-dot" onclick="changeLang('nl')" title="NL">🇳🇱</div>
-                <div class="lang-dot" onclick="changeLang('pt')" title="PT">🇵🇹</div>
-                <div class="lang-dot" onclick="changeLang('pl')" title="PL">🇵🇱</div>
-                <div class="lang-dot" onclick="changeLang('ro')" title="RO">🇷🇴</div>
-                <div class="lang-dot" onclick="changeLang('hu')" title="HU">🇭🇺</div>
-                <div class="lang-dot" onclick="changeLang('cs')" title="CZ">🇨🇿</div>
-                <div class="lang-dot" onclick="changeLang('sk')" title="SK">🇸🇰</div>
-                <div class="lang-dot" onclick="changeLang('da')" title="DK">🇩🇰</div>
-                <div class="lang-dot" onclick="changeLang('sv')" title="SE">🇸🇪</div>
-                <div class="lang-dot" onclick="changeLang('no')" title="NO">🇳🇴</div>
-                <div class="lang-dot" onclick="changeLang('fi')" title="FI">🇫🇮</div>
-                <div class="lang-dot" onclick="changeLang('bg')" title="BG">🇧🇬</div>
-                <div class="lang-dot" onclick="changeLang('et')" title="EE">🇪🇪</div>
-                <div class="lang-dot" onclick="changeLang('lv')" title="LV">🇱🇻</div>
-                <div class="lang-dot" onclick="changeLang('lt')" title="LT">🇱🇹</div>
-                <div class="lang-dot" onclick="changeLang('sl')" title="SI">🇸🇮</div>
-                <div class="lang-dot" onclick="changeLang('hr')" title="HR">🇭🇷</div>
-                <div class="lang-dot" onclick="changeLang('el')" title="GR">🇬🇷</div>
-                <div class="lang-dot" onclick="changeLang('tr')" title="TR">🇹🇷</div>
-                <div class="lang-dot" onclick="changeLang('ru')" title="RU">🇷🇺</div>
+                <div class="lang-dot" onclick="changeLang('fr')">🇫🇷</div>
+                <div class="lang-dot" onclick="changeLang('fr')">🇧🇪</div>
+                <div class="lang-dot" onclick="changeLang('nl')">🇧🇪</div>
+                <div class="lang-dot" onclick="changeLang('en')">🇬🇧</div>
+                <div class="lang-dot" onclick="changeLang('de')">🇩🇪</div>
+                <div class="lang-dot" onclick="changeLang('es')">🇪🇸</div>
+                <div class="lang-dot" onclick="changeLang('it')">🇮🇹</div>
+                <div class="lang-dot" onclick="changeLang('nl')">🇳🇱</div>
+                <div class="lang-dot" onclick="changeLang('pt')">🇵🇹</div>
+                <div class="lang-dot" onclick="changeLang('pl')">🇵🇱</div>
+                <div class="lang-dot" onclick="changeLang('ro')">🇷🇴</div>
+                <div class="lang-dot" onclick="changeLang('hu')">🇭🇺</div>
+                <div class="lang-dot" onclick="changeLang('cs')">🇨🇿</div>
+                <div class="lang-dot" onclick="changeLang('sk')">🇸🇰</div>
+                <div class="lang-dot" onclick="changeLang('da')">🇩🇰</div>
+                <div class="lang-dot" onclick="changeLang('sv')">🇸🇪</div>
+                <div class="lang-dot" onclick="changeLang('no')">🇳🇴</div>
+                <div class="lang-dot" onclick="changeLang('fi')">🇫🇮</div>
+                <div class="lang-dot" onclick="changeLang('bg')">🇧🇬</div>
+                <div class="lang-dot" onclick="changeLang('et')">🇪🇪</div>
+                <div class="lang-dot" onclick="changeLang('lv')">🇱🇻</div>
+                <div class="lang-dot" onclick="changeLang('lt')">🇱🇹</div>
+                <div class="lang-dot" onclick="changeLang('sl')">🇸🇮</div>
+                <div class="lang-dot" onclick="changeLang('hr')">🇭🇷</div>
+                <div class="lang-dot" onclick="changeLang('el')">🇬🇷</div>
+                <div class="lang-dot" onclick="changeLang('tr')">🇹🇷</div>
+                <div class="lang-dot" onclick="changeLang('ru')">🇷🇺</div>
             </div>
 
             <h2 style="margin-top:0; color:#f39c12;">👋 Outil Convoi</h2>
             <div class="modal-scroll">
                 <div class="modal-text">
                     <p><b>1. BOUTON RÉSEAUX :</b> Choisissez le réseau routier à afficher (Cat 1, 48t, 72t, 94t ou 120t+).</p>
-                    <p><b>2. BOUTON OUTILS :</b> Placez vos points d'intérêt personnels et tracez vos routes.</p>
-                    <p><b>3. BOUTON TRAVAUX :</b> Le bouton central ouvre la carte interactive.</p>
+                    <p><b>2. BOUTON OUTILS :</b> Placez vos points d'intérêt personnels en cliquant sur la carte. Tracez vos routes en cliquant sur la carte et effacez-les sans perdre vos points. Pour charger un trajet, utilisez vos archives en bas du menu.</p>
+                    <p><b>3. BOUTON TRAVAUX :</b> Le bouton central ouvre la carte travaux dans une petite fenêtre a droite. Utilisez <b>BOX</b> pour le plein écran et rappuyez dessus pour le reduire.</p>
                    
                     <p style="background: rgba(52, 152, 219, 0.2); padding: 8px; border-radius: 5px; font-size: 11px; border-left: 3px solid #3498db;">
-                        ℹ️ <b>CONFIDENTIALITÉ :</b> L'autorisation de position sert uniquement à afficher votre camion sur l'écran. <b>Aucune donnée n'est envoyée vers un serveur.</b> Je n'ai aucun accès à votre position.
+                        ℹ️ <b>CONFIDENTIALITÉ :</b> L'autorisation de position sert uniquement à afficher votre camion sur l'écran. <b>Aucune donnée n'est enregistrée ou envoyée vers un serveur.</b> Je n'ai aucun accès à votre position réelle.
                     </p>
                 </div>
-                <div class="warning-flash">⚠️ ATTENTION : Partage de GPX sous votre responsabilité.</div>
+                <div class="warning-flash">
+                    ⚠️ ATTENTION :<br>
+                    Le site n'est pas responsable en cas d'erreur sur les données partagées en gpx. Tout partage est sous votre responsabilité. Soyez vigilants !
+                </div>
+                <div class="modal-text">
+                    <p style="border:none; color:#2ecc71;font-style:italic;">Profitez bien de l'application, éclatez-vous ! J'espère que cet outil vous sera utile. Bonne roulade à tous et au plaisir de vous croiser un de ces jours sur la route !</p>
+                </div>
             </div>
-            <button style="background:#27ae60; color:white; margin-top:10px; width: 100%;" onclick="closeWelcome()">DÉMARRER / START</button>
+            <button style="background:#27ae60; color:white; margin-top:10px; width: 100%;" onclick="closeWelcome()">J'AI COMPRIS / START</button>
         </div>
     </div>
 
-    <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX</div>
+    <div id="btn-travaux-direct" onclick="toggleUmap()">🚧 TRAVAUX FRANCE</div>
     <div id="btn-gps-toggle" class="gps-off" onclick="toggleGPSFollow()">🛑 MODE ROUTE</div>
     <div id="distance-info">📏 <span id="dist-val">0</span> km</div>
 
@@ -214,6 +219,7 @@
             <button style="background:#3498db;" onclick="document.getElementById('fileIn').click()">📥 IMPORT</button>
             <input type="file" id="fileIn" style="display:none" accept=".gpx" onchange="importGPX(this)">
         </div>
+        <h2>MES ARCHIVES</h2>
         <div id="archive-list"></div>
     </div>
 
@@ -237,35 +243,31 @@
 
     const countries = [
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
-        { n: "Écosse", lat: 56.49, lon: -4.20, u: "https://www.traffic.gov.scot/", f: "🏴󐁧󐁢󐁳󐁣󐁴󐁿" },
         { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
-        { n: "Belgique (Wallonie)", lat: 50.35, lon: 4.85, u: "https://sofico.org/fr/chantiers/", f: "🇧🇪" },
-        { n: "België (Vlaanderen)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/reistijden", f: "🇧🇪" },
-        { n: "Luxembourg", lat: 49.61, lon: 6.13, u: "https://www.cita.lu/fr/chantiers.html", f: "🇱🇺" },
+        { n: "Belgique (W)", lat: 50.35, lon: 4.85, u: "https://sofico.org/fr/chantiers/", f: "🇧🇪" },
+        { n: "België (V)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/reistijden", f: "🇧🇪" },
+        { n: "Luxembourg", lat: 49.61, lon: 6.13, u: "https://www.cita.lu/", f: "🇱🇺" },
         { n: "Pays-Bas", lat: 52.13, lon: 5.29, u: "https://www.rwsverkeersinfo.nl/", f: "🇳🇱" },
         { n: "Allemagne", lat: 51.16, lon: 10.45, u: "https://verkehr.vz-deutschland.de/", f: "🇩🇪" },
         { n: "Suisse", lat: 46.81, lon: 8.22, u: "https://www.tcs.ch/", f: "🇨🇭" },
-        { n: "Autriche", lat: 47.51, lon: 14.55, u: "https://baustelleninfo.asfinag.at/client/", f: "🇦🇹" },
+        { n: "Autriche", lat: 47.51, lon: 14.55, u: "https://baustelleninfo.asfinag.at/", f: "🇦🇹" },
         { n: "Pologne", lat: 51.91, lon: 19.14, u: "https://drogi.gddkia.gov.pl/", f: "🇵🇱" },
-        { n: "Rép. Tchèque", lat: 49.81, lon: 15.47, u: "https://dropavniinfo.cz/", f: "🇨🇿" },
-        { n: "Slovaquie", lat: 48.66, lon: 19.14, u: "https://ndsas.sk/sluzby/dopravne-informacie", f: "🇸🇰" },
+        { n: "Tchéquie", lat: 49.81, lon: 15.47, u: "https://dropavniinfo.cz/", f: "🇨🇿" },
+        { n: "Slovaquie", lat: 48.66, lon: 19.14, u: "https://ndsas.sk/", f: "🇸🇰" },
         { n: "Hongrie", lat: 47.16, lon: 19.50, u: "https://www.utinform.hu/", f: "🇭🇺" },
         { n: "Espagne", lat: 40.41, lon: -3.70, u: "http://infocar.dgt.es/", f: "🇪🇸" },
         { n: "Italie", lat: 41.87, lon: 12.56, u: "https://www.autostrade.it/", f: "🇮🇹" },
         { n: "Portugal", lat: 39.39, lon: -8.22, u: "https://servicos.infraestruturasdeportugal.pt/", f: "🇵🇹" },
-        { n: "Slovénie", lat: 46.05, lon: 14.50, u: "https://www.promet.si/en/map", f: "🇸🇮" },
+        { n: "Slovénie", lat: 46.05, lon: 14.50, u: "https://www.promet.si/", f: "🇸🇮" },
         { n: "Croatie", lat: 45.81, lon: 15.98, u: "https://www.hak.hr/", f: "🇭🇷" },
-        { n: "Roumanie", lat: 44.42, lon: 26.10, u: "https://dispecerat.andnet.ro/harta.php", f: "🇷🇴" },
-        { n: "Bulgarie", lat: 42.73, lon: 25.48, u: "https://www.api.bg/index.php/bg/promeni", f: "🇧🇬" },
+        { n: "Roumanie", lat: 44.42, lon: 26.10, u: "https://dispecerat.andnet.ro/", f: "🇷🇴" },
+        { n: "Bulgarie", lat: 42.73, lon: 25.48, u: "https://www.api.bg/", f: "🇧🇬" },
         { n: "Grèce", lat: 39.07, lon: 21.82, u: "https://www.astynomia.gr/", f: "🇬🇷" },
         { n: "Turquie", lat: 38.96, lon: 35.24, u: "https://www.kgm.gov.tr/", f: "🇹🇷" },
         { n: "Danemark", lat: 56.26, lon: 9.50, u: "https://trafikkort.vejdirektoratet.dk/", f: "🇩🇰" },
         { n: "Suède", lat: 60.12, lon: 18.64, u: "https://www.trafikverket.se/", f: "🇸🇪" },
-        { n: "Norvège", lat: 60.47, lon: 8.46, u: "https://www.vegvesen.no/trafikk", f: "🇳🇴" },
-        { n: "Finlande", lat: 61.92, lon: 25.74, u: "https://liikennetilanne.fintraffic.fi/", f: "🇫🇮" },
-        { n: "Estonie", lat: 58.59, lon: 25.01, u: "https://www.tarktee.ee/", f: "🇪🇪" },
-        { n: "Lettonie", lat: 56.87, lon: 24.60, u: "https://lvceli.lv/", f: "🇱🇻" },
-        { n: "Lituanie", lat: 55.16, lon: 23.88, u: "https://eismoinfo.lt/", f: "🇱🇹" }
+        { n: "Norvège", lat: 60.47, lon: 8.46, u: "https://www.vegvesen.no/", f: "🇳🇴" },
+        { n: "Finlande", lat: 61.92, lon: 25.74, u: "https://liikennetilanne.fintraffic.fi/", f: "🇫🇮" }
     ];
 
     countries.forEach(c => {
@@ -289,19 +291,49 @@
     }
 
     function toggleUmap() { var w = document.getElementById('umap-window'); w.style.display = (w.style.display==='none'?'block':'none'); }
-    function toggleFullScreen() { var w = document.getElementById('umap-window'); if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; w.style.top='70px'; w.style.right='10px'; } else { w.style.width='100%'; w.style.height='100%'; w.style.top='0'; w.style.right='0'; } }
+    function toggleFullScreen() { var w = document.getElementById('umap-window'); if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; } else { w.style.width='100%'; w.style.height='100%'; } }
     function minimizeUmap() { var w = document.getElementById('umap-window'); w.style.height = (w.style.height==='35px'?'350px':'35px'); }
 
-    function activatePoi(t, c) { closeAll(); map.once('click', (e) => {
-        var n = prompt("Note :");
-        var m = L.marker(e.latlng, { icon: L.divIcon({ className:'poi-maps-style', html:`<div class="poi-inner" style="background:${c}">${t}</div>`, iconSize:[26,26], iconAnchor:[13,13] }) }).addTo(gPois);
-        if(n) m.bindTooltip(n, {sticky:true});
-    });}
+    // --- NOUVELLE FONCTION POUR LES POI (CLIC / DBLCLIC) ---
+    function setupPoiEvents(m) {
+        m.on('dblclick', function() {
+            gPois.removeLayer(this);
+        });
+    }
 
-    function activateRelais() { closeAll(); map.once('click', (e) => {
-        var m = L.marker(e.latlng, { icon: L.divIcon({ className: '', html: '<div class="poi-relais">R</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) }).addTo(gPois);
-        var n = prompt("Note Resto :"); if(n) m.bindTooltip(n, {sticky:true});
-    });}
+    function activatePoi(t, c) {
+        closeAll();
+        map.once('click', (e) => {
+            var n = prompt("Note :");
+            var m = L.marker(e.latlng, {
+                icon: L.divIcon({
+                    className:'poi-maps-style',
+                    html:`<div class="poi-inner" style="background:${c}">${t}</div>`,
+                    iconSize:[26,26],
+                    iconAnchor:[13,13]
+                })
+            }).addTo(gPois);
+            if(n) m.bindPopup(`<b>Note :</b><br>${n}`);
+            setupPoiEvents(m);
+        });
+    }
+
+    function activateRelais() {
+        closeAll();
+        map.once('click', (e) => {
+            var m = L.marker(e.latlng, {
+                icon: L.divIcon({
+                    className: '',
+                    html: '<div class="poi-relais">R</div>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                })
+            }).addTo(gPois);
+            var n = prompt("Note Resto :");
+            if(n) m.bindPopup(`<b>Resto :</b><br>${n}`);
+            setupPoiEvents(m);
+        });
+    }
 
     function openMenu(id) { closeAll(); document.getElementById(id).style.display = 'block'; }
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
@@ -330,9 +362,32 @@
         Object.keys(groups).forEach(k => map.addLayer(groups[k]));
     });
 
-    function saveToArchive() { var n = prompt("Nom :"); if(!n) return; var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) }); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); }
-    function renderArch() { var l = document.getElementById('archive-list'); l.innerHTML = ""; JSON.parse(localStorage.getItem('convoi_arch') || "[]").forEach((x, i) => { var d = document.createElement('div'); d.innerHTML = `<button onclick="loadArch(${i})" style="background:#34495e; margin-bottom:2px;">📂 ${x.name}</button>`; l.appendChild(d); }); }
+    function saveToArchive() { var n = prompt("Nom du trajet :"); if(!n) return; var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) }); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); }
+   
+    function deleteArch(i) {
+        if(confirm("Supprimer cette archive ?")) {
+            var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
+            a.splice(i, 1);
+            localStorage.setItem('convoi_arch', JSON.stringify(a));
+            renderArch();
+        }
+    }
+
+    function renderArch() {
+        var l = document.getElementById('archive-list'); l.innerHTML = "";
+        var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
+        a.forEach((x, i) => {
+            var d = document.createElement('div'); d.className = "archive-item";
+            d.innerHTML = `
+                <button onclick="loadArch(${i})" class="btn-archive-load">📂 ${x.name}</button>
+                <button onclick="deleteArch(${i})" class="btn-archive-del">✖</button>
+            `;
+            l.appendChild(d);
+        });
+    }
+
     function loadArch(i) { var a = JSON.parse(localStorage.getItem('convoi_arch'))[i]; clearCurrentData(); a.pts.forEach(p => { var m = L.marker(p, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); }); updateRoute(); closeAll(); }
+   
     renderArch();
 
     function exportGPX() { var pts = routeLayer.getLatLngs(); if(!pts.length) return; var gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>' + pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') + '</trkseg></trk></gpx>'; var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx], {type: 'application/gpx+xml'})); a.download = "itineraire.gpx"; a.click(); }
