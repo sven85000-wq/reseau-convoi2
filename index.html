@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>CARTE RESEAU ET TRAVAUX FRANCE / EUROPE</title>
+    <title>CARTE RESEAU ET TRAVAUX V40.16.2</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -10,7 +10,7 @@
         #map { width: 100%; height: 100vh; z-index: 1; position: absolute; }
 
         /* --- SUPPRESSION INTERFACE GOOGLE --- */
-        .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon, .goog-te-gadget-simple img, 
+        .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon, .goog-te-gadget-simple img,
         .goog-te-spinner-pos, .goog-te-menu-value span { display: none !important; }
         body { top: 0px !important; }
         .goog-tooltip, .goog-tooltip:hover { display: none !important; }
@@ -26,31 +26,41 @@
         }
         .modal-content {
             background: #1e2b37; color: white; border: 3px solid #f39c12;
-            border-radius: 15px; padding: 15px; max-width: 500px;
+            border-radius: 15px; padding: 15px; max-width: 550px;
             max-height: 95vh; display: flex; flex-direction: column;
         }
         .modal-scroll { overflow-y: auto; padding-right: 5px; }
 
         .lang-header {
             display: flex; flex-wrap: wrap; justify-content: center;
-            gap: 6px; padding-bottom: 12px; margin-bottom: 10px;
-            border-bottom: 1px solid rgba(243, 156, 18, 0.3);
+            gap: 8px; padding: 15px 0; margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         .lang-dot {
-            font-size: 18px; cursor: pointer; width: 34px; height: 34px;
+            font-size: 20px; cursor: pointer; width: 38px; height: 38px;
             display: flex; align-items: center; justify-content: center;
             background: #2c3e50; border: 1px solid #f39c12; border-radius: 50%;
-            transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        .lang-dot:hover { transform: scale(1.2); border-color: white; background: #f39c12; }
+        .lang-dot:hover { transform: scale(1.2); border-color: white; }
 
-        .modal-text { text-align: left; font-size: 13px; line-height: 1.4; }
-        .warning-flash {
-            border: 2px solid #ff0000; background: rgba(255,0,0,0.2);
-            padding: 8px; border-radius: 10px; margin: 10px 0;
-            animation: blinker 1.5s linear infinite; font-weight: bold; color: #ff4d4d; font-size: 11px;
+        .modal-text { text-align: left; font-size: 13px; line-height: 1.5; color: #ecf0f1; }
+       
+        .info-blue {
+            background: #2980b9; color: white; padding: 10px;
+            border-radius: 5px; margin: 10px 0; font-size: 12px;
         }
-        @keyframes blinker { 50% { opacity: 0.6; } }
+       
+        .warning-red {
+            border: 2px solid #e74c3c; background: rgba(231, 76, 60, 0.2);
+            padding: 10px; border-radius: 5px; margin: 10px 0;
+            color: #ff7675; font-size: 12px;
+        }
+       
+        .conclusion-green {
+            color: #2ecc71; font-style: italic; font-weight: bold;
+            margin: 15px 0; text-align: center; font-size: 13px;
+        }
 
         /* --- INTERFACE --- */
         #distance-info {
@@ -59,7 +69,7 @@
             padding: 5px 15px; border-radius: 20px; border: 2px solid #f39c12;
             font-weight: bold; font-size: 14px; pointer-events: none; display: none;
         }
-        
+       
         #btn-travaux-direct {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 9998; background: #f39c12; color: black; border: 2px solid #000;
@@ -89,10 +99,11 @@
         .sidebar { position: fixed; top: 0; height: 100vh; width: 310px; background: #1e2b37; color: white; padding: 20px; box-sizing: border-box; z-index: 10000; overflow-y: auto; display: none; }
         #sidebar-left { left: 0; border-right: 4px solid #f39c12; }
         #sidebar-right { right: 0; border-left: 4px solid #f39c12; }
+       
         h2 { font-size: 11px; color: #f39c12; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 15px; text-transform: uppercase; }
         button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; }
         .row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; }
-        
+       
         .gps-dot { width: 16px; height: 16px; background: #4285F4; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .poi-maps-style { display: flex; align-items: center; justify-content: center; background: white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.4); border: 1px solid #ccc; }
         .poi-inner { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
@@ -105,8 +116,7 @@
         }
 
         .btn-popup { display: inline-block; background: #f39c12; color: black; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 5px; }
-        
-        /* --- STYLE ARCHIVE CORRIGE --- */
+       
         .archive-item { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; width: 100%; }
         .btn-archive-load { flex-grow: 1; text-align: left; background: #34495e; padding: 12px; margin: 0; font-size: 13px; }
         .btn-archive-del { width: 45px !important; background: #c0392b; padding: 12px; margin: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
@@ -123,7 +133,7 @@
                 <div class="lang-dot" onclick="changeLang('fr')">🇧🇪</div>
                 <div class="lang-dot" onclick="changeLang('nl')">🇧🇪</div>
                 <div class="lang-dot" onclick="changeLang('en')">🇬🇧</div>
-                <div class="lang-dot" onclick="changeLang('en')">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
+                <div class="lang-dot" onclick="changeLang('en')">🏴󐁧󐁢󐁳󐁣󐁴󐁿</div>
                 <div class="lang-dot" onclick="changeLang('de')">🇩🇪</div>
                 <div class="lang-dot" onclick="changeLang('es')">🇪🇸</div>
                 <div class="lang-dot" onclick="changeLang('it')">🇮🇹</div>
@@ -149,26 +159,30 @@
                 <div class="lang-dot" onclick="changeLang('ru')">🇷🇺</div>
             </div>
 
-            <h2 style="margin-top:0; color:#f39c12;">👋 Outil Convoi</h2>
+            <h3 style="margin:0 0 10px 0; color:#f39c12;">👋 OUTIL CONVOI</h3>
+           
             <div class="modal-scroll">
                 <div class="modal-text">
                     <p><b>1. BOUTON RÉSEAUX :</b> Choisissez le réseau routier à afficher (Cat 1, 48t, 72t, 94t ou 120t+).</p>
                     <p><b>2. BOUTON OUTILS :</b> Placez vos points d'intérêt personnels en cliquant sur la carte. Tracez vos routes en cliquant sur la carte et effacez-les sans perdre vos points. Pour charger un trajet, utilisez vos archives en bas du menu.</p>
                     <p><b>3. BOUTON TRAVAUX :</b> Le bouton central ouvre la carte travaux dans une petite fenêtre a droite. Utilisez <b>BOX</b> pour le plein écran et rappuyez dessus pour le reduire.</p>
-                    
-                    <p style="background: rgba(52, 152, 219, 0.2); padding: 8px; border-radius: 5px; font-size: 11px; border-left: 3px solid #3498db;">
-                        ℹ️ <b>CONFIDENTIALITÉ :</b> L'autorisation de position sert uniquement à afficher votre camion sur l'écran. <b>Aucune donnée n'est enregistrée ou envoyée vers un serveur.</b> Je n'ai aucun accès à votre position réelle.
-                    </p>
                 </div>
-                <div class="warning-flash">
-                    ⚠️ ATTENTION :<br>
+
+                <div class="info-blue">
+                    <b>CONFIDENTIALITÉ :</b> L'autorisation de position sert uniquement à afficher votre camion sur l'écran. Aucune donnée n'est enregistrée ou envoyée vers un serveur. Je n'ai aucun accès à votre position réelle.
+                </div>
+
+                <div class="warning-red">
+                    ⚠️ <b>ATTENTION :</b><br>
                     Le site n'est pas responsable en cas d'erreur sur les données partagées en gpx. Tout partage est sous votre responsabilité. Soyez vigilants !
                 </div>
-                <div class="modal-text">
-                    <p style="border:none; color:#2ecc71;font-style:italic;">Profitez bien de l'application, éclatez-vous ! J'espère que cet outil vous sera utile. Bonne roulade à tous et au plaisir de vous croiser un de ces jours sur la route !</p>
+
+                <div class="conclusion-green">
+                    Profitez bien de l'application, éclatez-vous ! J'espère que cet outil vous sera utile. Bonne roulade à tous et au plaisir de vous croiser un de ces jours sur la route !
                 </div>
             </div>
-            <button style="background:#27ae60; color:white; margin-top:10px; width: 100%;" onclick="closeWelcome()">DÉMARRER / START</button>
+           
+            <button style="background:#2ecc71; color:white; border: 2px solid #27ae60; height: 50px; font-size: 16px;" onclick="closeWelcome()">DÉMARRER / START</button>
         </div>
     </div>
 
@@ -213,6 +227,7 @@
         </div>
         <h2>ITINÉRAIRE</h2>
         <button style="background:#2ecc71; color:black;" onclick="startRouting()">📍 TRACER (ÉPINGLES)</button>
+        <button style="background:#8e44ad;" onclick="fixRoute()">🔒 FIXER (EFFACER POINTS)</button>
         <button style="background:#c0392b;" onclick="clearCurrentData()">🗑️ EFFACER TOUT</button>
         <button style="background:#f39c12; color:black;" onclick="saveToArchive()">💾 SAUVEGARDER</button>
         <h2 style="color:#3498db;">GPX</h2>
@@ -234,19 +249,19 @@
     function googleTranslateElementInit() { new google.translate.TranslateElement({pageLanguage: 'fr', autoDisplay: false}, 'google_translate_element'); }
     function changeLang(l) { var s = document.querySelector('select.goog-te-combo'); if (s) { s.value = l; s.dispatchEvent(new Event('change')); } else { document.cookie = "googtrans=/fr/" + l + "; path=/"; location.reload(); } }
     function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; startGPS(); }
-    
+   
     var map = L.map('map', { center: [48.0, 10.0], zoom: 5, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     var gPois = L.featureGroup().addTo(map), gRouteMarkers = L.featureGroup().addTo(map);
     var routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map), routePoints = [];
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gEurope: L.layerGroup() };
-    var isFollowingGPS = false;
-    var isRoutingActive = false;
+    var isFollowingGPS = false, isRoutingActive = false;
 
+    // --- LOGIQUE PAYS EUROPE ---
     const countries = [
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
-        { n: "Écosse", lat: 56.49, lon: -4.20, u: "https://www.traffic.gov.scot/", f: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+        { n: "Écosse", lat: 56.49, lon: -4.20, u: "https://www.traffic.gov.scot/", f: "🏴󐁧󐁢󐁳󐁣󐁴󐁿" },
         { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
         { n: "Belgique (W)", lat: 50.35, lon: 4.85, u: "https://sofico.org/fr/chantiers/", f: "🇧🇪" },
         { n: "België (V)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/reistijden", f: "🇧🇪" },
@@ -282,6 +297,7 @@
         L.marker([c.lat, c.lon], {icon: f}).addTo(groups.gEurope).bindPopup(`<div style='text-align:center;'><b>${c.n}</b><br><a href='${c.u}' target='_blank' class='btn-popup'>VOIR LES TRAVAUX</a></div>`);
     });
 
+    // --- GPS ---
     function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); }
     map.on('locationfound', (e) => {
         if (!window.userMarker) window.userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(map);
@@ -297,28 +313,28 @@
         if (isFollowingGPS && window.userPos) map.setView(window.userPos, 15);
     }
 
+    // --- TRAVAUX UMAP ---
     function toggleUmap() { var w = document.getElementById('umap-window'); w.style.display = (w.style.display==='none'?'block':'none'); }
     function toggleFullScreen() { var w = document.getElementById('umap-window'); if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; } else { w.style.width='100%'; w.style.height='100%'; } }
     function minimizeUmap() { var w = document.getElementById('umap-window'); w.style.height = (w.style.height==='35px'?'350px':'35px'); }
 
-    function setupPoiEvents(m) { m.on('dblclick', function() { gPois.removeLayer(this); }); }
-
-    function activatePoi(t, c) { 
-        closeAll(); 
-        map.once('click', (e) => { 
-            var n = prompt("Note :"); 
+    // --- POI ---
+    function activatePoi(t, c) {
+        closeAll();
+        map.once('click', (e) => {
+            var n = prompt("Note :");
             var m = L.marker(e.latlng, { icon: L.divIcon({ className:'poi-maps-style', html:`<div class="poi-inner" style="background:${c}">${t}</div>`, iconSize:[26,26], iconAnchor:[13,13] }) }).addTo(gPois);
             if(n) m.bindPopup(`<b>Note :</b><br>${n}`);
-            setupPoiEvents(m);
+            m.on('dblclick', function() { gPois.removeLayer(this); });
         });
     }
 
-    function activateRelais() { 
-        closeAll(); 
-        map.once('click', (e) => { 
+    function activateRelais() {
+        closeAll();
+        map.once('click', (e) => {
             var m = L.marker(e.latlng, { icon: L.divIcon({ className: '', html: '<div class="poi-relais">R</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) }).addTo(gPois);
             var n = prompt("Note Resto :"); if(n) m.bindPopup(`<b>Resto :</b><br>${n}`);
-            setupPoiEvents(m);
+            m.on('dblclick', function() { gPois.removeLayer(this); });
         });
     }
 
@@ -326,8 +342,9 @@
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
 
-    function startRouting() { 
-        closeAll(); 
+    // --- ITINÉRAIRE ---
+    function startRouting() {
+        closeAll();
         if (isRoutingActive) return;
         isRoutingActive = true;
         document.getElementById('map').style.cursor = 'crosshair';
@@ -336,8 +353,8 @@
             var m = L.marker(e.latlng, { draggable: true }).addTo(gRouteMarkers);
             routePoints.push(m);
             m.on('dragend', updateRoute);
-            updateRoute(); 
-        }); 
+            updateRoute();
+        });
     }
 
     function updateRoute() {
@@ -353,19 +370,106 @@
                 document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
                 document.getElementById('distance-info').style.display = 'block';
             }
-        }).catch(err => console.log("Erreur OSRM:", err));
+        });
     }
 
-    function clearCurrentData() { 
+    // EFFACER LES POINTS MAIS GARDER LE TRACÉ
+    function fixRoute() {
         isRoutingActive = false;
         map.off('click');
         document.getElementById('map').style.cursor = '';
-        gRouteMarkers.clearLayers(); 
-        routeLayer.setLatLngs([]); 
-        routePoints=[]; 
-        document.getElementById('distance-info').style.display = 'none'; 
+        gRouteMarkers.clearLayers();
     }
 
+    function clearCurrentData() {
+        isRoutingActive = false;
+        map.off('click');
+        document.getElementById('map').style.cursor = '';
+        gRouteMarkers.clearLayers();
+        routeLayer.setLatLngs([]);
+        routePoints=[];
+        document.getElementById('distance-info').style.display = 'none';
+    }
+
+    function saveToArchive() {
+        if (routePoints.length < 2) return alert("Rien à sauvegarder.");
+        var n = prompt("Nom du trajet :"); if(!n) return;
+        var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
+        a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) });
+        localStorage.setItem('convoi_arch', JSON.stringify(a));
+        renderArch();
+    }
+   
+    function deleteArch(i) {
+        var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
+        a.splice(i, 1);
+        localStorage.setItem('convoi_arch', JSON.stringify(a));
+        renderArch();
+    }
+
+    function renderArch() {
+        var l = document.getElementById('archive-list'); l.innerHTML = "";
+        var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
+        a.forEach((x, i) => {
+            var d = document.createElement('div'); d.className = "archive-item";
+            var bLoad = document.createElement('button'); bLoad.className = "btn-archive-load"; bLoad.innerHTML = "📂 " + x.name; bLoad.onclick = function() { loadArch(i); };
+            var bDel = document.createElement('button'); bDel.className = "btn-archive-del"; bDel.innerHTML = "✖"; bDel.onclick = function() { deleteArch(i); renderArch(); };
+            d.appendChild(bLoad); d.appendChild(bDel); l.appendChild(d);
+        });
+    }
+
+    function loadArch(i) {
+        var a = JSON.parse(localStorage.getItem('convoi_arch'))[i];
+        clearCurrentData();
+        a.pts.forEach((p) => {
+            var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers);
+            routePoints.push(m);
+            m.on('dragend', updateRoute);
+        });
+        updateRoute();
+        closeAll();
+        // EFFACER LES POINTS AUTOMATIQUEMENT APRÈS CHARGEMENT (1sec de délai pour calcul)
+        setTimeout(() => { gRouteMarkers.clearLayers(); }, 1200);
+    }
+
+    function exportGPX() {
+        var pts = routeLayer.getLatLngs();
+        if(!pts || pts.length === 0) return alert("Pas de trajet à exporter !");
+        var gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="ConvoiApp"><trk><trkseg>' +
+                  pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') +
+                  '</trkseg></trk></gpx>';
+       
+        var blob = new Blob([gpx], {type: 'application/gpx+xml'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = "itineraire.gpx";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+   
+    function importGPX(input) {
+        var r = new FileReader();
+        r.onload = (e) => {
+            var xml = new DOMParser().parseFromString(e.target.result, "text/xml");
+            var pts = Array.from(xml.getElementsByTagName("trkpt"));
+            if(pts.length > 0) {
+                clearCurrentData();
+                pts.forEach((p, index) => {
+                    if(index % 20 === 0 || index === pts.length-1) {
+                        var m = L.marker([p.getAttribute("lat"), p.getAttribute("lon")], { draggable: true }).addTo(gRouteMarkers);
+                        routePoints.push(m);
+                        m.on('dragend', updateRoute);
+                    }
+                });
+                updateRoute(); closeAll();
+            }
+        };
+        r.readAsText(input.files[0]);
+    }
+
+    renderArch();
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json").then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
             var p = JSON.stringify(f.properties).toUpperCase(), g = "gCat1", c = "#FFFF00";
@@ -374,87 +478,6 @@
         }}).addTo(map);
         Object.keys(groups).forEach(k => map.addLayer(groups[k]));
     });
-
-    function saveToArchive() { var n = prompt("Nom du trajet :"); if(!n) return; var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) }); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); }
-    
-    // --- CORRECTION SUPPRESSION ARCHIVES ---
-    function deleteArch(i) { 
-        if(confirm("Supprimer cette archive ?")) { 
-            var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); 
-            a.splice(i, 1); 
-            localStorage.setItem('convoi_arch', JSON.stringify(a)); 
-            renderArch(); 
-        } 
-    }
-
-    function renderArch() { 
-        var l = document.getElementById('archive-list'); l.innerHTML = ""; 
-        var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
-        a.forEach((x, i) => { 
-            var d = document.createElement('div'); d.className = "archive-item";
-            // Création propre des éléments pour éviter les conflits d'événements
-            var bLoad = document.createElement('button');
-            bLoad.className = "btn-archive-load";
-            bLoad.innerHTML = "📂 " + x.name;
-            bLoad.onclick = function() { loadArch(i); };
-
-            var bDel = document.createElement('button');
-            bDel.className = "btn-archive-del";
-            bDel.innerHTML = "✖";
-            bDel.onclick = function() { deleteArch(i); };
-
-            d.appendChild(bLoad);
-            d.appendChild(bDel);
-            l.appendChild(d); 
-        }); 
-    }
-
-    function loadArch(i) { 
-        var a = JSON.parse(localStorage.getItem('convoi_arch'))[i]; 
-        clearCurrentData(); 
-        a.pts.forEach(p => { 
-            var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers); 
-            routePoints.push(m); 
-            m.on('dragend', updateRoute); 
-        }); 
-        updateRoute(); 
-        closeAll(); 
-    }
-    
-    renderArch();
-
-    function exportGPX() { var pts = routeLayer.getLatLngs(); if(!pts.length) return; var gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>' + pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') + '</trkseg></trk></gpx>'; var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx], {type: 'application/gpx+xml'})); a.download = "itineraire.gpx"; a.click(); }
-    
-    // --- CORRECTION IMPORT GPX (KILOMETRAGE) ---
-    function importGPX(input) { 
-        var r = new FileReader(); 
-        r.onload = (e) => { 
-            var xml = new DOMParser().parseFromString(e.target.result, "text/xml"); 
-            var pts = Array.from(xml.getElementsByTagName("trkpt")); 
-            if(pts.length > 0) { 
-                clearCurrentData(); 
-                // Pour éviter d'avoir 500 icônes, on ne garde que le premier et dernier point
-                var start = [parseFloat(pts[0].getAttribute("lat")), parseFloat(pts[0].getAttribute("lon"))];
-                var end = [parseFloat(pts[pts.length - 1].getAttribute("lat")), parseFloat(pts[pts.length - 1].getAttribute("lon"))];
-                
-                [start, end].forEach(p => {
-                    var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers); 
-                    routePoints.push(m); 
-                    m.on('dragend', updateRoute); 
-                });
-                
-                // Forcer le calcul du tracé et de la distance après un court délai
-                setTimeout(updateRoute, 600); 
-                
-                setTimeout(() => {
-                    if (routeLayer.getLatLngs().length > 0) map.fitBounds(routeLayer.getBounds());
-                }, 800); 
-                closeAll(); 
-            } 
-        }; 
-        r.readAsText(input.files[0]); 
-    }
 </script>
 </body>
 </html>
-
