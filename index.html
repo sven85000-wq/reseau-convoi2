@@ -106,9 +106,10 @@
 
         .btn-popup { display: inline-block; background: #f39c12; color: black; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 5px; }
         
-        .archive-item { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
-        .btn-archive-load { flex-grow: 1; text-align: left; background: #34495e; padding: 10px; margin: 0; }
-        .btn-archive-del { width: 40px !important; background: #c0392b; padding: 10px; margin: 0; flex-shrink: 0; }
+        /* --- STYLE ARCHIVE CORRIGE --- */
+        .archive-item { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; width: 100%; }
+        .btn-archive-load { flex-grow: 1; text-align: left; background: #34495e; padding: 12px; margin: 0; font-size: 13px; }
+        .btn-archive-del { width: 45px !important; background: #c0392b; padding: 12px; margin: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -122,6 +123,7 @@
                 <div class="lang-dot" onclick="changeLang('fr')">🇧🇪</div>
                 <div class="lang-dot" onclick="changeLang('nl')">🇧🇪</div>
                 <div class="lang-dot" onclick="changeLang('en')">🇬🇧</div>
+                <div class="lang-dot" onclick="changeLang('en')">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
                 <div class="lang-dot" onclick="changeLang('de')">🇩🇪</div>
                 <div class="lang-dot" onclick="changeLang('es')">🇪🇸</div>
                 <div class="lang-dot" onclick="changeLang('it')">🇮🇹</div>
@@ -240,10 +242,11 @@
     var routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map), routePoints = [];
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gEurope: L.layerGroup() };
     var isFollowingGPS = false;
-    var isRoutingActive = false; // Flag pour le mode tracé
+    var isRoutingActive = false;
 
     const countries = [
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
+        { n: "Écosse", lat: 56.49, lon: -4.20, u: "https://www.traffic.gov.scot/", f: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
         { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
         { n: "Belgique (W)", lat: 50.35, lon: 4.85, u: "https://sofico.org/fr/chantiers/", f: "🇧🇪" },
         { n: "België (V)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/reistijden", f: "🇧🇪" },
@@ -268,7 +271,10 @@
         { n: "Danemark", lat: 56.26, lon: 9.50, u: "https://trafikkort.vejdirektoratet.dk/", f: "🇩🇰" },
         { n: "Suède", lat: 60.12, lon: 18.64, u: "https://www.trafikverket.se/", f: "🇸🇪" },
         { n: "Norvège", lat: 60.47, lon: 8.46, u: "https://www.vegvesen.no/", f: "🇳🇴" },
-        { n: "Finlande", lat: 61.92, lon: 25.74, u: "https://liikennetilanne.fintraffic.fi/", f: "🇫🇮" }
+        { n: "Finlande", lat: 61.92, lon: 25.74, u: "https://liikennetilanne.fintraffic.fi/", f: "🇫🇮" },
+        { n: "Estonie", lat: 58.59, lon: 25.01, u: "https://tarktee.ee/", f: "🇪🇪" },
+        { n: "Lettonie", lat: 56.87, lon: 24.60, u: "https://lvceli.lv/", f: "🇱🇻" },
+        { n: "Lituanie", lat: 55.16, lon: 23.88, u: "https://eismoinfo.lt/", f: "🇱🇹" }
     ];
 
     countries.forEach(c => {
@@ -320,13 +326,11 @@
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
 
-    // --- CORRECTION DU TRACÉ ---
     function startRouting() { 
         closeAll(); 
-        if (isRoutingActive) return; // Évite de doubler les écouteurs
+        if (isRoutingActive) return;
         isRoutingActive = true;
         document.getElementById('map').style.cursor = 'crosshair';
-
         map.on('click', function(e) {
             if(!isRoutingActive) return;
             var m = L.marker(e.latlng, { draggable: true }).addTo(gRouteMarkers);
@@ -339,6 +343,7 @@
     function updateRoute() {
         if (routePoints.length < 2) {
             routeLayer.setLatLngs([]);
+            document.getElementById('distance-info').style.display = 'none';
             return;
         }
         var coords = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';');
@@ -360,7 +365,6 @@
         routePoints=[]; 
         document.getElementById('distance-info').style.display = 'none'; 
     }
-    // ----------------------------
 
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json").then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
@@ -372,14 +376,35 @@
     });
 
     function saveToArchive() { var n = prompt("Nom du trajet :"); if(!n) return; var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) }); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); }
-    function deleteArch(i) { if(confirm("Supprimer cette archive ?")) { var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.splice(i, 1); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); } }
+    
+    // --- CORRECTION SUPPRESSION ARCHIVES ---
+    function deleteArch(i) { 
+        if(confirm("Supprimer cette archive ?")) { 
+            var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); 
+            a.splice(i, 1); 
+            localStorage.setItem('convoi_arch', JSON.stringify(a)); 
+            renderArch(); 
+        } 
+    }
 
     function renderArch() { 
         var l = document.getElementById('archive-list'); l.innerHTML = ""; 
         var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
         a.forEach((x, i) => { 
             var d = document.createElement('div'); d.className = "archive-item";
-            d.innerHTML = `<button onclick="loadArch(${i})" class="btn-archive-load">📂 ${x.name}</button><button onclick="deleteArch(${i})" class="btn-archive-del">✖</button>`; 
+            // Création propre des éléments pour éviter les conflits d'événements
+            var bLoad = document.createElement('button');
+            bLoad.className = "btn-archive-load";
+            bLoad.innerHTML = "📂 " + x.name;
+            bLoad.onclick = function() { loadArch(i); };
+
+            var bDel = document.createElement('button');
+            bDel.className = "btn-archive-del";
+            bDel.innerHTML = "✖";
+            bDel.onclick = function() { deleteArch(i); };
+
+            d.appendChild(bLoad);
+            d.appendChild(bDel);
             l.appendChild(d); 
         }); 
     }
@@ -399,7 +424,36 @@
     renderArch();
 
     function exportGPX() { var pts = routeLayer.getLatLngs(); if(!pts.length) return; var gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1"><trk><trkseg>' + pts.map(p => `<trkpt lat="${p.lat}" lon="${p.lng}"></trkpt>`).join('') + '</trkseg></trk></gpx>'; var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx], {type: 'application/gpx+xml'})); a.download = "itineraire.gpx"; a.click(); }
-    function importGPX(input) { var r = new FileReader(); r.onload = (e) => { var xml = new DOMParser().parseFromString(e.target.result, "text/xml"); var pts = Array.from(xml.getElementsByTagName("trkpt")); if(pts.length > 0) { clearCurrentData(); pts.forEach(p => { var m = L.marker([p.getAttribute("lat"), p.getAttribute("lon")], { draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); }); updateRoute(); setTimeout(() => map.fitBounds(routeLayer.getBounds()), 500); closeAll(); } }; r.readAsText(input.files[0]); }
+    
+    // --- CORRECTION IMPORT GPX (KILOMETRAGE) ---
+    function importGPX(input) { 
+        var r = new FileReader(); 
+        r.onload = (e) => { 
+            var xml = new DOMParser().parseFromString(e.target.result, "text/xml"); 
+            var pts = Array.from(xml.getElementsByTagName("trkpt")); 
+            if(pts.length > 0) { 
+                clearCurrentData(); 
+                // Pour éviter d'avoir 500 icônes, on ne garde que le premier et dernier point
+                var start = [parseFloat(pts[0].getAttribute("lat")), parseFloat(pts[0].getAttribute("lon"))];
+                var end = [parseFloat(pts[pts.length - 1].getAttribute("lat")), parseFloat(pts[pts.length - 1].getAttribute("lon"))];
+                
+                [start, end].forEach(p => {
+                    var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers); 
+                    routePoints.push(m); 
+                    m.on('dragend', updateRoute); 
+                });
+                
+                // Forcer le calcul du tracé et de la distance après un court délai
+                setTimeout(updateRoute, 600); 
+                
+                setTimeout(() => {
+                    if (routeLayer.getLatLngs().length > 0) map.fitBounds(routeLayer.getBounds());
+                }, 800); 
+                closeAll(); 
+            } 
+        }; 
+        r.readAsText(input.files[0]); 
+    }
 </script>
 </body>
 </html>
