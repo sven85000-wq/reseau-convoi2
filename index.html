@@ -233,9 +233,24 @@
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
+    // --- GESTION ECRAN ALLUME (WAKE LOCK) ---
+    let wakeLock = null;
+    async function requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLock = await navigator.wakeLock.request('screen');
+            }
+        } catch (err) { console.log("WakeLock non supporté ou erreur"); }
+    }
+
     function googleTranslateElementInit() { new google.translate.TranslateElement({pageLanguage: 'fr', autoDisplay: false}, 'google_translate_element'); }
     function changeLang(l) { var s = document.querySelector('select.goog-te-combo'); if (s) { s.value = l; s.dispatchEvent(new Event('change')); } else { document.cookie = "googtrans=/fr/" + l + "; path=/"; location.reload(); } }
-    function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; startGPS(); }
+   
+    function closeWelcome() {
+        document.getElementById('welcome-modal').style.display = 'none';
+        startGPS();
+        requestWakeLock(); // Active l'écran toujours allumé après le message d'accueil
+    }
    
     var map = L.map('map', { center: [48.0, 10.0], zoom: 5, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -409,6 +424,13 @@
             l.setStyle({color: c, weight: 2}); groups[g].addLayer(l);
         }}).addTo(map);
         Object.keys(groups).forEach(k => map.addLayer(groups[k]));
+    });
+
+    // Relancer le Wake Lock si l'utilisateur change d'onglet et revient
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+            requestWakeLock();
+        }
     });
 </script>
 </body>
