@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>CARTE RESEAU ET TRAVAUX</title>
+    <title>CARTE RESEAU ET TRAVAUX V40.16</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; position: absolute; }
+
+        /* --- SUPPRESSION TOTALE ET DÉFINITIVE DE L'INTERFACE GOOGLE --- */
+        .goog-te-banner-frame.skiptranslate, 
+        .goog-te-gadget-icon, 
+        .goog-te-gadget-simple img,
+        .goog-te-spinner-pos, 
+        .goog-te-menu-value span { display: none !important; }
+        body { top: 0px !important; }
+        .goog-tooltip, .goog-tooltip:hover { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
+        #google_translate_element, .skiptranslate { display: none !important; visibility: hidden !important; }
 
         /* --- ACCUEIL --- */
         #welcome-modal {
@@ -19,11 +30,25 @@
         .modal-content {
             background: #1e2b37; color: white; border: 3px solid #f39c12;
             border-radius: 15px; padding: 15px; max-width: 500px;
-            max-height: 90vh; display: flex; flex-direction: column;
+            max-height: 95vh; display: flex; flex-direction: column;
         }
         .modal-scroll { overflow-y: auto; padding-right: 5px; }
+
+        /* --- BANDEAU DE PAYS --- */
+        .lang-header {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 6px; padding-bottom: 12px; margin-bottom: 10px;
+            border-bottom: 1px solid rgba(243, 156, 18, 0.3);
+        }
+        .lang-dot {
+            font-size: 18px; cursor: pointer; width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            background: #2c3e50; border: 1px solid #f39c12; border-radius: 50%;
+            transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .lang-dot:hover { transform: scale(1.2); border-color: white; background: #f39c12; }
+
         .modal-text { text-align: left; font-size: 13px; line-height: 1.4; }
-        
         .warning-flash {
             border: 2px solid #ff0000; background: rgba(255,0,0,0.2);
             padding: 8px; border-radius: 10px; margin: 10px 0;
@@ -73,19 +98,69 @@
         button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; }
         .row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; }
         
-        /* --- GPS ICON --- */
+        /* --- GPS & POI ICONS --- */
         .gps-dot { width: 16px; height: 16px; background: #4285F4; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .poi-maps-style { display: flex; align-items: center; justify-content: center; background: white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.4); border: 1px solid #ccc; }
         .poi-inner { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
         .poi-relais { width: 24px; height: 24px; background: #00561b; border: 2px solid #e30613; border-radius: 50%; color: white; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
 
+        /* --- NOUVEAU STYLE RONDS DRAPEAUX SUR CARTE --- */
+        .custom-flag-round { 
+            background: white; 
+            border-radius: 50%; 
+            width: 36px !important; 
+            height: 36px !important; 
+            display: flex !important; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4); 
+            border: 2px solid #f39c12; 
+            font-size: 22px; 
+            cursor: pointer;
+        }
+
+        .btn-popup { display: inline-block; background: #f39c12; color: black; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 5px; }
         .note-tooltip { background: #fff9c4; color: #333; border: 1px solid #fbc02d; font-weight: bold; padding: 5px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-     <div id="welcome-modal">
+    <div id="google_translate_element"></div>
+
+    <div id="welcome-modal">
         <div class="modal-content">
+            <div class="lang-header">
+                <div class="lang-dot" onclick="changeLang('fr')" title="FR">🇫🇷</div>
+                <div class="lang-dot" onclick="changeLang('fr')" title="BE-FR">🇧🇪</div>
+                <div class="lang-dot" onclick="changeLang('nl')" title="BE-NL">🇧🇪</div>
+                
+                <div class="lang-dot" onclick="changeLang('en')" title="UK">🇬🇧</div>
+                <div class="lang-dot" onclick="changeLang('en')" title="SCO">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div>
+                <div class="lang-dot" onclick="changeLang('de')" title="DE">🇩🇪</div>
+                <div class="lang-dot" onclick="changeLang('es')" title="ES">🇪🇸</div>
+                <div class="lang-dot" onclick="changeLang('it')" title="IT">🇮🇹</div>
+                <div class="lang-dot" onclick="changeLang('nl')" title="NL">🇳🇱</div>
+                <div class="lang-dot" onclick="changeLang('pt')" title="PT">🇵🇹</div>
+                <div class="lang-dot" onclick="changeLang('pl')" title="PL">🇵🇱</div>
+                <div class="lang-dot" onclick="changeLang('ro')" title="RO">🇷🇴</div>
+                <div class="lang-dot" onclick="changeLang('hu')" title="HU">🇭🇺</div>
+                <div class="lang-dot" onclick="changeLang('cs')" title="CZ">🇨🇿</div>
+                <div class="lang-dot" onclick="changeLang('sk')" title="SK">🇸🇰</div>
+                <div class="lang-dot" onclick="changeLang('da')" title="DK">🇩🇰</div>
+                <div class="lang-dot" onclick="changeLang('sv')" title="SE">🇸🇪</div>
+                <div class="lang-dot" onclick="changeLang('no')" title="NO">🇳🇴</div>
+                <div class="lang-dot" onclick="changeLang('fi')" title="FI">🇫🇮</div>
+                <div class="lang-dot" onclick="changeLang('bg')" title="BG">🇧🇬</div>
+                <div class="lang-dot" onclick="changeLang('et')" title="EE">🇪🇪</div>
+                <div class="lang-dot" onclick="changeLang('lv')" title="LV">🇱🇻</div>
+                <div class="lang-dot" onclick="changeLang('lt')" title="LT">🇱🇹</div>
+                <div class="lang-dot" onclick="changeLang('sl')" title="SI">🇸🇮</div>
+                <div class="lang-dot" onclick="changeLang('hr')" title="HR">🇭🇷</div>
+                <div class="lang-dot" onclick="changeLang('el')" title="GR">🇬🇷</div>
+                <div class="lang-dot" onclick="changeLang('tr')" title="TR">🇹🇷</div>
+                <div class="lang-dot" onclick="changeLang('ru')" title="RU">🇷🇺</div>
+            </div>
+
             <h2 style="margin-top:0; color:#f39c12;">👋 Outil Convoi</h2>
             <div class="modal-scroll">
                 <div class="modal-text">
@@ -93,6 +168,7 @@
                     <p><b>2. BOUTON OUTILS :</b> Placez vos points d'intérêt personnels en cliquant sur la carte. Tracez vos routes en cliquant sur la carte et effacez-les sans perdre vos points. Pour charger un trajet, utilisez vos archives en bas du menu.</p>
                     <p><b>3. BOUTON TRAVAUX LIVE :</b> Le bouton central ouvre la carte travaux dans une petite fenêtre a droite. Utilisez <b>BOX</b> pour le plein écran et rappueyez dessus pour le reduire.</p>
                 </div>
+                
                 <div class="warning-flash">
                     ⚠️ ATTENTION :<br>
                     Le site n'est pas responsable en cas d'erreur sur les données partagées en gpx les hauteurs de pont. Tout partage est sous votre responsabilité. Soyez vigilants !
@@ -131,6 +207,7 @@
         <div class="row"><input type="checkbox" checked onchange="toggleL('g72')"> Réseau 72t</div>
         <div class="row"><input type="checkbox" checked onchange="toggleL('g94')"> Réseau 94t</div>
         <div class="row"><input type="checkbox" checked onchange="toggleL('g120')"> Réseau 120t+</div>
+        <div class="row" style="border: 1px solid #f39c12;"><input type="checkbox" checked onchange="toggleL('gEurope')"> 🌍 Liens Travaux Europe</div>
     </div>
 
     <div id="sidebar-right" class="sidebar">
@@ -160,19 +237,76 @@
     <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 <script>
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({pageLanguage: 'fr', autoDisplay: false}, 'google_translate_element');
+    }
+    function changeLang(langCode) {
+        var select = document.querySelector('select.goog-te-combo');
+        if (select) { 
+            select.value = langCode; 
+            select.dispatchEvent(new Event('change')); 
+        } else { 
+            document.cookie = "googtrans=/fr/" + langCode + "; path=/"; 
+            location.reload(); 
+        }
+    }
+
     function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; startGPS(); }
-   
-    var map = L.map('map', { center: [46.9, -0.5], zoom: 6, zoomControl: false });
+    
+    var map = L.map('map', { center: [48.0, 10.0], zoom: 5, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     var gPois = L.featureGroup().addTo(map);
     var gRouteMarkers = L.featureGroup().addTo(map);
     var routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map);
     var routePoints = [];
-    var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup() };
-   
+    var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gEurope: L.layerGroup() };
+    
     var isFollowingGPS = false;
+
+    // --- DONNÉES EUROPE (30 PAYS AVEC BELGIQUE SÉPARÉE) ---
+    const countries = [
+        { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
+        { n: "Écosse", lat: 56.49, lon: -4.20, u: "https://www.traffic.gov.scot/", f: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+        { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
+        { n: "Belgique (Wallonie)", lat: 50.35, lon: 4.85, u: "https://sofico.org/fr/chantiers/", f: "🇧🇪" },
+        { n: "België (Vlaanderen)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/reistijden", f: "🇧🇪" },
+        { n: "Luxembourg", lat: 49.61, lon: 6.13, u: "https://www.cita.lu/fr/chantiers.html", f: "🇱🇺" },
+        { n: "Pays-Bas", lat: 52.13, lon: 5.29, u: "https://www.rwsverkeersinfo.nl/", f: "🇳🇱" },
+        { n: "Allemagne", lat: 51.16, lon: 10.45, u: "https://verkehr.vz-deutschland.de/", f: "🇩🇪" },
+        { n: "Suisse", lat: 46.81, lon: 8.22, u: "https://www.tcs.ch/", f: "🇨🇭" },
+        { n: "Liechtenstein", lat: 47.14, lon: 9.52, u: "https://www.llv.li/", f: "🇱🇮" },
+        { n: "Autriche", lat: 47.51, lon: 14.55, u: "https://baustelleninfo.asfinag.at/client/", f: "🇦🇹" },
+        { n: "Pologne", lat: 51.91, lon: 19.14, u: "https://drogi.gddkia.gov.pl/mapy/mapa-informacji-drogowej", f: "🇵🇱" },
+        { n: "Rép. Tchèque", lat: 49.81, lon: 15.47, u: "https://dropavniinfo.cz/", f: "🇨🇿" },
+        { n: "Slovaquie", lat: 48.66, lon: 19.14, u: "https://ndsas.sk/sluzby/dopravne-informacie", f: "🇸🇰" },
+        { n: "Hongrie", lat: 47.16, lon: 19.50, u: "https://www.utinform.hu/", f: "🇭🇺" },
+        { n: "Espagne", lat: 40.41, lon: -3.70, u: "http://infocar.dgt.es/", f: "🇪🇸" },
+        { n: "Italie", lat: 41.87, lon: 12.56, u: "https://www.autostrade.it/", f: "🇮🇹" },
+        { n: "Portugal", lat: 39.39, lon: -8.22, u: "https://servicos.infraestruturasdeportugal.pt/", f: "🇵🇹" },
+        { n: "Slovénie", lat: 46.05, lon: 14.50, u: "https://www.promet.si/en/map", f: "🇸🇮" },
+        { n: "Croatie", lat: 45.81, lon: 15.98, u: "https://www.hak.hr/", f: "🇭🇷" },
+        { n: "Serbie", lat: 44.01, lon: 20.91, u: "https://www.putevi-srbije.rs/", f: "🇷🇸" },
+        { n: "Roumanie", lat: 44.42, lon: 26.10, u: "https://dispecerat.andnet.ro/harta.php", f: "🇷🇴" },
+        { n: "Danemark", lat: 56.26, lon: 9.50, u: "https://trafikkort.vejdirektoratet.dk/", f: "🇩🇰" },
+        { n: "Suède", lat: 60.12, lon: 18.64, u: "https://www.trafikverket.se/", f: "🇸🇪" },
+        { n: "Norvège", lat: 60.47, lon: 8.46, u: "https://www.vegvesen.no/trafikk", f: "🇳🇴" },
+        { n: "Finlande", lat: 61.92, lon: 25.74, u: "https://liikennetilanne.fintraffic.fi/", f: "🇫🇮" },
+        { n: "Islande", lat: 64.96, lon: -19.02, u: "https://umferdin.is/en/", f: "🇮🇸" },
+        { n: "Estonie", lat: 58.59, lon: 25.01, u: "https://www.tarktee.ee/", f: "🇪🇪" },
+        { n: "Lettonie", lat: 56.87, lon: 24.60, u: "https://lvceli.lv/", f: "🇱🇻" },
+        { n: "Lituanie", lat: 55.16, lon: 23.88, u: "https://eismoinfo.lt/", f: "🇱🇹" }
+    ];
+
+    countries.forEach(c => {
+        let flagIcon = L.divIcon({ className: 'custom-flag-round', html: c.f, iconSize: [36, 36], iconAnchor: [18, 18] });
+        L.marker([c.lat, c.lon], {icon: flagIcon}).addTo(groups.gEurope).bindPopup(
+            `<div style='text-align:center;'><b>${c.f} ${c.n}</b><br><a href='${c.u}' target='_blank' class='btn-popup'>VOIR LES TRAVAUX</a></div>`
+        );
+    });
 
     // --- GPS ---
     function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); }
@@ -187,37 +321,33 @@
     function toggleGPSFollow() {
         isFollowingGPS = !isFollowingGPS;
         const btn = document.getElementById('btn-gps-toggle');
-        if (isFollowingGPS) { btn.className = "gps-on"; btn.innerText = "🚛 EN ROUTE..."; if (window.userPos) map.setView(window.userPos, 15); }
-        else { btn.className = "gps-off"; btn.innerText = "🛑 MODE ROUTE"; }
+        btn.className = isFollowingGPS ? "gps-on" : "gps-off";
+        btn.innerText = isFollowingGPS ? "🚛 EN ROUTE..." : "🛑 MODE ROUTE";
+        if (isFollowingGPS && window.userPos) map.setView(window.userPos, 15);
     }
-
-    map.on('dragstart', () => { if (isFollowingGPS) { isFollowingGPS = false; const btn = document.getElementById('btn-gps-toggle'); btn.className = "gps-off"; btn.innerText = "🛑 MODE ROUTE"; } });
 
     // --- UMAP ---
     function toggleUmap() { const win = document.getElementById('umap-window'); win.style.display = (win.style.display === 'none' || win.style.display === '') ? 'block' : 'none'; if (win.style.display === 'block') closeAll(); }
     function toggleFullScreen() { let w = document.getElementById('umap-window'); if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; w.style.top='70px'; w.style.right='10px'; } else { w.style.width='100%'; w.style.height='100%'; w.style.top='0'; w.style.right='0'; } }
     function minimizeUmap() { let w = document.getElementById('umap-window'); w.style.height = (w.style.height==='35px'?'350px':'35px'); }
 
-    // --- POI CORRIGÉS (PLUS D'INTERFÉRENCE ROUTE) ---
+    // --- POI ---
     function activatePoi(type, color) {
-        closeAll(); 
-        map.off('click'); // On désactive les autres écouteurs avant de poser
+        closeAll(); map.off('click');
         map.once('click', (e) => {
-            let note = prompt("Note pour ce point :", "");
+            let note = prompt("Note pour ce point :");
             let m = L.marker(e.latlng, { icon: L.divIcon({ className:'poi-maps-style', html:`<div class="poi-inner" style="background:${color}">${type}</div>`, iconSize:[26,26], iconAnchor:[13,13] }) }).addTo(gPois);
             if(note) m.bindTooltip(note, { className: 'note-tooltip', sticky: true });
-            m.bindPopup(`<b>${type}</b><br>${note}<br><br><button onclick="gPois.removeLayer(map._layers['${m._leaflet_id}'])" style="background:red;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">Retirer</button>`);
+            m.bindPopup(`<button onclick="gPois.removeLayer(map._layers['${m._leaflet_id}'])" style="background:red;color:white;border:none;padding:5px;cursor:pointer;">Retirer</button>`);
         });
     }
-
     function activateRelais() {
-        closeAll(); 
-        map.off('click'); // On désactive les autres écouteurs avant de poser
+        closeAll(); map.off('click');
         map.once('click', (e) => {
-            let note = prompt("Note pour ce Resto :", "");
+            let note = prompt("Note Resto :");
             let m = L.marker(e.latlng, { icon: L.divIcon({ className: '', html: '<div class="poi-relais">R</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) }).addTo(gPois);
             if(note) m.bindTooltip(note, { className: 'note-tooltip', sticky: true });
-            m.bindPopup(`<b>RESTO</b><br>${note}<br><br><button onclick="gPois.removeLayer(map._layers['${m._leaflet_id}'])" style="background:red;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">Retirer</button>`);
+            m.bindPopup(`<button onclick="gPois.removeLayer(map._layers['${m._leaflet_id}'])" style="background:red;color:white;border:none;padding:5px;cursor:pointer;">Retirer</button>`);
         });
     }
 
@@ -225,39 +355,31 @@
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
 
-    // --- ITINÉRAIRE ---
+    // --- ROUTING ---
     function startRouting() {
-        closeAll();
-        map.off('click'); // Sécurité
+        closeAll(); map.off('click');
         map.on('click', function(e) {
             let m = L.marker(e.latlng, {draggable:true}).addTo(gRouteMarkers);
             routePoints.push(m);
-            m.bindPopup(`<button onclick="removeMarker('${m._leaflet_id}')" style="background:red;color:white;border:none;padding:5px;border-radius:5px;">Effacer</button>`);
             m.on('dragend', updateRoute);
             updateRoute();
         });
     }
-    function removeMarker(id) { let m = map._layers[id]; gRouteMarkers.removeLayer(m); routePoints = routePoints.filter(p => p !== m); updateRoute(); }
-
     function updateRoute() {
-        if (routePoints.length < 2) { routeLayer.setLatLngs([]); return; }
+        if (routePoints.length < 2) return;
         let coords = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';');
         fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`)
-        .then(r => r.json()).then(d => { if(d.routes && d.routes.length > 0) { routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(x => [x[1], x[0]])); showDistance(d.routes[0].distance); } });
+        .then(r => r.json()).then(d => { 
+            if(d.routes && d.routes.length > 0) { 
+                routeLayer.setLatLngs(d.routes[0].geometry.coordinates.map(x => [x[1], x[0]])); 
+                document.getElementById('dist-val').innerText = (d.routes[0].distance / 1000).toFixed(1);
+                document.getElementById('distance-info').style.display = 'block';
+            } 
+        });
     }
-    function showDistance(meters) { document.getElementById('dist-val').innerText = (meters / 1000).toFixed(1); document.getElementById('distance-info').style.display = 'block'; }
-    
-    function clearCurrentData() { 
-        if(confirm("Effacer l'itinéraire actuel ? (Les POI resteront)")) {
-            gRouteMarkers.clearLayers(); 
-            routeLayer.setLatLngs([]); 
-            routePoints=[]; 
-            document.getElementById('distance-info').style.display = 'none'; 
-            map.off('click'); 
-        }
-    }
-   
-    // Réseaux (Pays)
+    function clearCurrentData() { gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); routePoints=[]; document.getElementById('distance-info').style.display = 'none'; }
+
+    // --- RÉSEAUX FRANCE ---
     fetch("https://raw.githubusercontent.com/sven85000-wq/reseau-convoi2/refs/heads/main/reseau_convois_france_2026(2).json").then(r => r.json()).then(data => {
         L.geoJSON(data, { onEachFeature: (f, l) => {
             let p = JSON.stringify(f.properties).toUpperCase(), g = "gCat1", c = "#FFFF00";
@@ -267,26 +389,18 @@
         Object.keys(groups).forEach(k => map.addLayer(groups[k]));
     });
 
-    // Archives
-    function saveToArchive() {
-        let n = prompt("Nom du trajet :"); if(!n) return;
-        let a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
-        a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) });
-        localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch();
-    }
+    // --- ARCHIVES ---
+    function saveToArchive() { let n = prompt("Nom :"); if(!n) return; let a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) }); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); }
     function renderArch() {
         let l = document.getElementById('archive-list'); l.innerHTML = "";
         JSON.parse(localStorage.getItem('convoi_arch') || "[]").forEach((x, i) => {
-            let d = document.createElement('div'); d.style.display="flex";
-            d.innerHTML = `<button onclick="loadArch(${i})" style="background:#34495e; flex:1; margin-bottom:2px;">📂 ${x.name}</button><button onclick="deleteArch(${i})" style="background:#c0392b; width:45px; margin-bottom:2px;">✖</button>`;
+            let d = document.createElement('div'); d.innerHTML = `<button onclick="loadArch(${i})" style="background:#34495e; flex:1; margin-bottom:2px;">📂 ${x.name}</button>`;
             l.appendChild(d);
         });
     }
-    function deleteArch(i) { if(confirm("Supprimer ?")) { let a = JSON.parse(localStorage.getItem('convoi_arch')); a.splice(i, 1); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); } }
     function loadArch(i) {
-        let a = JSON.parse(localStorage.getItem('convoi_arch'))[i]; 
-        gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); routePoints=[]; 
-        a.pts.forEach(p => { let m = L.marker(p, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.bindPopup(`<button onclick="removeMarker('${m._leaflet_id}')" style="background:red;color:white;border:none;padding:5px;border-radius:5px;">Effacer</button>`); m.on('dragend', updateRoute); });
+        let a = JSON.parse(localStorage.getItem('convoi_arch'))[i];
+        clearCurrentData(); a.pts.forEach(p => { let m = L.marker(p, {draggable:true}).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); });
         updateRoute(); closeAll();
     }
     renderArch();
@@ -297,13 +411,11 @@
         let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([gpx], {type: 'application/gpx+xml'})); a.download = "itineraire.gpx"; a.click();
     }
     function importGPX(input) {
-        let r = new FileReader();
-        r.onload = (e) => {
+        let r = new FileReader(); r.onload = (e) => {
             let xml = new DOMParser().parseFromString(e.target.result, "text/xml");
             let pts = Array.from(xml.getElementsByTagName("trkpt")).map(p => L.latLng(parseFloat(p.getAttribute("lat")), parseFloat(p.getAttribute("lon"))));
-            if(pts.length > 0) { clearCurrentData(); routeLayer.setLatLngs(pts); let totalDist = 0; for (let j = 0; j < pts.length - 1; j++) { totalDist += pts[j].distanceTo(pts[j+1]); } showDistance(totalDist); map.fitBounds(routeLayer.getBounds()); closeAll(); }
-        };
-        r.readAsText(input.files[0]);
+            if(pts.length) { clearCurrentData(); routeLayer.setLatLngs(pts); map.fitBounds(routeLayer.getBounds()); closeAll(); }
+        }; r.readAsText(input.files[0]);
     }
 </script>
 </body>
