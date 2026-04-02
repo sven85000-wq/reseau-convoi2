@@ -85,11 +85,25 @@
         .gps-off { background: #c0392b; }
         .gps-on { background: #27ae60; }
 
+        /* --- MODIFICATION UMAP WINDOW --- */
         #umap-window {
             position: fixed; top: 70px; right: 10px; width: 280px; height: 350px;
             z-index: 15000; border: 3px solid #f39c12; border-radius: 12px;
             background: #1e2b37; display: none; overflow: hidden;
+            transition: all 0.3s ease; /* Ajout transition fluide */
         }
+
+        /* Classe pour le plein écran total */
+        #umap-window.full-page {
+            top: 0 !important;
+            right: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border: none !important;
+            border-radius: 0 !important;
+            z-index: 30000 !important;
+        }
+
         .umap-bar { background: #f39c12; color: #000; padding: 8px; font-weight: bold; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
         #umap-frame { width: 100%; height: calc(100% - 35px); border: none; background: white; }
 
@@ -186,10 +200,10 @@
 
     <div id="umap-window">
         <div class="umap-bar">
-            <span onclick="minimizeUmap()" style="cursor:pointer">➖ RÉDUIRE</span>
+            <span onclick="minimizeUmap(event)" style="cursor:pointer">➖ RÉDUIRE</span>
             <div>
-                <span onclick="toggleFullScreen()" style="background:#2ecc71; color:white; padding:4px 8px; border-radius:4px; margin-right:5px; cursor:pointer; font-size:10px;">BOX</span>
-                <span onclick="toggleUmap()" style="background:#c0392b; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:10px;">X</span>
+                <span onclick="toggleFullScreen(event)" style="background:#2ecc71; color:white; padding:4px 8px; border-radius:4px; margin-right:5px; cursor:pointer; font-size:10px;">BOX</span>
+                <span onclick="toggleUmap(event)" style="background:#c0392b; color:white; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:10px;">X</span>
             </div>
         </div>
         <iframe id="umap-frame" src="https://umap.openstreetmap.fr/fr/map/travaux-convoi-2026_1383926?localizeUser=true" allow="geolocation"></iframe>
@@ -249,7 +263,7 @@
     function closeWelcome() {
         document.getElementById('welcome-modal').style.display = 'none';
         startGPS();
-        requestWakeLock(); // Active l'écran toujours allumé après le message d'accueil
+        requestWakeLock();
     }
    
     var map = L.map('map', { center: [48.0, 10.0], zoom: 5, zoomControl: false });
@@ -264,14 +278,14 @@
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
         { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
         { n: "Belgique (W)", lat: 50.35, lon: 4.85, u: "https://sofico.org/fr/chantiers/", f: "🇧🇪" },
-        { n: "België (V)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/reistijden", f: "🇧🇪" },
+        { n: "België (V)", lat: 51.05, lon: 3.73, u: "https://www.verkeerscentrum.be/verkeersinfo/werkzaamheden", f: "🇧🇪" },
         { n: "Luxembourg", lat: 49.61, lon: 6.13, u: "https://www.cita.lu/", f: "🇱🇺" },
         { n: "Pays-Bas", lat: 52.13, lon: 5.29, u: "https://www.rwsverkeersinfo.nl/", f: "🇳🇱" },
         { n: "Allemagne", lat: 51.16, lon: 10.45, u: "https://verkehr.vz-deutschland.de/", f: "🇩🇪" },
         { n: "Suisse", lat: 46.81, lon: 8.22, u: "https://www.tcs.ch/", f: "🇨🇭" },
         { n: "Autriche", lat: 47.51, lon: 14.55, u: "https://baustelleninfo.asfinag.at/", f: "🇦🇹" },
         { n: "Pologne", lat: 51.91, lon: 19.14, u: "https://drogi.gddkia.gov.pl/", f: "🇵🇱" },
-        { n: "Tchéquie", lat: 49.81, lon: 15.47, u: "https://dropavniinfo.cz/", f: "🇨🇿" },
+        { n: "Tchéquie", lat: 49.81, lon: 15.47, u: "https://dopravniinfo.cz/", f: "🇨🇿" },
         { n: "Slovaquie", lat: 48.66, lon: 19.14, u: "https://ndsas.sk/", f: "🇸🇰" },
         { n: "Hongrie", lat: 47.16, lon: 19.50, u: "https://www.utinform.hu/", f: "🇭🇺" },
         { n: "Espagne", lat: 40.41, lon: -3.70, u: "http://infocar.dgt.es/", f: "🇪🇸" },
@@ -312,9 +326,28 @@
         if (isFollowingGPS && window.userPos) map.setView(window.userPos, 15);
     }
 
-    function toggleUmap() { var w = document.getElementById('umap-window'); w.style.display = (w.style.display==='none'?'block':'none'); }
-    function toggleFullScreen() { var w = document.getElementById('umap-window'); if(w.style.width === '100%') { w.style.width='280px'; w.style.height='350px'; } else { w.style.width='100%'; w.style.height='100%'; } }
-    function minimizeUmap() { var w = document.getElementById('umap-window'); w.style.height = (w.style.height==='35px'?'350px':'35px'); }
+    // --- MODIFICATIONS LOGIQUE FENETRE TRAVAUX ---
+    function toggleUmap(event) {
+        if(event) event.stopPropagation();
+        var w = document.getElementById('umap-window');
+        w.style.display = (w.style.display==='none' || w.style.display==='' ?'block':'none');
+        // On retire le plein écran à la fermeture pour la prochaine fois
+        w.classList.remove('full-page');
+    }
+
+    function toggleFullScreen(event) {
+        if(event) event.stopPropagation();
+        var w = document.getElementById('umap-window');
+        w.classList.toggle('full-page');
+    }
+
+    function minimizeUmap(event) {
+        if(event) event.stopPropagation();
+        var w = document.getElementById('umap-window');
+        if(!w.classList.contains('full-page')) {
+            w.style.height = (w.style.height==='35px'?'350px':'35px');
+        }
+    }
 
     function activatePoi(t, c) {
         closeAll();
@@ -426,7 +459,6 @@
         Object.keys(groups).forEach(k => map.addLayer(groups[k]));
     });
 
-    // Relancer le Wake Lock si l'utilisateur change d'onglet et revient
     document.addEventListener('visibilitychange', async () => {
         if (wakeLock !== null && document.visibilityState === 'visible') {
             requestWakeLock();
