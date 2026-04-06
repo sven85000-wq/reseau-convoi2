@@ -45,18 +45,18 @@
         .lang-dot:hover { transform: scale(1.2); border-color: white; }
 
         .modal-text { text-align: left; font-size: 13px; line-height: 1.5; color: #ecf0f1; }
-       
+        
         .info-blue {
             background: #2980b9; color: white; padding: 10px;
             border-radius: 5px; margin: 10px 0; font-size: 12px;
         }
-       
+        
         .warning-red {
             border: 2px solid #e74c3c; background: rgba(231, 76, 60, 0.2);
             padding: 10px; border-radius: 5px; margin: 10px 0;
             color: #ff7675; font-size: 12px;
         }
-       
+        
         .conclusion-green {
             color: #2ecc71; font-style: italic; font-weight: bold;
             margin: 15px 0; text-align: center; font-size: 13px;
@@ -69,7 +69,7 @@
             padding: 5px 15px; border-radius: 20px; border: 2px solid #f39c12;
             font-weight: bold; font-size: 14px; pointer-events: none; display: none;
         }
-       
+        
         #btn-travaux-direct {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 9998; background: #f39c12; color: black; border: 2px solid #000;
@@ -113,11 +113,11 @@
         .sidebar { position: fixed; top: 0; height: 100vh; width: 310px; background: #1e2b37; color: white; padding: 20px; box-sizing: border-box; z-index: 10000; overflow-y: auto; display: none; }
         #sidebar-left { left: 0; border-right: 4px solid #f39c12; }
         #sidebar-right { right: 0; border-left: 4px solid #f39c12; }
-       
+        
         h2 { font-size: 11px; color: #f39c12; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 15px; text-transform: uppercase; }
         button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; }
         .row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; }
-       
+        
         .gps-dot { width: 16px; height: 16px; background: #4285F4; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .poi-maps-style { display: flex; align-items: center; justify-content: center; background: white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.4); border: 1px solid #ccc; }
         .poi-inner { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
@@ -130,10 +130,11 @@
         }
 
         .btn-popup { display: inline-block; background: #f39c12; color: black; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 5px; }
-       
+        
         .archive-item { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; width: 100%; }
         .btn-archive-load { flex-grow: 1; text-align: left; background: #34495e; padding: 12px; margin: 0; font-size: 13px; }
         .btn-archive-del { width: 45px !important; background: #c0392b; padding: 12px; margin: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .btn-archive-save { width: 45px !important; background: #2980b9; padding: 12px; margin: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -173,7 +174,7 @@
             </div>
 
             <h3 style="margin:0 0 10px 0; color:#f39c12;">👋 OUTIL CONVOI</h3>
-           
+            
             <div class="modal-scroll">
                 <div class="modal-text">
                     <p><b>1. BOUTON RÉSEAUX :</b> Choisissez le réseau routier à afficher (Cat 1, 48t, 72t, 94t ou 120t+).</p>
@@ -189,7 +190,7 @@
                     Profitez bien de l'application, éclatez-vous ! J'espère que cet outil vous sera utile. Bonne roulade à tous et au plaisir de vous croiser un de ces jours sur la route ! Sven
                 </div>
             </div>
-           
+            
             <button style="background:#2ecc71; color:white; border: 2px solid #27ae60; height: 50px; font-size: 16px;" onclick="closeWelcome()">DÉMARRER / START</button>
         </div>
     </div>
@@ -237,6 +238,11 @@
         <button style="background:#2ecc71; color:black;" onclick="startRouting()">📍 TRACER (ÉPINGLES)</button>
         <button style="background:#c0392b;" onclick="clearCurrentData()">🗑️ EFFACER TOUT</button>
         <button style="background:#f39c12; color:black;" onclick="saveToArchive()">💾 SAUVEGARDER</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+            <button style="background:#3498db;" onclick="exportCurrentGPX()">📤 EXPORT</button>
+            <button style="background:#9b59b6;" onclick="document.getElementById('input-gpx').click()">📥 IMPORT</button>
+            <input type="file" id="input-gpx" style="display:none" accept=".gpx" onchange="importGPX(event)">
+        </div>
         <h2>MES ARCHIVES</h2>
         <div id="archive-list"></div>
     </div>
@@ -259,13 +265,13 @@
 
     function googleTranslateElementInit() { new google.translate.TranslateElement({pageLanguage: 'fr', autoDisplay: false}, 'google_translate_element'); }
     function changeLang(l) { var s = document.querySelector('select.goog-te-combo'); if (s) { s.value = l; s.dispatchEvent(new Event('change')); } else { document.cookie = "googtrans=/fr/" + l + "; path=/"; location.reload(); } }
-   
+    
     function closeWelcome() {
         document.getElementById('welcome-modal').style.display = 'none';
         startGPS();
         requestWakeLock();
     }
-   
+    
     var map = L.map('map', { center: [48.0, 10.0], zoom: 5, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
@@ -419,7 +425,7 @@
         localStorage.setItem('convoi_arch', JSON.stringify(a));
         renderArch();
     }
-   
+    
     function deleteArch(i) {
         var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
         a.splice(i, 1);
@@ -433,8 +439,9 @@
         a.forEach((x, i) => {
             var d = document.createElement('div'); d.className = "archive-item";
             var bLoad = document.createElement('button'); bLoad.className = "btn-archive-load"; bLoad.innerHTML = "📂 " + x.name; bLoad.onclick = function() { loadArch(i); };
+            var bSave = document.createElement('button'); bSave.className = "btn-archive-save"; bSave.innerHTML = "💾"; bSave.onclick = function() { downloadGPX(x.pts, x.name); };
             var bDel = document.createElement('button'); bDel.className = "btn-archive-del"; bDel.innerHTML = "✖"; bDel.onclick = function() { deleteArch(i); renderArch(); };
-            d.appendChild(bLoad); d.appendChild(bDel); l.appendChild(d);
+            d.appendChild(bLoad); d.appendChild(bSave); d.appendChild(bDel); l.appendChild(d);
         });
     }
 
@@ -447,6 +454,41 @@
             m.on('dragend', updateRoute);
         });
         updateRoute(); closeAll();
+    }
+
+    function exportCurrentGPX() {
+        if(routePoints.length === 0) return alert("Aucun trajet à exporter.");
+        var n = prompt("Nom du fichier :", "trajet");
+        if(n) downloadGPX(routePoints.map(m => m.getLatLng()), n);
+    }
+
+    function downloadGPX(pts, name) {
+        var gpx = '<?xml version="1.1" encoding="UTF-8"?><gpx version="1.1" creator="SvenApp"><trk><name>' + name + '</name><trkseg>';
+        pts.forEach(p => { gpx += '<trkpt lat="' + p.lat + '" lon="' + p.lng + '"></trkpt>'; });
+        gpx += '</trkseg></trk></gpx>';
+        var blob = new Blob([gpx], {type: 'application/gpx+xml'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a'); a.href = url; a.download = name + ".gpx"; a.click();
+    }
+
+    function importGPX(e) {
+        var file = e.target.files[0]; if(!file) return;
+        var reader = new FileReader();
+        reader.onload = function(event) {
+            var parser = new DOMParser();
+            var xml = parser.parseFromString(event.target.result, "text/xml");
+            var points = xml.querySelectorAll("trkpt");
+            clearCurrentData();
+            points.forEach(p => {
+                var lat = parseFloat(p.getAttribute("lat"));
+                var lon = parseFloat(p.getAttribute("lon"));
+                var m = L.marker([lat, lon], { draggable: true }).addTo(gRouteMarkers);
+                routePoints.push(m);
+                m.on('dragend', updateRoute);
+            });
+            updateRoute(); closeAll();
+        };
+        reader.readAsText(file);
     }
 
     renderArch();
