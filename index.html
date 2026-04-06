@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>CARTE RESEAU ET TRAVAUX FRANCE / EUROPE V40.18</title>
+    <title>CARTE RESEAU ET TRAVAUX FRANCE / EUROPE V40.19</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -46,7 +46,6 @@
 
         .modal-text { text-align: left; font-size: 13px; line-height: 1.5; color: #ecf0f1; }
         .info-blue { background: #2980b9; color: white; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 12px; }
-        .warning-red { border: 2px solid #e74c3c; background: rgba(231, 76, 60, 0.2); padding: 10px; border-radius: 5px; margin: 10px 0; color: #ff7675; font-size: 12px; }
         .conclusion-green { color: #2ecc71; font-style: italic; font-weight: bold; margin: 15px 0; text-align: center; font-size: 13px; }
 
         /* --- INTERFACE --- */
@@ -144,7 +143,7 @@
                 <div class="lang-dot" onclick="changeLang('ru')">🇷🇺</div>
             </div>
 
-            <h3 style="margin:0 0 10px 0; color:#f39c12;">👋 OUTIL CONVOI V40.18</h3>
+            <h3 style="margin:0 0 10px 0; color:#f39c12;">👋 OUTIL CONVOI V40.19</h3>
             <div class="modal-scroll">
                 <div class="modal-text">
                     <p><b>1. BOUTON RÉSEAUX :</b> Choisissez le réseau routier à afficher (Cat 1, 48t, 72t, 94t ou 120t+).</p>
@@ -319,6 +318,7 @@
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
 
+    // --- MODE ROUTAGE MANUEL (AVEC RECALCUL) ---
     function startRouting() {
         closeAll();
         if (isRoutingActive) return;
@@ -328,6 +328,7 @@
             if(!isRoutingActive) return;
             var m = L.marker(e.latlng, { draggable: true }).addTo(gRouteMarkers);
             routePoints.push(m);
+            // Ici on garde updateRoute car l'utilisateur veut tracer via les routes
             m.on('dragend', updateRoute);
             updateRoute();
         });
@@ -347,19 +348,12 @@
 
     function clearCurrentData() { isRoutingActive = false; map.off('click'); document.getElementById('map').style.cursor = ''; gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); routePoints=[]; document.getElementById('distance-info').style.display = 'none'; }
 
-    // --- MODIFICATION SAUVEGARDE : On stocke TOUT le tracé (line) ---
     function saveToArchive() {
         var n = prompt("Nom du trajet :"); if(!n) return;
         var fullLine = routeLayer.getLatLngs();
         if (fullLine.length === 0) return alert("Aucun tracé à sauvegarder !");
-        
         var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
-        // On enregistre les marqueurs pour l'édition ET le tracé complet pour l'affichage fidèle
-        a.push({ 
-            name: n, 
-            pts: routePoints.map(m => m.getLatLng()),
-            line: fullLine 
-        });
+        a.push({ name: n, pts: routePoints.map(m => m.getLatLng()), line: fullLine });
         localStorage.setItem('convoi_arch', JSON.stringify(a));
         renderArch();
     }
@@ -384,31 +378,27 @@
         });
     }
 
-    // --- CHARGEMENT FIDÈLE : On restaure la ligne exacte ---
+    // --- CHARGEMENT FIDÈLE SANS RECALCUL ---
     function loadArch(i) {
         var a = JSON.parse(localStorage.getItem('convoi_arch'))[i];
         clearCurrentData();
-        
-        // 1. Restaurer le tracé visuel
         if(a.line) routeLayer.setLatLngs(a.line);
-        
-        // 2. Restaurer les marqueurs (épingles)
         a.pts.forEach((p) => {
             var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers);
             routePoints.push(m);
-            // On ne déclenche updateRoute QUE si l'utilisateur bouge une épingle manuellement
-            m.on('dragend', function() { updateRoute(); });
+            // TRÈS IMPORTANT : Pas de updateRoute ici. On bouge le point mais le trait reste fixe.
         });
+        updateDistManually();
+        map.fitBounds(routeLayer.getBounds());
+        closeAll();
+    }
 
-        // 3. Calculer distance
+    function updateDistManually() {
         let totalDist = 0;
         let l = routeLayer.getLatLngs();
         for (let j = 0; j < l.length - 1; j++) { totalDist += L.latLng(l[j]).distanceTo(L.latLng(l[j+1])); }
         document.getElementById('dist-val').innerText = (totalDist / 1000).toFixed(1);
         document.getElementById('distance-info').style.display = 'block';
-
-        map.fitBounds(routeLayer.getBounds());
-        closeAll();
     }
 
     function exportCurrentGPX() { if(routeLayer.getLatLngs().length === 0) return alert("Aucun trajet à exporter."); var n = prompt("Nom du fichier :", "trajet"); if(n) downloadGPX(null, n); }
@@ -429,7 +419,7 @@
             var end = routePoints[routePoints.length - 1].getLatLng();
             gRouteMarkers.clearLayers();
             routePoints = [];
-            [start, end].forEach(p => { var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); });
+            [start, end].forEach(p => { var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers); routePoints.push(m); });
         } else {
             var currentLatLngs = routeLayer.getLatLngs();
             if (currentLatLngs.length < 10) return;
@@ -440,15 +430,14 @@
                 var p = currentLatLngs[i];
                 var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers);
                 routePoints.push(m);
-                m.on('dragend', updateRoute);
             }
             var lastP = currentLatLngs[currentLatLngs.length - 1];
             var lastM = L.marker(lastP, { draggable: true }).addTo(gRouteMarkers);
             routePoints.push(lastM);
-            lastM.on('dragend', updateRoute);
         }
     }
 
+    // --- IMPORT GPX FIDÈLE ---
     function importGPX(e) {
         var file = e.target.files[0]; if(!file) return;
         var reader = new FileReader();
@@ -461,15 +450,11 @@
             points.forEach(p => { latlngs.push([parseFloat(p.getAttribute("lat")), parseFloat(p.getAttribute("lon"))]); });
             if(latlngs.length > 0) {
                 routeLayer.setLatLngs(latlngs);
-                let totalDist = 0;
-                for (let i = 0; i < latlngs.length - 1; i++) { totalDist += L.latLng(latlngs[i]).distanceTo(L.latLng(latlngs[i+1])); }
-                document.getElementById('dist-val').innerText = (totalDist / 1000).toFixed(1);
-                document.getElementById('distance-info').style.display = 'block';
+                updateDistManually();
+                // On pose les épingles mais on ne branche PAS updateRoute
                 var s = L.marker(latlngs[0], { draggable: true }).addTo(gRouteMarkers);
                 var en = L.marker(latlngs[latlngs.length-1], { draggable: true }).addTo(gRouteMarkers);
                 routePoints.push(s); routePoints.push(en);
-                s.on('dragend', function() { updateRoute(); });
-                en.on('dragend', function() { updateRoute(); });
                 map.fitBounds(routeLayer.getBounds());
             }
             closeAll();
