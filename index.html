@@ -90,10 +90,9 @@
             position: fixed; top: 70px; right: 10px; width: 280px; height: 350px;
             z-index: 15000; border: 3px solid #f39c12; border-radius: 12px;
             background: #1e2b37; display: none; overflow: hidden;
-            transition: all 0.3s ease; /* Ajout transition fluide */
+            transition: all 0.3s ease; 
         }
 
-        /* Classe pour le plein écran total */
         #umap-window.full-page {
             top: 0 !important;
             right: 0 !important;
@@ -236,6 +235,7 @@
         </div>
         <h2>ITINÉRAIRE</h2>
         <button style="background:#2ecc71; color:black;" onclick="startRouting()">📍 TRACER (ÉPINGLES)</button>
+        <button style="background:#34495e; font-size: 11px;" onclick="toggleAllPins()">📍 AFFICHER/CACHER POINTS</button>
         <button style="background:#c0392b;" onclick="clearCurrentData()">🗑️ EFFACER TOUT</button>
         <button style="background:#f39c12; color:black;" onclick="saveToArchive()">💾 SAUVEGARDER</button>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
@@ -280,6 +280,7 @@
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gEurope: L.layerGroup() };
     var isFollowingGPS = false, isRoutingActive = false;
 
+    // --- PAYS EUROPE ---
     const countries = [
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
         { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
@@ -332,12 +333,10 @@
         if (isFollowingGPS && window.userPos) map.setView(window.userPos, 15);
     }
 
-    // --- MODIFICATIONS LOGIQUE FENETRE TRAVAUX ---
     function toggleUmap(event) {
         if(event) event.stopPropagation();
         var w = document.getElementById('umap-window');
         w.style.display = (w.style.display==='none' || w.style.display==='' ?'block':'none');
-        // On retire le plein écran à la fermeture pour la prochaine fois
         w.classList.remove('full-page');
     }
 
@@ -459,16 +458,59 @@
     function exportCurrentGPX() {
         if(routePoints.length === 0) return alert("Aucun trajet à exporter.");
         var n = prompt("Nom du fichier :", "trajet");
-        if(n) downloadGPX(routePoints.map(m => m.getLatLng()), n);
+        if(n) downloadGPX(null, n);
     }
 
-    function downloadGPX(pts, name) {
+    function downloadGPX(ptsIgnored, name) {
+        var roadPoints = routeLayer.getLatLngs();
+        if (roadPoints.length === 0) return alert("Erreur: Le tracé n'est pas encore prêt.");
         var gpx = '<?xml version="1.1" encoding="UTF-8"?><gpx version="1.1" creator="SvenApp"><trk><name>' + name + '</name><trkseg>';
-        pts.forEach(p => { gpx += '<trkpt lat="' + p.lat + '" lon="' + p.lng + '"></trkpt>'; });
+        roadPoints.forEach(p => { 
+            var lat = p.lat || p[0];
+            var lng = p.lng || p[1];
+            gpx += '<trkpt lat="' + lat + '" lon="' + lng + '"></trkpt>'; 
+        });
         gpx += '</trkseg></trk></gpx>';
         var blob = new Blob([gpx], {type: 'application/gpx+xml'});
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a'); a.href = url; a.download = name + ".gpx"; a.click();
+    }
+
+    // --- FONCTION POUR AFFICHER/CACHER TOUS LES POINTS ---
+    function toggleAllPins() {
+        if (gRouteMarkers.getLayers().length > 2) {
+            // S'il y a plus de 2 points (départ/arrivée), on nettoie tout sauf les extrémités
+            var start = routePoints[0].getLatLng();
+            var end = routePoints[routePoints.length - 1].getLatLng();
+            gRouteMarkers.clearLayers();
+            routePoints = [];
+            [start, end].forEach(p => {
+                var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers);
+                routePoints.push(m);
+                m.on('dragend', updateRoute);
+            });
+        } else {
+            // Sinon, on recrée des points sur le tracé actuel pour permettre la modification
+            var currentLatLngs = routeLayer.getLatLngs();
+            if (currentLatLngs.length < 10) return alert("Pas assez de points sur le tracé.");
+            
+            gRouteMarkers.clearLayers();
+            routePoints = [];
+            
+            // On prend environ 1 point tous les 50 points de trace pour ne pas saturer
+            var step = Math.ceil(currentLatLngs.length / 15); 
+            for (var i = 0; i < currentLatLngs.length; i += step) {
+                var p = currentLatLngs[i];
+                var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers);
+                routePoints.push(m);
+                m.on('dragend', updateRoute);
+            }
+            // S'assurer que le dernier point est bien là
+            var lastP = currentLatLngs[currentLatLngs.length - 1];
+            var lastM = L.marker(lastP, { draggable: true }).addTo(gRouteMarkers);
+            routePoints.push(lastM);
+            lastM.on('dragend', updateRoute);
+        }
     }
 
     function importGPX(e) {
@@ -479,14 +521,24 @@
             var xml = parser.parseFromString(event.target.result, "text/xml");
             var points = xml.querySelectorAll("trkpt");
             clearCurrentData();
+            
+            var latlngs = [];
             points.forEach(p => {
-                var lat = parseFloat(p.getAttribute("lat"));
-                var lon = parseFloat(p.getAttribute("lon"));
-                var m = L.marker([lat, lon], { draggable: true }).addTo(gRouteMarkers);
-                routePoints.push(m);
-                m.on('dragend', updateRoute);
+                latlngs.push([parseFloat(p.getAttribute("lat")), parseFloat(p.getAttribute("lon"))]);
             });
-            updateRoute(); closeAll();
+
+            if(latlngs.length > 0) {
+                routeLayer.setLatLngs(latlngs);
+                // Par défaut : Seulement Départ et Arrivée pour rester léger
+                var startNode = L.marker(latlngs[0], { draggable: true }).addTo(gRouteMarkers);
+                var endNode = L.marker(latlngs[latlngs.length-1], { draggable: true }).addTo(gRouteMarkers);
+                routePoints.push(startNode);
+                routePoints.push(endNode);
+                startNode.on('dragend', updateRoute);
+                endNode.on('dragend', updateRoute);
+                map.fitBounds(routeLayer.getBounds());
+            }
+            closeAll();
         };
         reader.readAsText(file);
     }
