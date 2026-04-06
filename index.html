@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>CARTE RESEAU ET TRAVAUX FRANCE / EUROPE</title>
+    <title>CARTE RESEAU ET TRAVAUX FRANCE / EUROPE V40.18</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -45,22 +45,9 @@
         .lang-dot:hover { transform: scale(1.2); border-color: white; }
 
         .modal-text { text-align: left; font-size: 13px; line-height: 1.5; color: #ecf0f1; }
-        
-        .info-blue {
-            background: #2980b9; color: white; padding: 10px;
-            border-radius: 5px; margin: 10px 0; font-size: 12px;
-        }
-        
-        .warning-red {
-            border: 2px solid #e74c3c; background: rgba(231, 76, 60, 0.2);
-            padding: 10px; border-radius: 5px; margin: 10px 0;
-            color: #ff7675; font-size: 12px;
-        }
-        
-        .conclusion-green {
-            color: #2ecc71; font-style: italic; font-weight: bold;
-            margin: 15px 0; text-align: center; font-size: 13px;
-        }
+        .info-blue { background: #2980b9; color: white; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 12px; }
+        .warning-red { border: 2px solid #e74c3c; background: rgba(231, 76, 60, 0.2); padding: 10px; border-radius: 5px; margin: 10px 0; color: #ff7675; font-size: 12px; }
+        .conclusion-green { color: #2ecc71; font-style: italic; font-weight: bold; margin: 15px 0; text-align: center; font-size: 13px; }
 
         /* --- INTERFACE --- */
         #distance-info {
@@ -85,24 +72,13 @@
         .gps-off { background: #c0392b; }
         .gps-on { background: #27ae60; }
 
-        /* --- MODIFICATION UMAP WINDOW --- */
         #umap-window {
             position: fixed; top: 70px; right: 10px; width: 280px; height: 350px;
             z-index: 15000; border: 3px solid #f39c12; border-radius: 12px;
             background: #1e2b37; display: none; overflow: hidden;
             transition: all 0.3s ease; 
         }
-
-        #umap-window.full-page {
-            top: 0 !important;
-            right: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            border: none !important;
-            border-radius: 0 !important;
-            z-index: 30000 !important;
-        }
-
+        #umap-window.full-page { top: 0 !important; right: 0 !important; width: 100vw !important; height: 100vh !important; border: none !important; border-radius: 0 !important; z-index: 30000 !important; }
         .umap-bar { background: #f39c12; color: #000; padding: 8px; font-weight: bold; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
         #umap-frame { width: 100%; height: calc(100% - 35px); border: none; background: white; }
 
@@ -122,18 +98,14 @@
         .poi-inner { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
         .poi-relais { width: 24px; height: 24px; background: #00561b; border: 2px solid #e30613; border-radius: 50%; color: white; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
 
-        .custom-flag-round {
-            background: white; border-radius: 50%; width: 36px !important; height: 36px !important;
-            display: flex !important; align-items: center; justify-content: center;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.4); border: 2px solid #f39c12; font-size: 22px; cursor: pointer;
-        }
-
+        .custom-flag-round { background: white; border-radius: 50%; width: 36px !important; height: 36px !important; display: flex !important; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.4); border: 2px solid #f39c12; font-size: 22px; cursor: pointer; }
         .btn-popup { display: inline-block; background: #f39c12; color: black; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 5px; }
         
-        .archive-item { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; width: 100%; }
-        .btn-archive-load { flex-grow: 1; text-align: left; background: #34495e; padding: 12px; margin: 0; font-size: 13px; }
-        .btn-archive-del { width: 45px !important; background: #c0392b; padding: 12px; margin: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-        .btn-archive-save { width: 45px !important; background: #2980b9; padding: 12px; margin: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .archive-item { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; width: 100%; }
+        .btn-archive-load { flex-grow: 1; text-align: left; background: #34495e; padding: 12px; margin: 0; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .btn-archive-edit { width: 35px !important; background: #7f8c8d; padding: 12px 0; margin: 0; flex-shrink: 0; font-size: 14px; }
+        .btn-archive-del { width: 35px !important; background: #c0392b; padding: 12px 0; margin: 0; flex-shrink: 0; font-size: 14px; }
+        .btn-archive-save { width: 35px !important; background: #2980b9; padding: 12px 0; margin: 0; flex-shrink: 0; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -172,8 +144,7 @@
                 <div class="lang-dot" onclick="changeLang('ru')">🇷🇺</div>
             </div>
 
-            <h3 style="margin:0 0 10px 0; color:#f39c12;">👋 OUTIL CONVOI</h3>
-            
+            <h3 style="margin:0 0 10px 0; color:#f39c12;">👋 OUTIL CONVOI V40.18</h3>
             <div class="modal-scroll">
                 <div class="modal-text">
                     <p><b>1. BOUTON RÉSEAUX :</b> Choisissez le réseau routier à afficher (Cat 1, 48t, 72t, 94t ou 120t+).</p>
@@ -189,7 +160,6 @@
                     Profitez bien de l'application, éclatez-vous ! J'espère que cet outil vous sera utile. Bonne roulade à tous et au plaisir de vous croiser un de ces jours sur la route ! Sven
                 </div>
             </div>
-            
             <button style="background:#2ecc71; color:white; border: 2px solid #27ae60; height: 50px; font-size: 16px;" onclick="closeWelcome()">DÉMARRER / START</button>
         </div>
     </div>
@@ -253,30 +223,19 @@
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
-    // --- GESTION ECRAN ALLUME (WAKE LOCK) ---
     let wakeLock = null;
-    async function requestWakeLock() {
-        try {
-            if ('wakeLock' in navigator) {
-                wakeLock = await navigator.wakeLock.request('screen');
-            }
-        } catch (err) { console.log("WakeLock non supporté ou erreur"); }
-    }
+    async function requestWakeLock() { try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); } } catch (err) {} }
 
     function googleTranslateElementInit() { new google.translate.TranslateElement({pageLanguage: 'fr', autoDisplay: false}, 'google_translate_element'); }
     function changeLang(l) { var s = document.querySelector('select.goog-te-combo'); if (s) { s.value = l; s.dispatchEvent(new Event('change')); } else { document.cookie = "googtrans=/fr/" + l + "; path=/"; location.reload(); } }
     
-    function closeWelcome() {
-        document.getElementById('welcome-modal').style.display = 'none';
-        startGPS();
-        requestWakeLock();
-    }
+    function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; startGPS(); requestWakeLock(); }
     
-    var map = L.map('map', { center: [48.0, 10.0], zoom: 5, zoomControl: false });
+    var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     var gPois = L.featureGroup().addTo(map), gRouteMarkers = L.featureGroup().addTo(map);
-    var routeLayer = L.polyline([], {color: '#002a5c', weight: 8}).addTo(map), routePoints = [];
+    var routeLayer = L.polyline([], {color: '#002a5c', weight: 8, interactive: false}).addTo(map), routePoints = [];
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gEurope: L.layerGroup() };
     var isFollowingGPS = false, isRoutingActive = false;
 
@@ -333,26 +292,9 @@
         if (isFollowingGPS && window.userPos) map.setView(window.userPos, 15);
     }
 
-    function toggleUmap(event) {
-        if(event) event.stopPropagation();
-        var w = document.getElementById('umap-window');
-        w.style.display = (w.style.display==='none' || w.style.display==='' ?'block':'none');
-        w.classList.remove('full-page');
-    }
-
-    function toggleFullScreen(event) {
-        if(event) event.stopPropagation();
-        var w = document.getElementById('umap-window');
-        w.classList.toggle('full-page');
-    }
-
-    function minimizeUmap(event) {
-        if(event) event.stopPropagation();
-        var w = document.getElementById('umap-window');
-        if(!w.classList.contains('full-page')) {
-            w.style.height = (w.style.height==='35px'?'350px':'35px');
-        }
-    }
+    function toggleUmap(event) { if(event) event.stopPropagation(); var w = document.getElementById('umap-window'); w.style.display = (w.style.display==='none' || w.style.display==='' ?'block':'none'); w.classList.remove('full-page'); }
+    function toggleFullScreen(event) { if(event) event.stopPropagation(); var w = document.getElementById('umap-window'); w.classList.toggle('full-page'); }
+    function minimizeUmap(event) { if(event) event.stopPropagation(); var w = document.getElementById('umap-window'); if(!w.classList.contains('full-page')) { w.style.height = (w.style.height==='35px'?'350px':'35px'); } }
 
     function activatePoi(t, c) {
         closeAll();
@@ -392,11 +334,7 @@
     }
 
     function updateRoute() {
-        if (routePoints.length < 2) {
-            routeLayer.setLatLngs([]);
-            document.getElementById('distance-info').style.display = 'none';
-            return;
-        }
+        if (routePoints.length < 2) { routeLayer.setLatLngs([]); document.getElementById('distance-info').style.display = 'none'; return; }
         var coords = routePoints.map(m => `${m.getLatLng().lng},${m.getLatLng().lat}`).join(';');
         fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`).then(r => r.json()).then(d => {
             if(d.routes && d.routes[0]) {
@@ -407,97 +345,96 @@
         });
     }
 
-    function clearCurrentData() {
-        isRoutingActive = false;
-        map.off('click');
-        document.getElementById('map').style.cursor = '';
-        gRouteMarkers.clearLayers();
-        routeLayer.setLatLngs([]);
-        routePoints=[];
-        document.getElementById('distance-info').style.display = 'none';
-    }
+    function clearCurrentData() { isRoutingActive = false; map.off('click'); document.getElementById('map').style.cursor = ''; gRouteMarkers.clearLayers(); routeLayer.setLatLngs([]); routePoints=[]; document.getElementById('distance-info').style.display = 'none'; }
 
+    // --- MODIFICATION SAUVEGARDE : On stocke TOUT le tracé (line) ---
     function saveToArchive() {
         var n = prompt("Nom du trajet :"); if(!n) return;
+        var fullLine = routeLayer.getLatLngs();
+        if (fullLine.length === 0) return alert("Aucun tracé à sauvegarder !");
+        
         var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
-        a.push({ name: n, pts: routePoints.map(m => m.getLatLng()) });
+        // On enregistre les marqueurs pour l'édition ET le tracé complet pour l'affichage fidèle
+        a.push({ 
+            name: n, 
+            pts: routePoints.map(m => m.getLatLng()),
+            line: fullLine 
+        });
         localStorage.setItem('convoi_arch', JSON.stringify(a));
         renderArch();
     }
     
-    function deleteArch(i) {
-        var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
-        a.splice(i, 1);
-        localStorage.setItem('convoi_arch', JSON.stringify(a));
-        renderArch();
-    }
+    function deleteArch(i) { var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); a.splice(i, 1); localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); }
+    function renameArch(i) { var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]"); var n = prompt("Nouveau nom :", a[i].name); if (n && n !== a[i].name) { a[i].name = n; localStorage.setItem('convoi_arch', JSON.stringify(a)); renderArch(); } }
 
     function renderArch() {
         var l = document.getElementById('archive-list'); l.innerHTML = "";
         var a = JSON.parse(localStorage.getItem('convoi_arch') || "[]");
         a.forEach((x, i) => {
             var d = document.createElement('div'); d.className = "archive-item";
-            var bLoad = document.createElement('button'); bLoad.className = "btn-archive-load"; bLoad.innerHTML = "📂 " + x.name; bLoad.onclick = function() { loadArch(i); };
-            var bSave = document.createElement('button'); bSave.className = "btn-archive-save"; bSave.innerHTML = "💾"; bSave.onclick = function() { downloadGPX(x.pts, x.name); };
-            var bDel = document.createElement('button'); bDel.className = "btn-archive-del"; bDel.innerHTML = "✖"; bDel.onclick = function() { deleteArch(i); renderArch(); };
-            d.appendChild(bLoad); d.appendChild(bSave); d.appendChild(bDel); l.appendChild(d);
+            var bLoad = document.createElement('button'); bLoad.className = "btn-archive-load"; bLoad.innerHTML = "📂 " + x.name; 
+            bLoad.onclick = function() { loadArch(i); };
+            var bEdit = document.createElement('button'); bEdit.className = "btn-archive-edit"; bEdit.innerHTML = "✏️";
+            bEdit.onclick = function() { renameArch(i); };
+            var bSave = document.createElement('button'); bSave.className = "btn-archive-save"; bSave.innerHTML = "💾"; 
+            bSave.onclick = function() { downloadGPX(null, x.name); };
+            var bDel = document.createElement('button'); bDel.className = "btn-archive-del"; bDel.innerHTML = "✖"; 
+            bDel.onclick = function() { deleteArch(i); };
+            d.appendChild(bLoad); d.appendChild(bEdit); d.appendChild(bSave); d.appendChild(bDel); l.appendChild(d);
         });
     }
 
+    // --- CHARGEMENT FIDÈLE : On restaure la ligne exacte ---
     function loadArch(i) {
         var a = JSON.parse(localStorage.getItem('convoi_arch'))[i];
         clearCurrentData();
+        
+        // 1. Restaurer le tracé visuel
+        if(a.line) routeLayer.setLatLngs(a.line);
+        
+        // 2. Restaurer les marqueurs (épingles)
         a.pts.forEach((p) => {
             var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers);
             routePoints.push(m);
-            m.on('dragend', updateRoute);
+            // On ne déclenche updateRoute QUE si l'utilisateur bouge une épingle manuellement
+            m.on('dragend', function() { updateRoute(); });
         });
-        updateRoute(); closeAll();
+
+        // 3. Calculer distance
+        let totalDist = 0;
+        let l = routeLayer.getLatLngs();
+        for (let j = 0; j < l.length - 1; j++) { totalDist += L.latLng(l[j]).distanceTo(L.latLng(l[j+1])); }
+        document.getElementById('dist-val').innerText = (totalDist / 1000).toFixed(1);
+        document.getElementById('distance-info').style.display = 'block';
+
+        map.fitBounds(routeLayer.getBounds());
+        closeAll();
     }
 
-    function exportCurrentGPX() {
-        if(routePoints.length === 0) return alert("Aucun trajet à exporter.");
-        var n = prompt("Nom du fichier :", "trajet");
-        if(n) downloadGPX(null, n);
-    }
+    function exportCurrentGPX() { if(routeLayer.getLatLngs().length === 0) return alert("Aucun trajet à exporter."); var n = prompt("Nom du fichier :", "trajet"); if(n) downloadGPX(null, n); }
 
     function downloadGPX(ptsIgnored, name) {
         var roadPoints = routeLayer.getLatLngs();
-        if (roadPoints.length === 0) return alert("Erreur: Le tracé n'est pas encore prêt.");
         var gpx = '<?xml version="1.1" encoding="UTF-8"?><gpx version="1.1" creator="SvenApp"><trk><name>' + name + '</name><trkseg>';
-        roadPoints.forEach(p => { 
-            var lat = p.lat || p[0];
-            var lng = p.lng || p[1];
-            gpx += '<trkpt lat="' + lat + '" lon="' + lng + '"></trkpt>'; 
-        });
+        roadPoints.forEach(p => { gpx += '<trkpt lat="' + p.lat + '" lon="' + p.lng + '"></trkpt>'; });
         gpx += '</trkseg></trk></gpx>';
         var blob = new Blob([gpx], {type: 'application/gpx+xml'});
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a'); a.href = url; a.download = name + ".gpx"; a.click();
     }
 
-    // --- FONCTION POUR AFFICHER/CACHER TOUS LES POINTS ---
     function toggleAllPins() {
         if (gRouteMarkers.getLayers().length > 2) {
-            // S'il y a plus de 2 points (départ/arrivée), on nettoie tout sauf les extrémités
             var start = routePoints[0].getLatLng();
             var end = routePoints[routePoints.length - 1].getLatLng();
             gRouteMarkers.clearLayers();
             routePoints = [];
-            [start, end].forEach(p => {
-                var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers);
-                routePoints.push(m);
-                m.on('dragend', updateRoute);
-            });
+            [start, end].forEach(p => { var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers); routePoints.push(m); m.on('dragend', updateRoute); });
         } else {
-            // Sinon, on recrée des points sur le tracé actuel pour permettre la modification
             var currentLatLngs = routeLayer.getLatLngs();
-            if (currentLatLngs.length < 10) return alert("Pas assez de points sur le tracé.");
-            
+            if (currentLatLngs.length < 10) return;
             gRouteMarkers.clearLayers();
             routePoints = [];
-            
-            // On prend environ 1 point tous les 50 points de trace pour ne pas saturer
             var step = Math.ceil(currentLatLngs.length / 15); 
             for (var i = 0; i < currentLatLngs.length; i += step) {
                 var p = currentLatLngs[i];
@@ -505,7 +442,6 @@
                 routePoints.push(m);
                 m.on('dragend', updateRoute);
             }
-            // S'assurer que le dernier point est bien là
             var lastP = currentLatLngs[currentLatLngs.length - 1];
             var lastM = L.marker(lastP, { draggable: true }).addTo(gRouteMarkers);
             routePoints.push(lastM);
@@ -521,21 +457,19 @@
             var xml = parser.parseFromString(event.target.result, "text/xml");
             var points = xml.querySelectorAll("trkpt");
             clearCurrentData();
-            
             var latlngs = [];
-            points.forEach(p => {
-                latlngs.push([parseFloat(p.getAttribute("lat")), parseFloat(p.getAttribute("lon"))]);
-            });
-
+            points.forEach(p => { latlngs.push([parseFloat(p.getAttribute("lat")), parseFloat(p.getAttribute("lon"))]); });
             if(latlngs.length > 0) {
                 routeLayer.setLatLngs(latlngs);
-                // Par défaut : Seulement Départ et Arrivée pour rester léger
-                var startNode = L.marker(latlngs[0], { draggable: true }).addTo(gRouteMarkers);
-                var endNode = L.marker(latlngs[latlngs.length-1], { draggable: true }).addTo(gRouteMarkers);
-                routePoints.push(startNode);
-                routePoints.push(endNode);
-                startNode.on('dragend', updateRoute);
-                endNode.on('dragend', updateRoute);
+                let totalDist = 0;
+                for (let i = 0; i < latlngs.length - 1; i++) { totalDist += L.latLng(latlngs[i]).distanceTo(L.latLng(latlngs[i+1])); }
+                document.getElementById('dist-val').innerText = (totalDist / 1000).toFixed(1);
+                document.getElementById('distance-info').style.display = 'block';
+                var s = L.marker(latlngs[0], { draggable: true }).addTo(gRouteMarkers);
+                var en = L.marker(latlngs[latlngs.length-1], { draggable: true }).addTo(gRouteMarkers);
+                routePoints.push(s); routePoints.push(en);
+                s.on('dragend', function() { updateRoute(); });
+                en.on('dragend', function() { updateRoute(); });
                 map.fitBounds(routeLayer.getBounds());
             }
             closeAll();
@@ -553,11 +487,7 @@
         Object.keys(groups).forEach(k => map.addLayer(groups[k]));
     });
 
-    document.addEventListener('visibilitychange', async () => {
-        if (wakeLock !== null && document.visibilityState === 'visible') {
-            requestWakeLock();
-        }
-    });
+    document.addEventListener('visibilitychange', async () => { if (wakeLock !== null && document.visibilityState === 'visible') { requestWakeLock(); } });
 </script>
 </body>
 </html>
