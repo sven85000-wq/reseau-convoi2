@@ -105,6 +105,9 @@
         .btn-archive-edit { width: 35px !important; background: #7f8c8d; padding: 12px 0; margin: 0; flex-shrink: 0; font-size: 14px; }
         .btn-archive-del { width: 35px !important; background: #c0392b; padding: 12px 0; margin: 0; flex-shrink: 0; font-size: 14px; }
         .btn-archive-save { width: 35px !important; background: #2980b9; padding: 12px 0; margin: 0; flex-shrink: 0; font-size: 14px; }
+
+        /* Ajustement position contrôle calques Leaflet pour ne pas gêner les boutons */
+        .leaflet-control-layers { margin-top: 70px !important; }
     </style>
 </head>
 <body>
@@ -230,8 +233,28 @@
     
     function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; startGPS(); requestWakeLock(); }
     
-    var map = L.map('map', { center: [46.5, 2.5], zoom: 6, zoomControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    // --- DEFINITION DES FONDS DE CARTE ---
+    var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    });
+
+    var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+
+    var map = L.map('map', { 
+        center: [46.5, 2.5], 
+        zoom: 6, 
+        zoomControl: false,
+        layers: [osmLayer] // Fond par défaut
+    });
+
+    // Ajout du contrôleur de calques
+    var baseMaps = {
+        "🗺️ Plan (OSM)": osmLayer,
+        "🛰️ Satellite": satelliteLayer
+    };
+    L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
     var gPois = L.featureGroup().addTo(map), gRouteMarkers = L.featureGroup().addTo(map);
     var routeLayer = L.polyline([], {color: '#002a5c', weight: 8, interactive: false}).addTo(map), routePoints = [];
@@ -328,7 +351,6 @@
             if(!isRoutingActive) return;
             var m = L.marker(e.latlng, { draggable: true }).addTo(gRouteMarkers);
             routePoints.push(m);
-            // Ici on garde updateRoute car l'utilisateur veut tracer via les routes
             m.on('dragend', updateRoute);
             updateRoute();
         });
@@ -378,7 +400,6 @@
         });
     }
 
-    // --- CHARGEMENT FIDÈLE SANS RECALCUL ---
     function loadArch(i) {
         var a = JSON.parse(localStorage.getItem('convoi_arch'))[i];
         clearCurrentData();
@@ -386,7 +407,6 @@
         a.pts.forEach((p) => {
             var m = L.marker(p, { draggable: true }).addTo(gRouteMarkers);
             routePoints.push(m);
-            // TRÈS IMPORTANT : Pas de updateRoute ici. On bouge le point mais le trait reste fixe.
         });
         updateDistManually();
         map.fitBounds(routeLayer.getBounds());
@@ -437,7 +457,6 @@
         }
     }
 
-    // --- IMPORT GPX FIDÈLE ---
     function importGPX(e) {
         var file = e.target.files[0]; if(!file) return;
         var reader = new FileReader();
@@ -451,7 +470,6 @@
             if(latlngs.length > 0) {
                 routeLayer.setLatLngs(latlngs);
                 updateDistManually();
-                // On pose les épingles mais on ne branche PAS updateRoute
                 var s = L.marker(latlngs[0], { draggable: true }).addTo(gRouteMarkers);
                 var en = L.marker(latlngs[latlngs.length-1], { draggable: true }).addTo(gRouteMarkers);
                 routePoints.push(s); routePoints.push(en);
