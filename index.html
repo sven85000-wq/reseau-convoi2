@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>CARTE RESEAU ET TRAVAUX FRANCE / EUROPE V40.19</title>
+    <title>CARTE RESEAU ET TRAVAUX FRANCE / EUROPE V40.20</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; height: 100vh; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        #map { width: 100%; height: 100vh; z-index: 1; position: absolute; }
+        /* Ajout de la transition pour la rotation fluide de la carte */
+        #map { width: 100%; height: 100vh; z-index: 1; position: absolute; transition: transform 0.5s ease-in-out; }
 
         /* --- SUPPRESSION INTERFACE GOOGLE --- */
         .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon, .goog-te-gadget-simple img,
@@ -92,7 +93,8 @@
         button { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; }
         .row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; }
         
-        .gps-dot { width: 16px; height: 16px; background: #4285F4; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        /* Modifié pour permettre la rotation inverse du marqueur */
+        .gps-dot { width: 16px; height: 16px; background: #4285F4; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); transition: transform 0.2s; }
         .poi-maps-style { display: flex; align-items: center; justify-content: center; background: white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.4); border: 1px solid #ccc; }
         .poi-inner { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
         .poi-relais { width: 24px; height: 24px; background: #00561b; border: 2px solid #e30613; border-radius: 50%; color: white; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
@@ -106,7 +108,6 @@
         .btn-archive-del { width: 35px !important; background: #c0392b; padding: 12px 0; margin: 0; flex-shrink: 0; font-size: 14px; }
         .btn-archive-save { width: 35px !important; background: #2980b9; padding: 12px 0; margin: 0; flex-shrink: 0; font-size: 14px; }
 
-        /* Ajustement position contrôle calques Leaflet pour ne pas gêner les boutons */
         .leaflet-control-layers { margin-top: 70px !important; }
     </style>
 </head>
@@ -146,7 +147,7 @@
                 <div class="lang-dot" onclick="changeLang('ru')">🇷🇺</div>
             </div>
 
-            <h3 style="margin:0 0 10px 0; color:#f39c12;">👋 OUTIL CONVOI V40.19</h3>
+            <h3 style="margin:0 0 10px 0; color:#f39c12;">👋 OUTIL CONVOI V40.20</h3>
             <div class="modal-scroll">
                 <div class="modal-text">
                     <p><b>1. BOUTON RÉSEAUX :</b> Choisissez le réseau routier à afficher (Cat 1, 48t, 72t, 94t ou 120t+).</p>
@@ -233,27 +234,17 @@
     
     function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; startGPS(); requestWakeLock(); }
     
-    // --- DEFINITION DES FONDS DE CARTE ---
-    var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    });
-
-    var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-    });
+    var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
+    var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' });
 
     var map = L.map('map', { 
         center: [46.5, 2.5], 
         zoom: 6, 
         zoomControl: false,
-        layers: [osmLayer] // Fond par défaut
+        layers: [osmLayer]
     });
 
-    // Ajout du contrôleur de calques
-    var baseMaps = {
-        "🗺️ Plan (OSM)": osmLayer,
-        "🛰️ Satellite": satelliteLayer
-    };
+    var baseMaps = { "🗺️ Plan (OSM)": osmLayer, "🛰️ Satellite": satelliteLayer };
     L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
     var gPois = L.featureGroup().addTo(map), gRouteMarkers = L.featureGroup().addTo(map);
@@ -261,7 +252,6 @@
     var groups = { gCat1: L.layerGroup(), g48: L.layerGroup(), g72: L.layerGroup(), g94: L.layerGroup(), g120: L.layerGroup(), gEurope: L.layerGroup() };
     var isFollowingGPS = false, isRoutingActive = false;
 
-    // --- PAYS EUROPE ---
     const countries = [
         { n: "Angleterre", lat: 52.35, lon: -1.17, u: "https://www.trafficengland.com/", f: "🇬🇧" },
         { n: "Irlande", lat: 53.41, lon: -8.24, u: "https://www.tiitraffic.ie/", f: "🇮🇪" },
@@ -300,18 +290,32 @@
     });
 
     function startGPS() { map.locate({ watch: true, enableHighAccuracy: true }); }
+    
     map.on('locationfound', (e) => {
         if (!window.userMarker) window.userMarker = L.marker(e.latlng, { icon: L.divIcon({ className: 'gps-dot', iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(map);
         else window.userMarker.setLatLng(e.latlng);
         window.userPos = e.latlng;
-        if (isFollowingGPS) map.setView(e.latlng, map.getZoom());
+        
+        if (isFollowingGPS) {
+            map.setView(e.latlng, map.getZoom());
+            // Rotation de la carte selon le cap (heading) si disponible
+            if (e.heading !== undefined && e.heading !== null) {
+                document.getElementById('map').style.transform = `rotate(${-e.heading}deg)`;
+                // On garde le point bleu droit malgré la rotation de la carte
+                if(window.userMarker.getElement()) window.userMarker.getElement().style.transform = `rotate(${e.heading}deg)`;
+            }
+        }
     });
 
     function toggleGPSFollow() {
         isFollowingGPS = !isFollowingGPS;
         document.getElementById('btn-gps-toggle').className = isFollowingGPS ? "gps-on" : "gps-off";
         document.getElementById('btn-gps-toggle').innerText = isFollowingGPS ? "🚛 EN ROUTE..." : "🛑 MODE ROUTE";
-        if (isFollowingGPS && window.userPos) map.setView(window.userPos, 15);
+        if (isFollowingGPS && window.userPos) {
+            map.setView(window.userPos, 15);
+        } else {
+            document.getElementById('map').style.transform = `rotate(0deg)`;
+        }
     }
 
     function toggleUmap(event) { if(event) event.stopPropagation(); var w = document.getElementById('umap-window'); w.style.display = (w.style.display==='none' || w.style.display==='' ?'block':'none'); w.classList.remove('full-page'); }
@@ -341,7 +345,6 @@
     function closeAll() { document.querySelectorAll('.sidebar').forEach(s => s.style.display = 'none'); }
     function toggleL(id) { if(map.hasLayer(groups[id])) map.removeLayer(groups[id]); else map.addLayer(groups[id]); }
 
-    // --- MODE ROUTAGE MANUEL (AVEC RECALCUL) ---
     function startRouting() {
         closeAll();
         if (isRoutingActive) return;
